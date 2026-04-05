@@ -2182,17 +2182,43 @@ async function processScannedDocument(base64Data) {
     const arr = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
     const pdf = await pdfjsLib.getDocument({ data: arr }).promise;
-    const page = await pdf.getPage(1);
-    const viewport = page.getViewport({ scale: 2 });
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-    const imageBase64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+    const pageCount = Math.min(pdf.numPages, 10); // cap at 10 pages
+    const pageImages = [];
+    for (let p = 1; p <= pageCount; p++) {
+      const page = await pdf.getPage(p);
+      const viewport = page.getViewport({ scale: 2 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      pageImages.push(canvas.toDataURL('image/jpeg', 0.92).split(',')[1]);
+    }
+    // Show first page as preview
     const previewImg = document.getElementById('scan-preview-img');
-    previewImg.src = 'data:image/jpeg;base64,' + imageBase64;
+    previewImg.src = 'data:image/jpeg;base64,' + pageImages[0];
     previewImg.style.display = 'block';
-    await processScannedImage(imageBase64, 'image/jpeg');
+    // Build content array: one image block per page + prompt
+    const content = pageImages.map(b64 => ({
+      type: 'image',
+      source: { type: 'base64', media_type: 'image/jpeg', data: b64 }
+    }));
+    content.push({ type: 'text', text: 'Extract all form fields from this workplace form (all pages shown). Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If you cannot read the form return { error: \'cannot_read\' }.' });
+    if (!navigator.onLine) { showScreen('screen-err-network'); return; }
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content }] })
+    });
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    const parsed = parseClaudeJson(data.content[0].text.trim());
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) { showScreen('screen-err-scan'); return; }
+    session.fields = parsed;
+    session.refNumber = generateRef();
+    session.answers = new Array(parsed.length).fill(null);
+    session.formType = deriveFormType(parsed);
+    renderConfirmType();
+    showScreen('screen-confirm-type');
   } catch { showScreen('screen-err-scan'); }
 }
 
