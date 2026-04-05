@@ -11,7 +11,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Talk%20It%20Out%22,%22short_name%22:%22TalkItOut%22,%22theme_color%22:%22%23F59E0B%22,%22background_color%22:%22%23FFFFFF%22,%22display%22:%22standalone%22,%22start_url%22:%22app.html%22,%22icons%22:[{%22src%22:%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AQFEhQnrqfGxQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAMvSURBVHja7d0xbhpBFIDhN0tBkSNYR0iRI3CEnCBH4ARITpAj+AQ+QU5gH4GShiNYR0iRI1iHlAIJEGD2zby3839SR9oV7Mz8O29mRwIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFzGGGOMg2OMAQ4iYowxjjHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOe4BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2CsAAQYAExIBjgAAAABJRU5ErkJggg==%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
 <style>
 /* ===== CSS RESET & ROOT VARIABLES ===== */
@@ -1979,9 +1978,10 @@ function handleWelcomeUpload(e) {
     };
     reader.readAsDataURL(file);
   } else if (file.name.match(/\.docx?$/i) || file.type.includes('wordprocessingml') || file.type.includes('msword')) {
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       showDocPlaceholder(file.name);
       try {
+        await loadMammoth();
         mammoth.extractRawText({ arrayBuffer: ev.target.result })
           .then(result => processScannedText(result.value))
           .catch(err => showScanError('mammoth error: ' + (err && err.message)));
@@ -2089,9 +2089,10 @@ function handleScanFile(e) {
     };
     reader.readAsDataURL(file);
   } else if (file.name.match(/\.docx?$/i) || file.type.includes('wordprocessingml') || file.type.includes('msword')) {
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       showDocPlaceholder(file.name);
       try {
+        await loadMammoth();
         mammoth.extractRawText({ arrayBuffer: ev.target.result })
           .then(result => processScannedText(result.value))
           .catch(err => showScanError('mammoth error: ' + (err && err.message)));
@@ -2169,6 +2170,17 @@ async function processScannedImage(base64Data, mimeType) {
   } catch (err) {
     showScanError('image exception: ' + (err && err.message));
   }
+}
+
+async function loadMammoth() {
+  if (window.mammoth) return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
 }
 
 async function loadPdfJs() {
