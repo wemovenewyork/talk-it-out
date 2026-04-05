@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Talk%20It%20Out%22,%22short_name%22:%22TalkItOut%22,%22theme_color%22:%22%23F59E0B%22,%22background_color%22:%22%23FFFFFF%22,%22display%22:%22standalone%22,%22start_url%22:%22app.html%22,%22icons%22:[{%22src%22:%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AQFEhQnrqfGxQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAMvSURBVHja7d0xbhpBFIDhN0tBkSNYR0iRI3CEnCBH4ARITpAj+AQ+QU5gH4GShiNYR0iRI1iHlAIJEGD2zby3839SR9oV7Mz8O29mRwIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFzGGGOMg2OMAQ4iYowxjjHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOe4BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2CsAAQYAExIBjgAAAABJRU5ErkJggg==%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
 <style>
 /* ===== CSS RESET & ROOT VARIABLES ===== */
@@ -880,7 +881,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <p style="color:var(--color-text-light-muted);">Choose from your files</p>
     </div>
   </button>
-  <input id="welcome-file-input" type="file" accept="image/*" style="display:none;" onchange="handleWelcomeUpload(event)">
+  <input id="welcome-file-input" type="file" accept="image/*,application/pdf,.docx,.doc" style="display:none;" onchange="handleWelcomeUpload(event)">
   <div style="text-align:center;margin:8px 0 20px;">
     <button class="btn-ghost" style="color:var(--color-amber-dark);font-size:15px;" onclick="showScreen('screen-quick-photo')">Quick photo capture</button>
   </div>
@@ -952,7 +953,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <p class="text-small text-muted">Camera opens automatically</p>
   </div>
   <input id="scan-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleScanFile(event)">
-  <input id="scan-file" type="file" accept="image/*" style="display:none;" onchange="handleScanFile(event)">
+  <input id="scan-file" type="file" accept="image/*,application/pdf,.docx,.doc" style="display:none;" onchange="handleScanFile(event)">
   <button class="btn btn-outline" onclick="document.getElementById('scan-file').click()">
     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
     Upload from files
@@ -1967,13 +1968,30 @@ function triggerFileUpload() {
 function handleWelcomeUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
+  showScreen('screen-scan');
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    const base64 = ev.target.result.split(',')[1];
-    processScannedImage(base64, file.type);
-    showScreen('screen-scan');
-  };
-  reader.readAsDataURL(file);
+  if (file.type === 'application/pdf') {
+    reader.onload = (ev) => {
+      const base64 = ev.target.result.split(',')[1];
+      showDocPlaceholder(file.name);
+      processScannedDocument(base64);
+    };
+    reader.readAsDataURL(file);
+  } else if (file.name.match(/\.docx?$/i) || file.type.includes('wordprocessingml') || file.type.includes('msword')) {
+    reader.onload = (ev) => {
+      showDocPlaceholder(file.name);
+      mammoth.extractRawText({ arrayBuffer: ev.target.result })
+        .then(result => processScannedText(result.value))
+        .catch(() => showScreen('screen-err-scan'));
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.onload = (ev) => {
+      const base64 = ev.target.result.split(',')[1];
+      processScannedImage(base64, file.type);
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 // ===== PWA INSTALL =====
@@ -2041,18 +2059,51 @@ function doneQuickPhoto() {
 }
 
 // ===== SCAN =====
+function showDocPlaceholder(filename) {
+  document.getElementById('scan-preview').style.display = 'block';
+  document.getElementById('scan-preview-img').style.display = 'none';
+  document.getElementById('scan-loading').style.display = 'block';
+  let placeholder = document.getElementById('scan-doc-placeholder');
+  if (!placeholder) {
+    placeholder = document.createElement('div');
+    placeholder.id = 'scan-doc-placeholder';
+    placeholder.style.cssText = 'text-align:center;padding:20px 0 8px;';
+    document.getElementById('scan-preview').insertBefore(placeholder, document.getElementById('scan-loading'));
+  }
+  placeholder.innerHTML = `<svg width="40" height="40" fill="none" stroke="var(--color-text-muted)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p style="font-size:13px;color:var(--color-text-muted);word-break:break-all;">${filename}</p>`;
+  placeholder.style.display = 'block';
+}
+
 function handleScanFile(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    const base64 = ev.target.result.split(',')[1];
-    document.getElementById('scan-preview').style.display = 'block';
-    document.getElementById('scan-preview-img').src = ev.target.result;
-    document.getElementById('scan-loading').style.display = 'block';
-    processScannedImage(base64, file.type);
-  };
-  reader.readAsDataURL(file);
+  if (file.type === 'application/pdf') {
+    reader.onload = (ev) => {
+      const base64 = ev.target.result.split(',')[1];
+      showDocPlaceholder(file.name);
+      processScannedDocument(base64);
+    };
+    reader.readAsDataURL(file);
+  } else if (file.name.match(/\.docx?$/i) || file.type.includes('wordprocessingml') || file.type.includes('msword')) {
+    reader.onload = (ev) => {
+      showDocPlaceholder(file.name);
+      mammoth.extractRawText({ arrayBuffer: ev.target.result })
+        .then(result => processScannedText(result.value))
+        .catch(() => showScreen('screen-err-scan'));
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.onload = (ev) => {
+      const base64 = ev.target.result.split(',')[1];
+      document.getElementById('scan-preview').style.display = 'block';
+      document.getElementById('scan-preview-img').style.display = 'block';
+      document.getElementById('scan-preview-img').src = ev.target.result;
+      document.getElementById('scan-loading').style.display = 'block';
+      processScannedImage(base64, file.type);
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 async function processScannedImage(base64Data, mimeType) {
@@ -2100,6 +2151,77 @@ async function processScannedImage(base64Data, mimeType) {
   } catch {
     showScreen('screen-err-scan');
   }
+}
+
+async function processScannedDocument(base64Data) {
+  if (!navigator.onLine) { showScreen('screen-err-network'); return; }
+  const FIELD_PROMPT = 'Extract all form fields from this workplace form document. Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If you cannot read the form return { error: \'cannot_read\' }.';
+  try {
+    const resp = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64Data } },
+            { type: "text", text: FIELD_PROMPT }
+          ]
+        }]
+      })
+    });
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    const text = data.content[0].text.trim();
+    let parsed;
+    try { parsed = JSON.parse(text); } catch {
+      const match = text.match(/\[[\s\S]*\]/);
+      parsed = match ? JSON.parse(match[0]) : null;
+    }
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed)) { showScreen('screen-err-scan'); return; }
+    session.fields = parsed;
+    session.refNumber = generateRef();
+    session.answers = new Array(parsed.length).fill(null);
+    session.formType = deriveFormType(parsed);
+    renderConfirmType();
+    showScreen('screen-confirm-type');
+  } catch { showScreen('screen-err-scan'); }
+}
+
+async function processScannedText(text) {
+  if (!navigator.onLine) { showScreen('screen-err-network'); return; }
+  if (!text || text.trim().length < 10) { showScreen('screen-err-scan'); return; }
+  try {
+    const resp = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `Extract all form fields from this workplace form document text. Return ONLY a JSON array, no other text. Each item: { name: string, type: 'short_text'|'long_text'|'date'|'checkbox'|'signature', required: boolean }. If you cannot identify form fields return { error: 'cannot_read' }.\n\nDocument text:\n${text.slice(0, 8000)}`
+        }]
+      })
+    });
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    const raw = data.content[0].text.trim();
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch {
+      const match = raw.match(/\[[\s\S]*\]/);
+      parsed = match ? JSON.parse(match[0]) : null;
+    }
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed)) { showScreen('screen-err-scan'); return; }
+    session.fields = parsed;
+    session.refNumber = generateRef();
+    session.answers = new Array(parsed.length).fill(null);
+    session.formType = deriveFormType(parsed);
+    renderConfirmType();
+    showScreen('screen-confirm-type');
+  } catch { showScreen('screen-err-scan'); }
 }
 
 function deriveFormType(fields) {
