@@ -1048,6 +1048,11 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <button class="yesno-btn" onclick="answerCheckbox(false)">No</button>
     </div>
   </div>
+  <!-- Voice / Type tabs -->
+  <div class="sig-tabs" style="margin-bottom:16px;">
+    <button id="tab-voice-btn" class="sig-tab active" onclick="setInputTab('voice')">Voice</button>
+    <button id="tab-type-btn" class="sig-tab" onclick="setInputTab('type')">Type</button>
+  </div>
   <!-- Mic UI -->
   <div id="voice-mic-ui">
     <div class="mic-container">
@@ -1066,15 +1071,12 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <button class="btn btn-amber" onclick="nextVoiceField()">Next field</button>
     </div>
   </div>
-  <!-- Manual entry toggle -->
+  <!-- Manual entry (always available via tab) -->
   <div id="voice-manual-ui" style="display:none;">
     <textarea id="voice-manual-input" class="input-field" rows="4" placeholder="Type your answer here…"></textarea>
-    <button class="btn btn-amber mt-8" onclick="useManualAnswer()">Use this answer</button>
+    <button class="btn btn-amber mt-8" onclick="useManualAnswer()">Save answer</button>
   </div>
   <div style="text-align:center;margin-top:16px;">
-    <button class="btn-ghost" id="voice-type-toggle" onclick="toggleVoiceManual()">Can't use voice? Type instead</button>
-  </div>
-  <div style="text-align:center;margin-top:8px;">
     <button class="btn-ghost" style="font-size:13px;color:var(--color-text-muted);" onclick="skipVoiceField()">Skip this field</button>
   </div>
 </div>
@@ -2425,19 +2427,25 @@ function renderVoiceField() {
   currentTranscript = '';
   document.getElementById('transcript-display').innerHTML = '<span style="color:var(--color-text-muted);font-size:13px;font-style:italic;">Your answer will appear here…</span>';
   document.getElementById('voice-next-row').style.display = 'none';
-  document.getElementById('voice-manual-ui').style.display = 'none';
-  document.getElementById('voice-type-toggle').style.display = 'block';
+  document.getElementById('voice-manual-input').value = '';
 
   if (field.type === 'checkbox') {
     document.getElementById('voice-checkbox-ui').style.display = 'block';
     document.getElementById('voice-mic-ui').style.display = 'none';
+    document.getElementById('voice-manual-ui').style.display = 'none';
+    document.getElementById('tab-voice-btn').style.display = 'none';
+    document.getElementById('tab-type-btn').style.display = 'none';
   } else if (field.type === 'signature') {
     document.getElementById('voice-checkbox-ui').style.display = 'none';
+    document.getElementById('tab-voice-btn').style.display = 'none';
+    document.getElementById('tab-type-btn').style.display = 'none';
     document.getElementById('voice-mic-ui').style.display = 'none';
     showScreen('screen-signature');
   } else {
     document.getElementById('voice-checkbox-ui').style.display = 'none';
-    document.getElementById('voice-mic-ui').style.display = 'block';
+    document.getElementById('tab-voice-btn').style.display = '';
+    document.getElementById('tab-type-btn').style.display = '';
+    setInputTab('voice');
   }
   stopMic();
 }
@@ -2567,15 +2575,19 @@ function goToFieldsDone() {
   showScreen('screen-fields-done');
 }
 
+function setInputTab(tab) {
+  const isVoice = tab === 'voice';
+  document.getElementById('voice-mic-ui').style.display = isVoice ? 'block' : 'none';
+  document.getElementById('voice-manual-ui').style.display = isVoice ? 'none' : 'block';
+  document.getElementById('tab-voice-btn').classList.toggle('active', isVoice);
+  document.getElementById('tab-type-btn').classList.toggle('active', !isVoice);
+  if (isVoice) stopMic();
+}
+
 function toggleVoiceManual() {
-  const manual = document.getElementById('voice-manual-ui');
-  const mic = document.getElementById('voice-mic-ui');
-  const toggle = document.getElementById('voice-type-toggle');
-  const isManual = manual.style.display === 'block';
-  manual.style.display = isManual ? 'none' : 'block';
-  mic.style.display = isManual ? 'block' : 'none';
-  toggle.textContent = isManual ? "Can't use voice? Type instead" : "Use voice instead";
-  if (!isManual) stopMic();
+  // legacy — now handled by setInputTab
+  const isManual = document.getElementById('voice-manual-ui').style.display === 'block';
+  setInputTab(isManual ? 'voice' : 'type');
 }
 
 function useManualAnswer() {
