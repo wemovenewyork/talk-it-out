@@ -958,7 +958,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     Upload from files
   </button>
   <div id="scan-preview" style="display:none;margin-top:20px;">
-    <img id="scan-preview-img" style="width:100%;border-radius:var(--radius-md);max-height:200px;object-fit:cover;" alt="Form preview">
+    <img id="scan-preview-img" style="width:100%;border-radius:var(--radius-md);" alt="Form preview">
     <div id="scan-loading" style="text-align:center;padding:24px;">
       <div class="spinner"></div>
       <p class="text-muted mt-12">Reading your form…</p>
@@ -979,7 +979,8 @@ textarea.input-field { min-height: 100px; resize: vertical; }
   <div style="border:2px solid var(--color-amber);border-radius:var(--radius-lg);padding:24px;text-align:center;margin-bottom:8px;">
     <div id="detected-form-name" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">Incident Report</div>
   </div>
-  <p id="detected-field-count" class="text-muted text-center mb-24">7 fields detected</p>
+  <p id="detected-field-count" class="text-muted text-center mb-8">7 fields detected</p>
+  <div id="detected-fields-list" style="margin-bottom:24px;"></div>
   <button class="btn btn-amber" onclick="confirmFormType()">Yes, that's right</button>
   <button class="btn btn-outline mt-8" onclick="toggleTypeSelector()">No, change form type</button>
   <div id="type-selector" style="display:none;margin-top:16px;">
@@ -1036,7 +1037,8 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <span id="voice-field-counter" class="text-muted" style="font-size:13px;">Field 1 of 1</span>
   </div>
   <div style="text-align:center;padding:8px 0 0;">
-    <p id="voice-field-label" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;">Field Label</p>
+    <p id="voice-field-label" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;">Field Label</p>
+    <p id="voice-field-type" class="text-muted" style="font-size:12px;margin-bottom:4px;"></p>
     <p class="text-muted" style="font-size:14px;">Speak naturally — we'll write it up</p>
   </div>
   <!-- Checkbox field UI -->
@@ -2339,6 +2341,13 @@ const CONFIDENTIAL_TYPES = ['HR Complaint', 'OSHA Report', 'Grievance'];
 function renderConfirmType() {
   document.getElementById('detected-form-name').textContent = session.formType;
   document.getElementById('detected-field-count').textContent = session.fields.length + ' field' + (session.fields.length !== 1 ? 's' : '') + ' detected';
+  const typeLabels = { short_text: 'Text', long_text: 'Long text', date: 'Date', checkbox: 'Yes/No', signature: 'Signature' };
+  document.getElementById('detected-fields-list').innerHTML = session.fields.map((f, i) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 14px;background:var(--color-bg-secondary);border-radius:8px;margin-bottom:6px;">
+      <span style="font-size:14px;font-weight:500;">${i + 1}. ${f.name}</span>
+      <span style="font-size:11px;color:var(--color-text-muted);background:var(--color-bg);border-radius:4px;padding:2px 8px;">${typeLabels[f.type] || f.type}</span>
+    </div>`
+  ).join('');
   const grid = document.getElementById('type-tags-grid');
   grid.innerHTML = FORM_TYPES.map(t => `<div class="type-tag${t === session.formType ? ' active' : ''}" onclick="selectFormType(this,'${t}')">${t}</div>`).join('');
 }
@@ -2394,8 +2403,10 @@ function renderVoiceField() {
   if (idx >= fields.length) { goToFieldsDone(); return; }
   const field = fields[idx];
   updateProgress(idx, fields.length);
+  const typeLabels = { short_text: 'Short text', long_text: 'Long text', date: 'Date', checkbox: 'Yes / No', signature: 'Signature' };
   document.getElementById('voice-field-counter').textContent = `Field ${idx + 1} of ${fields.length}`;
   document.getElementById('voice-field-label').textContent = field.name;
+  document.getElementById('voice-field-type').textContent = typeLabels[field.type] || field.type;
   document.getElementById('voice-confidential-banner').style.display = session.confidential ? 'flex' : 'none';
   currentTranscript = '';
   document.getElementById('transcript-display').innerHTML = '<span style="color:var(--color-text-muted);font-size:13px;font-style:italic;">Your answer will appear here…</span>';
