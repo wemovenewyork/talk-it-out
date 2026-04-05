@@ -1354,6 +1354,13 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       </div>
     </div>
   </div>
+  <!-- Download scanned PDF -->
+  <div id="output-pdf-download" style="display:none;margin-bottom:12px;">
+    <button class="btn btn-outline" onclick="downloadScannedPDF()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      Download scanned PDF
+    </button>
+  </div>
   <!-- Print -->
   <button class="btn btn-outline mb-12" onclick="window.print()">
     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -1786,7 +1793,8 @@ let session = {
   draft: false,
   startTime: null,
   rewriteCount: 0,
-  formImage: null
+  formImage: null,
+  scannedPdfUri: null
 };
 
 // ===== SCREEN MANAGEMENT =====
@@ -2031,9 +2039,15 @@ function handleWelcomeUpload(e) {
     };
     reader.readAsArrayBuffer(file);
   } else {
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const base64 = ev.target.result.split(',')[1];
-      processScannedImage(base64, file.type);
+      try {
+        const { enhancedBase64, pdfDataUri } = await photoToScannedPDF(base64, file.type);
+        session.scannedPdfUri = pdfDataUri;
+        processScannedImage(enhancedBase64, 'image/jpeg');
+      } catch {
+        processScannedImage(base64, file.type);
+      }
     };
     reader.readAsDataURL(file);
   }
@@ -2142,13 +2156,20 @@ function handleScanFile(e) {
     };
     reader.readAsArrayBuffer(file);
   } else {
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const base64 = ev.target.result.split(',')[1];
       document.getElementById('scan-preview').style.display = 'block';
-      document.getElementById('scan-preview-img').style.display = 'block';
       document.getElementById('scan-preview-img').src = ev.target.result;
+      document.getElementById('scan-preview-img').style.display = 'block';
       document.getElementById('scan-loading').style.display = 'block';
-      processScannedImage(base64, file.type);
+      try {
+        const { enhancedBase64, pdfDataUri } = await photoToScannedPDF(base64, file.type);
+        session.scannedPdfUri = pdfDataUri;
+        document.getElementById('scan-preview-img').src = 'data:image/jpeg;base64,' + enhancedBase64;
+        processScannedImage(enhancedBase64, 'image/jpeg');
+      } catch {
+        processScannedImage(base64, file.type);
+      }
     };
     reader.readAsDataURL(file);
   }
@@ -2217,6 +2238,67 @@ async function processScannedImage(base64Data, mimeType) {
   } catch (err) {
     showScanError('image exception: ' + (err && err.message));
   }
+}
+
+// ===== DOCUMENT SCAN (photo → enhanced image + PDF) =====
+async function loadJsPDF() {
+  if (window.jspdf) return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function applyDocumentScanEffect(canvas) {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    // Contrast boost + slight brightness lift for white paper
+    let val = (gray - 128) * 1.7 + 150;
+    val = Math.max(0, Math.min(255, val));
+    data[i] = data[i + 1] = data[i + 2] = val;
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+async function photoToScannedPDF(base64, mimeType) {
+  await loadJsPDF();
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      // Scale down if very large
+      const maxDim = 2400;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (Math.max(w, h) > maxDim) {
+        const scale = maxDim / Math.max(w, h);
+        w = Math.round(w * scale); h = Math.round(h * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      applyDocumentScanEffect(canvas);
+      const enhancedJpeg = canvas.toDataURL('image/jpeg', 0.92);
+      const enhancedBase64 = enhancedJpeg.split(',')[1];
+      // Build PDF (A4, portrait or landscape)
+      const { jsPDF } = window.jspdf;
+      const orientation = w >= h ? 'landscape' : 'portrait';
+      const pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 24;
+      const ratio = Math.min((pageW - margin * 2) / w, (pageH - margin * 2) / h);
+      const imgW = w * ratio, imgH = h * ratio;
+      pdf.addImage(enhancedJpeg, 'JPEG', margin + ((pageW - margin * 2) - imgW) / 2, margin + ((pageH - margin * 2) - imgH) / 2, imgW, imgH);
+      resolve({ enhancedBase64, pdfDataUri: pdf.output('datauristring') });
+    };
+    img.onerror = reject;
+    img.src = `data:${mimeType || 'image/jpeg'};base64,` + base64;
+  });
 }
 
 async function loadMammoth() {
@@ -2949,6 +3031,15 @@ function renderOutput() {
   document.getElementById('output-ref').textContent = session.refNumber;
   document.getElementById('output-email-form').style.display = 'none';
   document.getElementById('output-email-confirm').style.display = 'none';
+  document.getElementById('output-pdf-download').style.display = session.scannedPdfUri ? 'block' : 'none';
+}
+
+function downloadScannedPDF() {
+  if (!session.scannedPdfUri) return;
+  const a = document.createElement('a');
+  a.href = session.scannedPdfUri;
+  a.download = (session.refNumber || 'form') + '-scanned.pdf';
+  a.click();
 }
 
 function toggleEmailForm() {
