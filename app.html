@@ -1074,6 +1074,9 @@ textarea.input-field { min-height: 100px; resize: vertical; }
   <div style="text-align:center;margin-top:16px;">
     <button class="btn-ghost" id="voice-type-toggle" onclick="toggleVoiceManual()">Can't use voice? Type instead</button>
   </div>
+  <div style="text-align:center;margin-top:8px;">
+    <button class="btn-ghost" style="font-size:13px;color:var(--color-text-muted);" onclick="skipVoiceField()">Skip this field</button>
+  </div>
 </div>
 
 <!-- SCREEN: rewrite -->
@@ -1169,6 +1172,14 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     </button>
   </div>
   <p class="text-muted mb-16" style="font-size:13px;">How your completed form will appear</p>
+  <!-- Filled form overlay (only shown when a scanned image is available) -->
+  <div id="preview-overlay-container" style="display:none;margin-bottom:20px;">
+    <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:8px;">Your answers on the original form</p>
+    <div style="position:relative;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-border);">
+      <img id="preview-overlay-img" style="width:100%;display:block;" alt="Form">
+      <div id="preview-overlay-fields" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
+    </div>
+  </div>
   <div class="doc-preview">
     <div class="doc-header">
       <h2 id="preview-form-title">Form Title</h2>
@@ -1327,9 +1338,9 @@ textarea.input-field { min-height: 100px; resize: vertical; }
   </div>
   <!-- Email -->
   <div id="output-email-area" style="margin-bottom:12px;">
-    <button class="btn btn-outline" onclick="toggleEmailForm()">
+    <button class="btn btn-amber" onclick="toggleEmailForm()">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-      Email
+      Send as Email
     </button>
     <div id="output-email-form" style="display:none;margin-top:10px;padding:14px;background:var(--color-bg-secondary);border-radius:var(--radius-md);border:1px solid var(--color-border);">
       <div class="input-group">
@@ -1778,7 +1789,8 @@ let session = {
   signature: null,
   draft: false,
   startTime: null,
-  rewriteCount: 0
+  rewriteCount: 0,
+  formImage: null
 };
 
 // ===== SCREEN MANAGEMENT =====
@@ -2182,7 +2194,7 @@ async function processScannedImage(base64Data, mimeType) {
           role: "user",
           content: [
             { type: "image", source: { type: "base64", media_type: mediaType, data: base64Data } },
-            { type: "text", text: 'Extract all form fields from this workplace form image. Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If you cannot read the form return { error: \'cannot_read\' }.' }
+            { type: "text", text: 'Extract all form fields from this workplace form image. Return ONLY a JSON array, no other text. Each item: { "name": string, "type": "short_text"|"long_text"|"date"|"checkbox"|"signature", "required": boolean, "x": number, "y": number, "w": number, "h": number } where x/y are the top-left corner of the field as a percentage of image width/height (0-100), and w/h are the field\'s width/height as percentages. If you cannot read the form return { "error": "cannot_read" }.' }
           ]
         }]
       })
@@ -2200,6 +2212,7 @@ async function processScannedImage(base64Data, mimeType) {
       showScanError('parse failed: ' + raw.slice(0, 120)); return;
     }
     session.fields = parsed;
+    session.formImage = base64Data;
     session.refNumber = generateRef();
     session.answers = new Array(parsed.length).fill(null);
     session.formType = deriveFormType(parsed);
@@ -2261,7 +2274,7 @@ async function processScannedDocument(base64Data) {
       type: 'image',
       source: { type: 'base64', media_type: 'image/jpeg', data: b64 }
     }));
-    content.push({ type: 'text', text: 'Extract all form fields from this workplace form (all pages shown). Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If you cannot read the form return { error: \'cannot_read\' }.' });
+    content.push({ type: 'text', text: 'Extract all form fields from this workplace form (all pages shown). Return ONLY a JSON array, no other text. Each item: { "name": string, "type": "short_text"|"long_text"|"date"|"checkbox"|"signature", "required": boolean, "x": number, "y": number, "w": number, "h": number } where x/y are the top-left corner of the field as a percentage of the FIRST page\'s width/height (0-100), and w/h are the field\'s width/height as percentages. If you cannot read the form return { "error": "cannot_read" }.' });
     if (!navigator.onLine) { showScreen('screen-err-network'); return; }
     const resp = await fetch('/api/chat', {
       method: 'POST',
@@ -2281,6 +2294,7 @@ async function processScannedDocument(base64Data) {
       showScanError('pdf parse failed: ' + raw.slice(0, 120)); return;
     }
     session.fields = parsed;
+    session.formImage = pageImages[0];
     session.refNumber = generateRef();
     session.answers = new Array(parsed.length).fill(null);
     session.formType = deriveFormType(parsed);
@@ -2516,6 +2530,12 @@ function nextVoiceField() {
   advanceField();
 }
 
+function skipVoiceField() {
+  if (!session.answers) session.answers = new Array(session.fields.length).fill(null);
+  session.answers[session.currentFieldIndex] = { value: '—', aiRewritten: false, skipped: true };
+  advanceField();
+}
+
 function answerCheckbox(val) {
   saveCurrentAnswer(val ? 'Yes' : 'No');
   advanceField();
@@ -2721,6 +2741,20 @@ function renderPreview() {
       </div>
     `;
   }).join('');
+
+  // Filled form overlay
+  const overlayContainer = document.getElementById('preview-overlay-container');
+  if (session.formImage) {
+    overlayContainer.style.display = 'block';
+    document.getElementById('preview-overlay-img').src = 'data:image/jpeg;base64,' + session.formImage;
+    document.getElementById('preview-overlay-fields').innerHTML = session.fields.map((f, i) => {
+      const ans = session.answers && session.answers[i];
+      if (!ans || ans.skipped || f.x == null) return '';
+      return `<div style="position:absolute;left:${f.x}%;top:${f.y}%;width:${f.w || 20}%;background:rgba(255,251,230,0.92);border:1.5px solid #F59E0B;border-radius:3px;padding:1px 5px;font-size:10px;color:#0F1A24;line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${ans.value}</div>`;
+    }).join('');
+  } else {
+    overlayContainer.style.display = 'none';
+  }
 }
 
 // ===== SIGNATURE =====
