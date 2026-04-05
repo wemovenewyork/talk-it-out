@@ -1175,23 +1175,14 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <span class="top-bar-title">Review before approving</span>
   </div>
 
-  <!-- View toggle tabs (shown only when form image exists) -->
-  <div id="preview-view-tabs" style="display:none;margin-bottom:16px;">
-    <div class="sig-tabs">
-      <button id="preview-tab-form" class="sig-tab active" onclick="setPreviewTab('form')">Filled Form</button>
-      <button id="preview-tab-list" class="sig-tab" onclick="setPreviewTab('list')">Field List</button>
-    </div>
-  </div>
-
-  <!-- FILLED FORM VIEW -->
-  <div id="preview-filled-view" style="display:none;">
-    <p class="text-muted mb-12" style="font-size:13px;">Your answers are filled into the original form below.</p>
-    <canvas id="preview-form-canvas" style="width:100%;border-radius:var(--radius-md);box-shadow:0 2px 12px rgba(0,0,0,0.12);display:block;margin-bottom:8px;"></canvas>
-    <p id="preview-canvas-status" style="font-size:11px;color:var(--color-text-muted);text-align:center;margin-bottom:16px;"></p>
-  </div>
-
-  <!-- FIELD LIST VIEW (fallback / secondary) -->
+  <!-- COMPLETED FORM DOCUMENT -->
   <div id="preview-list-view">
+    <!-- Original form thumbnail (when scanned) -->
+    <div id="preview-scan-thumb" style="display:none;margin-bottom:16px;">
+      <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:6px;">Original form</p>
+      <img id="preview-thumb-img" style="width:100%;border-radius:var(--radius-md);border:1px solid var(--color-border);opacity:0.7;" alt="Original scanned form">
+    </div>
+    <!-- Filled document -->
     <div class="doc-preview">
       <div class="doc-header">
         <h2 id="preview-form-title">Form Title</h2>
@@ -2755,92 +2746,27 @@ function renderPreview() {
   document.getElementById('preview-ref-footer').textContent = session.refNumber;
   document.getElementById('preview-ts-footer').textContent = ts;
 
-  // Field list view
-  const body = document.getElementById('preview-fields-body');
-  if (!session.fields || session.fields.length === 0) { body.innerHTML = '<p class="text-muted">No fields.</p>'; }
-  else {
-    body.innerHTML = session.fields.map((f, i) => {
-      const ans = session.answers && session.answers[i];
-      return `<div class="doc-field">
-        <div class="doc-field-label">${f.name}</div>
-        <div class="doc-field-value">${ans && !ans.skipped ? ans.value : '—'}</div>
-      </div>`;
-    }).join('');
-  }
-
+  // Show original form thumbnail if available
+  const thumb = document.getElementById('preview-scan-thumb');
   if (session.formImage) {
-    document.getElementById('preview-view-tabs').style.display = 'block';
-    setPreviewTab('form');
-    renderFilledFormCanvas();
+    thumb.style.display = 'block';
+    document.getElementById('preview-thumb-img').src = 'data:image/jpeg;base64,' + session.formImage;
   } else {
-    document.getElementById('preview-view-tabs').style.display = 'none';
-    setPreviewTab('list');
+    thumb.style.display = 'none';
   }
-}
 
-function renderFilledFormCanvas() {
-  const canvas = document.getElementById('preview-form-canvas');
-  const status = document.getElementById('preview-canvas-status');
-  if (!canvas) return;
-  status.textContent = 'Rendering…';
-  const img = new Image();
-  img.onload = () => {
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-
-    const fields = session.fields || [];
-    const hasPositions = fields.some(f => f.x != null && f.y != null);
-    let filled = 0;
-
-    if (hasPositions) {
-      fields.forEach((f, i) => {
-        const ans = session.answers && session.answers[i];
-        if (!ans || ans.skipped || f.x == null || f.y == null) return;
-        const x = (f.x / 100) * img.naturalWidth;
-        const y = (f.y / 100) * img.naturalHeight;
-        const w = ((f.w || 20) / 100) * img.naturalWidth;
-        const h = Math.max(((f.h || 5) / 100) * img.naturalHeight, 18);
-        // Yellow fill box
-        ctx.fillStyle = 'rgba(255, 248, 195, 0.92)';
-        ctx.fillRect(x, y, w, h);
-        ctx.strokeStyle = '#F59E0B';
-        ctx.lineWidth = Math.max(1, img.naturalWidth * 0.002);
-        ctx.strokeRect(x, y, w, h);
-        // Answer text
-        const fontSize = Math.max(10, Math.min(h * 0.55, 22));
-        ctx.fillStyle = '#0F1A24';
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.textBaseline = 'middle';
-        // Clip text to box width
-        const text = String(ans.value);
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x + 3, y, w - 6, h);
-        ctx.clip();
-        ctx.fillText(text, x + 4, y + h / 2);
-        ctx.restore();
-        filled++;
-      });
-      status.textContent = filled + ' answer' + (filled !== 1 ? 's' : '') + ' placed on form';
-    } else {
-      // No positions — just show the form image with a note
-      status.textContent = 'Form preview shown — switch to Field List to see your answers';
-    }
-  };
-  img.onerror = () => { status.textContent = 'Could not render form image'; };
-  img.src = 'data:image/jpeg;base64,' + session.formImage;
-}
-
-function setPreviewTab(tab) {
-  const isForm = tab === 'form';
-  document.getElementById('preview-filled-view').style.display = isForm ? 'block' : 'none';
-  document.getElementById('preview-list-view').style.display = isForm ? 'none' : 'block';
-  const tabForm = document.getElementById('preview-tab-form');
-  const tabList = document.getElementById('preview-tab-list');
-  if (tabForm) tabForm.classList.toggle('active', isForm);
-  if (tabList) tabList.classList.toggle('active', !isForm);
+  // Filled document
+  const body = document.getElementById('preview-fields-body');
+  if (!session.fields || session.fields.length === 0) { body.innerHTML = '<p class="text-muted">No fields.</p>'; return; }
+  body.innerHTML = session.fields.map((f, i) => {
+    const ans = session.answers && session.answers[i];
+    const val = ans && !ans.skipped ? ans.value : '—';
+    const isEmpty = !ans || ans.skipped;
+    return `<div class="doc-field" style="${isEmpty ? 'opacity:0.45;' : ''}">
+      <div class="doc-field-label">${f.name}${f.required ? ' *' : ''}</div>
+      <div class="doc-field-value" style="${isEmpty ? '' : 'color:var(--color-text);font-weight:500;'}">${val}</div>
+    </div>`;
+  }).join('');
 }
 
 // ===== SIGNATURE =====
