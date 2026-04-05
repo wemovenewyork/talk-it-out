@@ -2185,7 +2185,11 @@ async function processScannedImage(base64Data, mimeType) {
         }]
       })
     });
-    if (!resp.ok) { showScanError('image API ' + resp.status); return; }
+    if (!resp.ok) {
+      const errBody = await resp.json().catch(() => ({}));
+      const msg = errBody?.error?.message || errBody?.error?.type || JSON.stringify(errBody).slice(0, 200);
+      showScanError('image API ' + resp.status + ': ' + msg); return;
+    }
     const data = await resp.json();
     const raw = data.content?.[0]?.text?.trim();
     if (!raw) { showScanError('empty API response'); return; }
@@ -2262,7 +2266,11 @@ async function processScannedDocument(base64Data) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, messages: [{ role: 'user', content }] })
     });
-    if (!resp.ok) { showScanError('pdf API ' + resp.status); return; }
+    if (!resp.ok) {
+      const errBody = await resp.json().catch(() => ({}));
+      const msg = errBody?.error?.message || errBody?.error?.type || JSON.stringify(errBody).slice(0, 200);
+      showScanError('pdf API ' + resp.status + ': ' + msg); return;
+    }
     const data = await resp.json();
     const raw = data.content?.[0]?.text?.trim();
     if (!raw) { showScanError('empty pdf API response'); return; }
