@@ -1980,9 +1980,11 @@ function handleWelcomeUpload(e) {
   } else if (file.name.match(/\.docx?$/i) || file.type.includes('wordprocessingml') || file.type.includes('msword')) {
     reader.onload = (ev) => {
       showDocPlaceholder(file.name);
-      mammoth.extractRawText({ arrayBuffer: ev.target.result })
-        .then(result => processScannedText(result.value))
-        .catch(() => showScreen('screen-err-scan'));
+      try {
+        mammoth.extractRawText({ arrayBuffer: ev.target.result })
+          .then(result => processScannedText(result.value))
+          .catch(() => showScreen('screen-err-scan'));
+      } catch { showScreen('screen-err-scan'); }
     };
     reader.readAsArrayBuffer(file);
   } else {
@@ -2088,9 +2090,11 @@ function handleScanFile(e) {
   } else if (file.name.match(/\.docx?$/i) || file.type.includes('wordprocessingml') || file.type.includes('msword')) {
     reader.onload = (ev) => {
       showDocPlaceholder(file.name);
-      mammoth.extractRawText({ arrayBuffer: ev.target.result })
-        .then(result => processScannedText(result.value))
-        .catch(() => showScreen('screen-err-scan'));
+      try {
+        mammoth.extractRawText({ arrayBuffer: ev.target.result })
+          .then(result => processScannedText(result.value))
+          .catch(() => showScreen('screen-err-scan'));
+      } catch { showScreen('screen-err-scan'); }
     };
     reader.readAsArrayBuffer(file);
   } else {
