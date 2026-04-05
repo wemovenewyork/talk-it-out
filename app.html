@@ -2162,35 +2162,37 @@ async function processScannedImage(base64Data, mimeType) {
   }
 }
 
+async function loadPdfJs() {
+  if (window.pdfjsLib) return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+}
+
 async function processScannedDocument(base64Data) {
   if (!navigator.onLine) { showScreen('screen-err-network'); return; }
-  const FIELD_PROMPT = 'Extract all fillable fields from this document. Include any blank lines, input areas, checkboxes, or labeled spaces where someone would write information. Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If there are truly no fillable fields return { error: \'cannot_read\' }.';
   try {
-    const resp = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{
-          role: "user",
-          content: [
-            { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64Data } },
-            { type: "text", text: FIELD_PROMPT }
-          ]
-        }]
-      })
-    });
-    if (!resp.ok) throw new Error('API error');
-    const data = await resp.json();
-    const parsed = parseClaudeJson(data.content[0].text.trim());
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) { showScreen('screen-err-scan'); return; }
-    session.fields = parsed;
-    session.refNumber = generateRef();
-    session.answers = new Array(parsed.length).fill(null);
-    session.formType = deriveFormType(parsed);
-    renderConfirmType();
-    showScreen('screen-confirm-type');
+    await loadPdfJs();
+    const raw = atob(base64Data);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    const pdf = await pdfjsLib.getDocument({ data: arr }).promise;
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({ scale: 2 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    const imageBase64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+    const previewImg = document.getElementById('scan-preview-img');
+    previewImg.src = 'data:image/jpeg;base64,' + imageBase64;
+    previewImg.style.display = 'block';
+    await processScannedImage(imageBase64, 'image/jpeg');
   } catch { showScreen('screen-err-scan'); }
 }
 
