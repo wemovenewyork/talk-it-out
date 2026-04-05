@@ -622,7 +622,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
 <!-- ===================== AUTH SCREENS ===================== -->
 
 <!-- SCREEN: auth-signin -->
-<div id="screen-auth-signin" class="screen">
+<div id="screen-auth-signin" class="screen active">
   <div style="text-align:center;padding-top:48px;">
     <div class="logo" style="justify-content:center;font-size:28px;">Talk It Out<span class="logo-dot">.</span></div>
     <p class="tagline">Just talk. We handle the rest.</p>
@@ -1810,23 +1810,30 @@ function getDrafts() { return getLS('tio_drafts', []); }
 
 // ===== APP INIT =====
 window.addEventListener('load', () => {
-  const user = getUser();
-  const settings = getSettings();
-  if (settings.darkMode) document.body.classList.add('dark-mode');
+  try {
+    const user = getUser();
+    const settings = getSettings();
+    if (settings.darkMode) document.body.classList.add('dark-mode');
 
-  if (!user.email) {
-    showScreen('screen-auth-signin');
-  } else if (!getLS('tio_privacy_accepted')) {
-    showScreen('screen-privacy-notice');
-  } else if (!getLS('tio_onboarded')) {
-    showScreen('screen-onboard-1');
-  } else {
-    showScreen('screen-welcome');
+    if (!user.email) {
+      showScreen('screen-auth-signin');
+    } else if (!getLS('tio_privacy_accepted')) {
+      showScreen('screen-privacy-notice');
+    } else if (!getLS('tio_onboarded')) {
+      showScreen('screen-onboard-1');
+    } else {
+      showScreen('screen-welcome');
+    }
+
+    setupOrgCodeInputs();
+    setupPWAInstall();
+    setupNetworkListener();
+  } catch(e) {
+    // Fallback: make sure auth screen is visible if anything fails
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-auth-signin').classList.add('active');
+    console.error('Init error:', e);
   }
-
-  setupOrgCodeInputs();
-  setupPWAInstall();
-  setupNetworkListener();
 });
 
 // ===== AUTH =====
