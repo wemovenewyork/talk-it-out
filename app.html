@@ -1629,6 +1629,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     </div>
     <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;">Couldn't read this form</h2>
     <p class="text-muted mb-32">The image was too blurry or the form layout wasn't recognized.</p>
+    <p id="scan-err-detail" style="font-size:11px;color:#999;margin-bottom:16px;word-break:break-all;display:none;"></p>
     <button class="btn btn-amber" onclick="showScreen('screen-scan')">Try scanning again</button>
     <button class="btn btn-outline mt-8" onclick="showScreen('screen-scan')">Upload a clearer image</button>
     <div style="text-align:center;margin-top:12px;">
@@ -1983,8 +1984,8 @@ function handleWelcomeUpload(e) {
       try {
         mammoth.extractRawText({ arrayBuffer: ev.target.result })
           .then(result => processScannedText(result.value))
-          .catch(() => showScreen('screen-err-scan'));
-      } catch { showScreen('screen-err-scan'); }
+          .catch(err => showScanError('mammoth error: ' + (err && err.message)));
+      } catch (err) { showScanError('mammoth load error: ' + (err && err.message)); }
     };
     reader.readAsArrayBuffer(file);
   } else {
@@ -2093,8 +2094,8 @@ function handleScanFile(e) {
       try {
         mammoth.extractRawText({ arrayBuffer: ev.target.result })
           .then(result => processScannedText(result.value))
-          .catch(() => showScreen('screen-err-scan'));
-      } catch { showScreen('screen-err-scan'); }
+          .catch(err => showScanError('mammoth error: ' + (err && err.message)));
+      } catch (err) { showScanError('mammoth load error: ' + (err && err.message)); }
     };
     reader.readAsArrayBuffer(file);
   } else {
@@ -2108,6 +2109,12 @@ function handleScanFile(e) {
     };
     reader.readAsDataURL(file);
   }
+}
+
+function showScanError(reason) {
+  const el = document.getElementById('scan-err-detail');
+  if (el) { el.textContent = reason || ''; el.style.display = reason ? 'block' : 'none'; }
+  showScreen('screen-err-scan');
 }
 
 function parseClaudeJson(raw) {
@@ -2134,7 +2141,7 @@ async function processScannedImage(base64Data, mimeType) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1000,
         messages: [{
           role: "user",
@@ -2145,11 +2152,13 @@ async function processScannedImage(base64Data, mimeType) {
         }]
       })
     });
-    if (!resp.ok) throw new Error('API error');
+    if (!resp.ok) { showScanError('image API ' + resp.status); return; }
     const data = await resp.json();
-    const parsed = parseClaudeJson(data.content[0].text.trim());
+    const raw = data.content?.[0]?.text?.trim();
+    if (!raw) { showScanError('empty API response'); return; }
+    const parsed = parseClaudeJson(raw);
     if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) {
-      showScreen('screen-err-scan'); return;
+      showScanError('parse failed: ' + raw.slice(0, 120)); return;
     }
     session.fields = parsed;
     session.refNumber = generateRef();
@@ -2157,8 +2166,8 @@ async function processScannedImage(base64Data, mimeType) {
     session.formType = deriveFormType(parsed);
     renderConfirmType();
     showScreen('screen-confirm-type');
-  } catch {
-    showScreen('screen-err-scan');
+  } catch (err) {
+    showScanError('image exception: ' + (err && err.message));
   }
 }
 
@@ -2207,30 +2216,34 @@ async function processScannedDocument(base64Data) {
     const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, messages: [{ role: 'user', content }] })
     });
-    if (!resp.ok) throw new Error('API error');
+    if (!resp.ok) { showScanError('pdf API ' + resp.status); return; }
     const data = await resp.json();
-    const parsed = parseClaudeJson(data.content[0].text.trim());
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) { showScreen('screen-err-scan'); return; }
+    const raw = data.content?.[0]?.text?.trim();
+    if (!raw) { showScanError('empty pdf API response'); return; }
+    const parsed = parseClaudeJson(raw);
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) {
+      showScanError('pdf parse failed: ' + raw.slice(0, 120)); return;
+    }
     session.fields = parsed;
     session.refNumber = generateRef();
     session.answers = new Array(parsed.length).fill(null);
     session.formType = deriveFormType(parsed);
     renderConfirmType();
     showScreen('screen-confirm-type');
-  } catch { showScreen('screen-err-scan'); }
+  } catch (err) { showScanError('pdf exception: ' + (err && err.message)); }
 }
 
 async function processScannedText(text) {
   if (!navigator.onLine) { showScreen('screen-err-network'); return; }
-  if (!text || text.trim().length < 10) { showScreen('screen-err-scan'); return; }
+  if (!text || text.trim().length < 10) { showScanError('word doc: extracted text too short (' + (text ? text.trim().length : 0) + ' chars)'); return; }
   try {
     const resp = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1000,
         messages: [{
           role: "user",
@@ -2238,17 +2251,21 @@ async function processScannedText(text) {
         }]
       })
     });
-    if (!resp.ok) throw new Error('API error');
+    if (!resp.ok) { showScanError('text API ' + resp.status); return; }
     const data = await resp.json();
-    const parsed = parseClaudeJson(data.content[0].text.trim());
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) { showScreen('screen-err-scan'); return; }
+    const raw = data.content?.[0]?.text?.trim();
+    if (!raw) { showScanError('empty text API response'); return; }
+    const parsed = parseClaudeJson(raw);
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) {
+      showScanError('text parse failed: ' + raw.slice(0, 120)); return;
+    }
     session.fields = parsed;
     session.refNumber = generateRef();
     session.answers = new Array(parsed.length).fill(null);
     session.formType = deriveFormType(parsed);
     renderConfirmType();
     showScreen('screen-confirm-type');
-  } catch { showScreen('screen-err-scan'); }
+  } catch (err) { showScanError('text exception: ' + (err && err.message)); }
 }
 
 function deriveFormType(fields) {
@@ -2526,7 +2543,7 @@ async function callRewriteAPI(transcript, tone) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 500,
         messages: [{
           role: "user",
