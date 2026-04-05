@@ -2110,6 +2110,18 @@ function handleScanFile(e) {
   }
 }
 
+function parseClaudeJson(raw) {
+  // Strip markdown code fences if present
+  let text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+  try { return JSON.parse(text); } catch {}
+  // Try to extract a JSON array or object
+  const arrMatch = text.match(/\[[\s\S]*\]/);
+  if (arrMatch) { try { return JSON.parse(arrMatch[0]); } catch {} }
+  const objMatch = text.match(/\{[\s\S]*\}/);
+  if (objMatch) { try { return JSON.parse(objMatch[0]); } catch {} }
+  return null;
+}
+
 async function processScannedImage(base64Data, mimeType) {
   const mediaType = mimeType.startsWith('image/') ? mimeType : 'image/jpeg';
   if (!navigator.onLine) {
@@ -2135,15 +2147,8 @@ async function processScannedImage(base64Data, mimeType) {
     });
     if (!resp.ok) throw new Error('API error');
     const data = await resp.json();
-    const text = data.content[0].text.trim();
-    let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      const match = text.match(/\[[\s\S]*\]/);
-      parsed = match ? JSON.parse(match[0]) : null;
-    }
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed)) {
+    const parsed = parseClaudeJson(data.content[0].text.trim());
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) {
       showScreen('screen-err-scan'); return;
     }
     session.fields = parsed;
@@ -2159,7 +2164,7 @@ async function processScannedImage(base64Data, mimeType) {
 
 async function processScannedDocument(base64Data) {
   if (!navigator.onLine) { showScreen('screen-err-network'); return; }
-  const FIELD_PROMPT = 'Extract all form fields from this workplace form document. Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If you cannot read the form return { error: \'cannot_read\' }.';
+  const FIELD_PROMPT = 'Extract all fillable fields from this document. Include any blank lines, input areas, checkboxes, or labeled spaces where someone would write information. Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If there are truly no fillable fields return { error: \'cannot_read\' }.';
   try {
     const resp = await fetch("/api/chat", {
       method: "POST",
@@ -2178,13 +2183,8 @@ async function processScannedDocument(base64Data) {
     });
     if (!resp.ok) throw new Error('API error');
     const data = await resp.json();
-    const text = data.content[0].text.trim();
-    let parsed;
-    try { parsed = JSON.parse(text); } catch {
-      const match = text.match(/\[[\s\S]*\]/);
-      parsed = match ? JSON.parse(match[0]) : null;
-    }
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed)) { showScreen('screen-err-scan'); return; }
+    const parsed = parseClaudeJson(data.content[0].text.trim());
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) { showScreen('screen-err-scan'); return; }
     session.fields = parsed;
     session.refNumber = generateRef();
     session.answers = new Array(parsed.length).fill(null);
@@ -2212,13 +2212,8 @@ async function processScannedText(text) {
     });
     if (!resp.ok) throw new Error('API error');
     const data = await resp.json();
-    const raw = data.content[0].text.trim();
-    let parsed;
-    try { parsed = JSON.parse(raw); } catch {
-      const match = raw.match(/\[[\s\S]*\]/);
-      parsed = match ? JSON.parse(match[0]) : null;
-    }
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed)) { showScreen('screen-err-scan'); return; }
+    const parsed = parseClaudeJson(data.content[0].text.trim());
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) { showScreen('screen-err-scan'); return; }
     session.fields = parsed;
     session.refNumber = generateRef();
     session.answers = new Array(parsed.length).fill(null);
