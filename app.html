@@ -2739,6 +2739,12 @@ function editFieldFromReview(index) {
 
 // ===== PREVIEW =====
 function renderPreview() {
+  // Diagnostic — remove once working
+  const _dbg = `fields:${session.fields ? session.fields.length : 'null'} answers:${session.answers ? session.answers.length : 'null'} type:${session.formType || 'none'}`;
+  let _el = document.getElementById('preview-debug');
+  if (!_el) { _el = document.createElement('div'); _el.id = 'preview-debug'; _el.style.cssText = 'background:#FFF8C3;border:1px solid #F59E0B;border-radius:8px;padding:8px 12px;font-size:11px;font-family:monospace;margin-bottom:12px;'; document.getElementById('preview-list-view').prepend(_el); }
+  _el.textContent = _dbg;
+
   document.getElementById('preview-form-title').textContent = session.formType || 'Workplace Form';
   document.getElementById('preview-ref-number').textContent = 'Ref: ' + (session.refNumber || '—');
   const ts = new Date().toLocaleString();
