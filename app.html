@@ -867,22 +867,13 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <svg width="24" height="24" fill="none" stroke="#0F1A24" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
     </div>
     <div class="action-card-text">
-      <h3>Scan a form</h3>
-      <p>Take a photo of any workplace form</p>
-    </div>
-  </button>
-  <button class="action-card card-slate" onclick="triggerFileUpload()">
-    <div class="action-card-icon" style="background:rgba(255,255,255,0.1);">
-      <svg width="24" height="24" fill="none" stroke="#F5F0E8" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-    </div>
-    <div class="action-card-text" style="color:var(--color-text-light);">
-      <h3>Upload image</h3>
-      <p style="color:var(--color-text-light-muted);">Choose from your files</p>
+      <h3>Start a form</h3>
+      <p>Scan, photo, or upload — we read it for you</p>
     </div>
   </button>
   <input id="welcome-file-input" type="file" accept="image/*,application/pdf,.docx,.doc" style="display:none;" onchange="handleWelcomeUpload(event)">
   <div style="text-align:center;margin:8px 0 20px;">
-    <button class="btn-ghost" style="color:var(--color-amber-dark);font-size:15px;" onclick="showScreen('screen-quick-photo')">Quick photo capture</button>
+    <button class="btn-ghost" style="color:var(--color-amber-dark);font-size:15px;" onclick="showScreen('screen-quick-photo')">Quick photo evidence capture</button>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
     <button class="btn btn-outline" onclick="showScreen('screen-form-library')">
@@ -944,19 +935,19 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       Back
     </button>
-    <span class="top-bar-title">Scan your form</span>
+    <span class="top-bar-title">Step 1 — Upload your form</span>
   </div>
-  <div id="scan-dropzone" style="border:2px dashed var(--color-border-strong);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;cursor:pointer;margin-bottom:16px;" onclick="document.getElementById('scan-camera').click()">
-    <svg width="40" height="40" fill="none" stroke="var(--color-text-muted)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-    <p style="font-weight:600;font-size:15px;margin-bottom:4px;">Tap to photograph form</p>
-    <p class="text-small text-muted">Camera opens automatically</p>
-  </div>
+  <p class="text-muted mb-16" style="font-size:14px;">Take a photo of your form, or upload a PDF or image file. We'll read every field automatically.</p>
+  <button class="btn btn-amber" onclick="document.getElementById('scan-camera').click()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    Take a photo
+  </button>
+  <button class="btn btn-outline mt-8" onclick="document.getElementById('scan-file').click()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    Upload PDF, image or Word doc
+  </button>
   <input id="scan-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleScanFile(event)">
   <input id="scan-file" type="file" accept="image/*,application/pdf,.docx,.doc" style="display:none;" onchange="handleScanFile(event)">
-  <button class="btn btn-outline" onclick="document.getElementById('scan-file').click()">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-    Upload from files
-  </button>
   <div id="scan-preview" style="display:none;margin-top:20px;">
     <img id="scan-preview-img" style="width:100%;border-radius:var(--radius-md);" alt="Form preview">
     <div id="scan-loading" style="text-align:center;padding:24px;">
@@ -974,8 +965,9 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       Back
     </button>
   </div>
-  <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px;">Is this correct?</h2>
-  <p class="text-muted mb-16">We detected the following form type</p>
+  <p style="font-size:12px;font-weight:600;color:var(--color-amber-dark);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Step 2 — Confirm form type</p>
+  <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px;">Does this look right?</h2>
+  <p class="text-muted mb-16">We detected the following form and its fields</p>
   <div style="border:2px solid var(--color-amber);border-radius:var(--radius-lg);padding:24px;text-align:center;margin-bottom:8px;">
     <div id="detected-form-name" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">Incident Report</div>
   </div>
@@ -1037,9 +1029,10 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <span id="voice-field-counter" class="text-muted" style="font-size:13px;">Field 1 of 1</span>
   </div>
   <div style="text-align:center;padding:8px 0 0;">
-    <p id="voice-field-label" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;">Field Label</p>
+    <p style="font-size:12px;font-weight:600;color:var(--color-amber-dark);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Step 3 — Fill in your answers</p>
+    <p id="voice-field-label" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px;">Field Label</p>
     <p id="voice-field-type" class="text-muted" style="font-size:12px;margin-bottom:4px;"></p>
-    <p class="text-muted" style="font-size:14px;">Speak naturally — we'll write it up</p>
+    <p class="text-muted" style="font-size:13px;">Speak your answer or tap Type to type it</p>
   </div>
   <!-- Checkbox field UI -->
   <div id="voice-checkbox-ui" style="display:none;">
@@ -1148,7 +1141,8 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <div class="summary-row"><span class="summary-key">AI rewrites applied</span><span class="summary-val" id="done-rewrites-count">0</span></div>
       <div class="summary-row"><span class="summary-key">Time taken</span><span class="summary-val" id="done-time">0:00</span></div>
     </div>
-    <button class="btn btn-amber mt-16" onclick="showScreen('screen-preview')">Preview &amp; Approve</button>
+    <p style="font-size:12px;font-weight:600;color:var(--color-amber-dark);text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 8px;">Next: Review &amp; Approve</p>
+    <button class="btn btn-amber" onclick="showScreen('screen-preview')">Preview &amp; Approve</button>
     <button class="btn btn-outline mt-8" onclick="showScreen('screen-review')">Review answers first</button>
   </div>
 </div>
@@ -1173,7 +1167,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       Back
     </button>
-    <span class="top-bar-title">Review before approving</span>
+    <span class="top-bar-title">Step 4 — Preview &amp; Approve</span>
   </div>
 
   <!-- COMPLETED FORM DOCUMENT -->
@@ -2740,12 +2734,6 @@ function editFieldFromReview(index) {
 
 // ===== PREVIEW =====
 function renderPreview() {
-  // Diagnostic — remove once working
-  const _dbg = `fields:${session.fields ? session.fields.length : 'null'} answers:${session.answers ? session.answers.length : 'null'} type:${session.formType || 'none'}`;
-  let _el = document.getElementById('preview-debug');
-  if (!_el) { _el = document.createElement('div'); _el.id = 'preview-debug'; _el.style.cssText = 'background:#FFF8C3;border:1px solid #F59E0B;border-radius:8px;padding:8px 12px;font-size:11px;font-family:monospace;margin-bottom:12px;'; document.getElementById('preview-list-view').prepend(_el); }
-  _el.textContent = _dbg;
-
   document.getElementById('preview-form-title').textContent = session.formType || 'Workplace Form';
   document.getElementById('preview-ref-number').textContent = 'Ref: ' + (session.refNumber || '—');
   const ts = new Date().toLocaleString();
