@@ -1319,11 +1319,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <div class="summary-row"><span class="summary-key">Submitted by</span><span class="summary-val" id="approve-name">—</span></div>
     <div class="summary-row"><span class="summary-key">Timestamp</span><span class="summary-val" id="approve-timestamp">—</span></div>
   </div>
-  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;margin:20px 0;padding:16px;background:var(--color-bg-secondary);border-radius:var(--radius-md);border:1px solid var(--color-border);">
-    <input type="checkbox" id="approve-checkbox" onchange="updateApproveButton()" style="margin-top:2px;width:20px;height:20px;accent-color:var(--color-amber);flex-shrink:0;">
-    <span style="font-size:15px;line-height:1.5;">I confirm this information is accurate to the best of my knowledge</span>
-  </label>
-  <button class="btn btn-slate" id="approve-btn" disabled onclick="submitApproval()">Approve and complete</button>
+  <button class="btn btn-amber mt-16" onclick="submitApproval()">Approve and complete</button>
   <button class="btn btn-danger mt-12" onclick="showScreen('screen-preview')">Go back and edit</button>
 </div>
 
@@ -2922,9 +2918,6 @@ function renderApprove() {
   updateApproveButton();
 }
 
-function updateApproveButton() {
-  document.getElementById('approve-btn').disabled = !document.getElementById('approve-checkbox').checked;
-}
 
 function submitApproval() {
   const user = getUser();
