@@ -1628,7 +1628,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     </div>
     <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;">Couldn't read this form</h2>
     <p class="text-muted mb-32">The image was too blurry or the form layout wasn't recognized.</p>
-    <p id="scan-err-detail" style="font-size:11px;color:#999;margin-bottom:16px;word-break:break-all;display:none;"></p>
+    <p id="scan-err-detail" style="font-size:13px;color:#A32D2D;background:#FCEBEB;border-radius:8px;padding:10px 14px;margin-bottom:16px;word-break:break-all;display:none;text-align:left;"></p>
     <button class="btn btn-amber" onclick="showScreen('screen-scan')">Try scanning again</button>
     <button class="btn btn-outline mt-8" onclick="showScreen('screen-scan')">Upload a clearer image</button>
     <div style="text-align:center;margin-top:12px;">
@@ -2175,7 +2175,7 @@ async function processScannedImage(base64Data, mimeType) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 1000,
+        max_tokens: 2000,
         messages: [{
           role: "user",
           content: [
