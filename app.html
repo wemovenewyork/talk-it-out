@@ -1738,10 +1738,6 @@ textarea.input-field { min-height: 100px; resize: vertical; }
 </div>
 
 <script>
-// ===== API CONFIG =====
-const ANTHROPIC_API_KEY = "YOUR_KEY_HERE";
-const MODEL = "claude-sonnet-4-20250514";
-
 // ===== SESSION STATE =====
 let session = {
   refNumber: "",
@@ -2065,15 +2061,13 @@ async function processScannedImage(base64Data, mimeType) {
     showScreen('screen-err-network'); return;
   }
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    const resp = await fetch("/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: MODEL,
+        model: "claude-sonnet-4-20250514",
         max_tokens: 1000,
         messages: [{
           role: "user",
@@ -2377,15 +2371,13 @@ async function callRewriteAPI(transcript, tone) {
   else if (tone === 'plain') toneInstr = ' Use simple, plain language.';
   else toneInstr = ' Use formal, professional workplace documentation language.';
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    const resp = await fetch("/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: MODEL,
+        model: "claude-sonnet-4-20250514",
         max_tokens: 500,
         messages: [{
           role: "user",
