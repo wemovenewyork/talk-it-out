@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Talk It Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F8F7F4;
+  --color-bg-dark: #1C2B3A;
+  --color-bg-footer: #0A1520;
+  --color-text: #0F1A24;
+  --color-text-muted: #6B7280;
+  --color-text-light: #F5F0E8;
+  --color-text-light-muted: #9CB3C9;
+  --color-amber: #F59E0B;
+  --color-amber-dark: #BA7517;
+  --color-amber-light: #FAEEDA;
+  --color-success: #3B6D11;
+  --color-success-bg: #EAF3DE;
+  --color-error: #A32D2D;
+  --color-error-bg: #FCEBEB;
+  --color-info: #185FA5;
+  --color-info-bg: #E6F1FB;
+  --color-border: rgba(0,0,0,0.08);
+  --color-border-strong: rgba(0,0,0,0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+  --transition: 200ms ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  padding-top: 64px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ==============================
+   NAV
+============================== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  height: 64px;
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-page-name {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-amber);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-center {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  justify-content: center;
+}
+.nav-center a {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition);
+  white-space: nowrap;
+}
+.nav-center a:hover { color: var(--color-amber); }
+.nav-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-amber);
+  color: var(--color-text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 20px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+}
+.btn-primary:hover { background: var(--color-amber-dark); color: #fff; }
+
+@media (max-width: 768px) {
+  .nav-inner { grid-template-columns: 1fr 1fr; }
+  .nav-center { display: none; }
+}
+
+/* ==============================
+   PAGE HEADER
+============================== */
+.page-header {
+  background: var(--color-bg-secondary);
+  padding: 64px 0 48px;
+}
+.page-header-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+.breadcrumb a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.breadcrumb a:hover { color: var(--color-amber); }
+.breadcrumb .chevron { opacity: 0.5; }
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 16px;
+  line-height: 1.2;
+}
+.effective-date {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .page-title { font-size: 30px; }
+}
+
+/* ==============================
+   MAIN LAYOUT GRID
+============================== */
+.content-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 64px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .sidebar { order: 2; }
+}
+
+/* ==============================
+   SIDEBAR
+============================== */
+.sidebar {
+  position: sticky;
+  top: 88px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+.sidebar-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-link {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-left: 2px solid transparent;
+  transition: color var(--transition), border-color var(--transition);
+  line-height: 1.4;
+}
+.sidebar-link:hover { color: var(--color-amber); }
+.sidebar-link.active {
+  border-left-color: var(--color-amber);
+  color: var(--color-text);
+}
+.sidebar-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 20px 0;
+}
+.sidebar-contact-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+.sidebar-email {
+  display: block;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-amber);
+  text-decoration: none;
+  margin-bottom: 4px;
+  transition: color var(--transition);
+  word-break: break-all;
+}
+.sidebar-email:hover { color: var(--color-amber-dark); }
+.btn-outline {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  margin-top: 8px;
+}
+.btn-outline:hover {
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+  background: var(--color-amber-light);
+}
+
+/* ==============================
+   ARTICLE & CONTENT SECTIONS
+============================== */
+.article p {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+.article p:last-child { margin-bottom: 0; }
+
+.content-section { margin-top: 48px; }
+.content-section:first-child { margin-top: 0; }
+
+.section-heading {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ==============================
+   BULLET LIST
+============================== */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+.bullet-list li {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text);
+  padding-left: 20px;
+  position: relative;
+  margin-bottom: 6px;
+}
+.bullet-list li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: var(--color-text-muted);
+}
+
+/* ==============================
+   CHECK ITEMS
+============================== */
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.check-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.check-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.check-icon-yes { background: var(--color-success-bg); }
+.check-icon-x   { background: var(--color-error-bg); }
+.check-text {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+.check-text a { color: var(--color-amber); transition: color var(--transition); }
+.check-text a:hover { color: var(--color-amber-dark); }
+
+/* ==============================
+   CALLOUT BOXES
+============================== */
+.callout {
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.callout-heading {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.callout-text {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 !important;
+}
+.callout-amber  { background: var(--color-amber-light);   border-left-color: var(--color-amber); }
+.callout-amber  .callout-heading,
+.callout-amber  .callout-text  { color: var(--color-amber-dark); }
+.callout-green  { background: var(--color-success-bg);    border-left-color: var(--color-success); }
+.callout-green  .callout-heading,
+.callout-green  .callout-text  { color: var(--color-success); }
+.callout-blue   { background: var(--color-info-bg);       border-left-color: var(--color-info); }
+.callout-blue   .callout-heading,
+.callout-blue   .callout-text  { color: var(--color-info); }
+.callout-red    { background: var(--color-error-bg);      border-left-color: var(--color-error); }
+.callout-red    .callout-heading,
+.callout-red    .callout-text  { color: var(--color-error); }
+
+/* ==============================
+   DATA TABLE
+============================== */
+.data-table-wrapper {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  margin-bottom: 16px;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table thead {
+  background: var(--color-bg-secondary);
+}
+.data-table thead th {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  padding: 12px 16px;
+  text-align: left;
+}
+.data-table tbody tr:nth-child(odd)  { background: #fff; }
+.data-table tbody tr:nth-child(even) { background: #FAFAF9; }
+.data-table tbody td {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* ==============================
+   CONTACT GRID
+============================== */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+.contact-box {
+  background: var(--color-info-bg);
+  border-left: 4px solid var(--color-info);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 16px 20px;
+}
+.contact-box-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-info);
+  margin-bottom: 6px;
+}
+.contact-box a {
+  display: block;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-amber);
+  text-decoration: none;
+  margin-bottom: 8px;
+  word-break: break-all;
+  transition: color var(--transition);
+}
+.contact-box a:hover { color: var(--color-amber-dark); }
+.contact-box-desc {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-info);
+  line-height: 1.5;
+  margin: 0;
+}
+@media (max-width: 768px) {
+  .contact-grid { grid-template-columns: 1fr; }
+}
+
+/* ==============================
+   LAST UPDATED BAR
+============================== */
+.last-updated-bar {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.last-updated-bar span {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.link-amber {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-amber);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.link-amber:hover { color: var(--color-amber-dark); }
+
+/* ==============================
+   INLINE AMBER LINKS
+============================== */
+.article a.inline-link {
+  color: var(--color-amber);
+  transition: color var(--transition);
+}
+.article a.inline-link:hover { color: var(--color-amber-dark); }
+
+/* ==============================
+   FOOTER
+============================== */
+.footer {
+  background: var(--color-bg-footer);
+  padding: 64px 0 32px;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+}
+.footer-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.footer-tagline {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-text-light-muted);
+  line-height: 1.5;
+}
+.footer-col-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-light-muted);
+  margin-bottom: 16px;
+}
+.footer-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-links a {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.footer-links a:hover { color: #fff; }
+.footer-links a.footer-link-amber { color: var(--color-amber); }
+.footer-links a.footer-link-amber:hover { color: #fff; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 48px;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.footer-bottom span,
+.footer-bottom a {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+}
+.footer-bottom a:hover { color: rgba(255,255,255,0.7); }
+
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+}
+
+/* ==============================
+   PRINT STYLES
+============================== */
+@media print {
+  .nav,
+  .sidebar,
+  .footer,
+  .last-updated-bar {
+    display: none !important;
+  }
+  body {
+    padding-top: 0;
+    font-size: 12px;
+  }
+  .breadcrumb {
+    display: none;
+  }
+  .page-header {
+    padding: 24px 0 16px;
+    background: none;
+  }
+  .content-wrapper {
+    display: block;
+    max-width: none;
+    padding: 24px 0;
+  }
+  .article { width: 100%; }
+  .callout {
+    background: none !important;
+    border-left-width: 4px;
+    border-left-style: solid;
+    padding: 8px 12px;
+  }
+  .section-heading,
+  .page-title {
+    page-break-after: avoid;
+  }
+  .content-section {
+    page-break-inside: avoid;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ==============================
+     NAV
+============================== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <a href="index.html" class="nav-logo">Talk It Out</a>
+      <span class="nav-page-name">Privacy Policy</span>
+    </div>
+    <div class="nav-center">
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="index.html#features">Features</a>
+      <a href="index.html#pricing">Pricing</a>
+    </div>
+    <div class="nav-right">
+      <a href="app.html" class="btn-primary">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ==============================
+     PAGE HEADER
+============================== -->
+<section class="page-header">
+  <div class="page-header-inner">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Talk It Out</a>
+      <span class="chevron">›</span>
+      <span>Legal</span>
+      <span class="chevron">›</span>
+      <span>Privacy Policy</span>
+    </nav>
+    <h1 class="page-title">Privacy Policy</h1>
+    <p class="effective-date">Effective April 5, 2026 · Plain language version</p>
+  </div>
+</section>
+
+<!-- ==============================
+     MAIN
+============================== -->
+<main>
+  <div class="content-wrapper">
+
+    <!-- ARTICLE CONTENT -->
+    <article class="article">
+
+      <!-- 1. Overview -->
+      <section class="content-section" id="overview">
+        <div class="callout callout-green">
+          <div class="callout-heading">The short version</div>
+          <p class="callout-text">Your form data and submissions belong to you. Your employer cannot access your data through Talk It Out. Voice recordings are used only for live transcription and are never stored. You can delete your account and all your data at any time.</p>
+        </div>
+      </section>
+
+      <!-- 2. What we collect -->
+      <section class="content-section" id="what-we-collect">
+        <h2 class="section-heading">What we collect</h2>
+        <p>We collect only what is necessary to provide the Talk It Out service. This includes the following:</p>
+        <ul class="bullet-list">
+          <li>Your name and email address when you create an account.</li>
+          <li>Form content and answers you provide during the filing process.</li>
+          <li>Form images you upload for field extraction — deleted within 24 hours.</li>
+          <li>Device and browser information for offline functionality and app performance.</li>
+          <li>Aggregate anonymized usage data to improve the service.</li>
+        </ul>
+      </section>
+
+      <!-- 3. What we don't collect -->
+      <section class="content-section" id="what-we-dont-collect">
+        <h2 class="section-heading">What we do not collect</h2>
+        <div class="check-list">
+          <div class="check-item">
+            <div class="check-icon check-icon-x">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M8 2L2 8" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <p class="check-text">We do not sell your data to any third party under any circumstances.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-x">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M8 2L2 8" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <p class="check-text">We do not share individual form submissions with your employer, their representatives, or any management personnel.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-x">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M8 2L2 8" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <p class="check-text">We do not store voice recordings. Audio is processed live for transcription and immediately discarded — never saved to our servers.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-x">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M8 2L2 8" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <p class="check-text">We do not use your form content, answers, or voice input to train AI models.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Data retention -->
+      <section class="content-section" id="data-retention">
+        <h2 class="section-heading">Data we collect and how long we keep it</h2>
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Data type</th>
+                <th>Purpose</th>
+                <th>Kept for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Account information</td>
+                <td>Name, email, org code</td>
+                <td>Until account deleted</td>
+              </tr>
+              <tr>
+                <td>Form submissions</td>
+                <td>Your completed filings and answers</td>
+                <td>Until you delete them</td>
+              </tr>
+              <tr>
+                <td>Voice recordings</td>
+                <td>Live transcription only</td>
+                <td>Not stored — discarded immediately</td>
+              </tr>
+              <tr>
+                <td>Form images</td>
+                <td>Field extraction</td>
+                <td>24 hours maximum</td>
+              </tr>
+              <tr>
+                <td>E-signatures</td>
+                <td>Document signing</td>
+                <td>Lifetime of the submission</td>
+              </tr>
+              <tr>
+                <td>Usage analytics</td>
+                <td>App performance and improvement</td>
+                <td>90 days rolling</td>
+              </tr>
+              <tr>
+                <td>Error logs</td>
+                <td>Debugging and reliability</td>
+                <td>30 days</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5. Your rights -->
+      <section class="content-section" id="your-rights">
+        <h2 class="section-heading">Your rights</h2>
+        <div class="check-list">
+          <div class="check-item">
+            <div class="check-icon check-icon-yes">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.5L4.5 9L10 3.5" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="check-text">Request a complete copy of all data associated with your account at any time by emailing <a href="mailto:privacy@talkitout.app">privacy@talkitout.app</a>.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-yes">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.5L4.5 9L10 3.5" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="check-text">Permanently delete your account and all associated data from the profile screen or by emailing <a href="mailto:privacy@talkitout.app?subject=Data%20Deletion%20Request">privacy@talkitout.app</a> with subject "Data Deletion Request".</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-yes">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.5L4.5 9L10 3.5" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="check-text">Correct or update any inaccurate personal information directly in the app profile screen.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-yes">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.5L4.5 9L10 3.5" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="check-text">Opt out of all non-essential communications at any time from notification preferences in the app.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-yes">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.5L4.5 9L10 3.5" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="check-text">California residents — full CCPA rights apply. You have the right to know what data is collected, request deletion, and opt out of sale. We do not sell data.</p>
+          </div>
+        </div>
+        <p>EU and UK residents have rights under GDPR including the right to data portability and the right to lodge a complaint with your local supervisory authority. Contact <a href="mailto:privacy@talkitout.app" class="inline-link">privacy@talkitout.app</a> for any GDPR requests.</p>
+      </section>
+
+      <!-- 6. Third parties -->
+      <section class="content-section" id="third-parties">
+        <h2 class="section-heading">Third parties and sub-processors</h2>
+        <p>We use a limited number of third party services to operate Talk It Out. All sub-processors are bound by data processing agreements and may only use your data to provide their specific service.</p>
+        <ul class="bullet-list">
+          <li>Anthropic — AI text processing and form field extraction via Claude API.</li>
+          <li>Standard cloud hosting providers for infrastructure.</li>
+          <li>Email delivery service for notification emails.</li>
+        </ul>
+        <p>We do not use advertising networks, marketing trackers, social media pixels, or analytics services that share data with third parties. A complete list of sub-processors is available on request at <a href="mailto:privacy@talkitout.app" class="inline-link">privacy@talkitout.app</a>.</p>
+      </section>
+
+      <!-- 7. Security -->
+      <section class="content-section" id="security">
+        <h2 class="section-heading">How we protect your data</h2>
+        <p>We take security seriously and implement the following measures:</p>
+        <ul class="bullet-list">
+          <li>All data is encrypted in transit using TLS 1.3.</li>
+          <li>Form submissions and personal data are encrypted at rest.</li>
+          <li>E-signatures are stored as encrypted base64 data.</li>
+          <li>We conduct regular security reviews and vulnerability assessments.</li>
+          <li>Access to production systems is restricted to authorized personnel only.</li>
+        </ul>
+        <p>In the event of a data breach that affects your personal information we will notify you within 72 hours as required by applicable law.</p>
+      </section>
+
+      <!-- 8. Contact us -->
+      <section class="content-section" id="contact">
+        <h2 class="section-heading">Contact us</h2>
+        <p>We take privacy questions seriously and respond to all inquiries within 5 business days.</p>
+        <div class="contact-grid">
+          <div class="contact-box">
+            <p class="contact-box-label">Privacy questions</p>
+            <a href="mailto:privacy@talkitout.app">privacy@talkitout.app</a>
+            <p class="contact-box-desc">General privacy inquiries and policy questions</p>
+          </div>
+          <div class="contact-box">
+            <p class="contact-box-label">Data requests</p>
+            <a href="mailto:privacy@talkitout.app?subject=Data%20Deletion%20Request">privacy@talkitout.app</a>
+            <p class="contact-box-desc">Account deletion and data export requests</p>
+          </div>
+          <div class="contact-box">
+            <p class="contact-box-label">Security issues</p>
+            <a href="mailto:privacy@talkitout.app?subject=Security%20Issue">privacy@talkitout.app</a>
+            <p class="contact-box-desc">Report security vulnerabilities responsibly</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Last updated bar -->
+      <div class="last-updated-bar">
+        <span>Last updated April 5, 2026</span>
+        <a href="#" class="link-amber">View change history</a>
+      </div>
+
+    </article>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <p class="sidebar-label">On this page</p>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="#overview"            class="sidebar-link">1 Overview</a>
+        <a href="#what-we-collect"     class="sidebar-link">2 What we collect</a>
+        <a href="#what-we-dont-collect" class="sidebar-link">3 What we don't collect</a>
+        <a href="#data-retention"      class="sidebar-link">4 Data retention</a>
+        <a href="#your-rights"         class="sidebar-link">5 Your rights</a>
+        <a href="#third-parties"       class="sidebar-link">6 Third parties</a>
+        <a href="#security"            class="sidebar-link">7 Security</a>
+        <a href="#contact"             class="sidebar-link">8 Contact us</a>
+      </nav>
+      <hr class="sidebar-divider">
+      <p class="sidebar-contact-label">Contact</p>
+      <a href="mailto:privacy@talkitout.app" class="sidebar-email">privacy@talkitout.app</a>
+      <button class="btn-outline btn-print">Download PDF</button>
+    </aside>
+
+  </div>
+</main>
+
+<!-- ==============================
+     FOOTER
+============================== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-logo">Talk It Out</p>
+        <p class="footer-tagline">Just talk. We handle the rest.</p>
+      </div>
+      <div>
+        <p class="footer-col-label">Product</p>
+        <ul class="footer-links">
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#how-it-works">How it works</a></li>
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="index.html#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-label">Support</p>
+        <ul class="footer-links">
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Status</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-label">Legal</p>
+        <ul class="footer-links">
+          <li><a href="privacy.html" class="footer-link-amber">Privacy Policy</a></li>
+          <li><a href="terms.html"   class="footer-link-amber">Terms of Service</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+          <li><a href="#">CCPA / GDPR Rights</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Talk It Out. All rights reserved.</span>
+      <a href="mailto:hello@talkitout.app">hello@talkitout.app</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var sections = document.querySelectorAll('.content-section');
+  var links    = document.querySelectorAll('.sidebar-link');
+
+  // Scroll spy
+  function updateSpy() {
+    var current = '';
+    sections.forEach(function (sec) {
+      if (sec.getBoundingClientRect().top <= 100) {
+        current = sec.id;
+      }
+    });
+    links.forEach(function (link) {
+      var active = link.getAttribute('href') === '#' + current;
+      link.classList.toggle('active', active);
+    });
+    // highlight first section if none active yet
+    if (!current && links.length) {
+      links[0].classList.add('active');
+    }
+  }
+
+  window.addEventListener('scroll', updateSpy, { passive: true });
+  updateSpy();
+
+  // Smooth scroll
+  links.forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var id = this.getAttribute('href').slice(1);
+      var target = document.getElementById(id);
+      if (target) {
+        var top = target.getBoundingClientRect().top + window.scrollY - 88;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Print button
+  var printBtn = document.querySelector('.btn-print');
+  if (printBtn) {
+    printBtn.addEventListener('click', function () {
+      window.print();
+    });
+  }
+}());
+</script>
+</body>
+</html>

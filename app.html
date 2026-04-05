@@ -1,0 +1,3328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F59E0B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Talk It Out">
+<title>Talk It Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Talk%20It%20Out%22,%22short_name%22:%22TalkItOut%22,%22theme_color%22:%22%23F59E0B%22,%22background_color%22:%22%23FFFFFF%22,%22display%22:%22standalone%22,%22start_url%22:%22app.html%22,%22icons%22:[{%22src%22:%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AQFEhQnrqfGxQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAMvSURBVHja7d0xbhpBFIDhN0tBkSNYR0iRI3CEnCBH4ARITpAj+AQ+QU5gH4GShiNYR0iRI1iHlAIJEGD2zby3839SR9oV7Mz8O29mRwIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFzGGGOMg2OMAQ4iYowxjjHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOe4BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2CsAAQYAExIBjgAAAABJRU5ErkJggg==%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
+<style>
+/* ===== CSS RESET & ROOT VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F8F7F4;
+  --color-bg-dark: #0F1A24;
+  --color-surface-dark: #1C2B3A;
+  --color-text: #0F1A24;
+  --color-text-muted: #6B7280;
+  --color-text-light: #F5F0E8;
+  --color-text-light-muted: #9CB3C9;
+  --color-amber: #F59E0B;
+  --color-amber-dark: #BA7517;
+  --color-amber-light: #FAEEDA;
+  --color-amber-ring: #FAC775;
+  --color-slate: #1C2B3A;
+  --color-success: #3B6D11;
+  --color-success-bg: #EAF3DE;
+  --color-error: #A32D2D;
+  --color-error-bg: #FCEBEB;
+  --color-info: #185FA5;
+  --color-info-bg: #E6F1FB;
+  --color-purple: #534AB7;
+  --color-purple-bg: #EEEDFE;
+  --color-border: rgba(0,0,0,0.1);
+  --color-border-strong: rgba(0,0,0,0.2);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --transition: 300ms ease;
+}
+
+/* ===== DARK MODE ===== */
+body.dark-mode {
+  --color-bg: #0F1A24;
+  --color-bg-secondary: #1C2B3A;
+  --color-text: #F5F0E8;
+  --color-text-muted: #9CB3C9;
+  --color-border: rgba(255,255,255,0.1);
+  --color-border-strong: rgba(255,255,255,0.2);
+  --color-amber-light: #2a2010;
+}
+
+/* ===== BASE STYLES ===== */
+html, body {
+  height: 100%;
+  font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, .font-syne { font-family: 'Syne', sans-serif; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; font-size: inherit; }
+input, textarea, select { font-family: inherit; font-size: inherit; }
+
+/* ===== PROGRESS BAR ===== */
+#progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: var(--color-amber); width: 0%;
+  transition: width 300ms ease; z-index: 1000;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  display: none; min-height: 100vh;
+  padding: 0 16px 32px;
+  max-width: 480px; margin: 0 auto;
+}
+.screen.active { display: block; animation: slideIn 300ms ease; }
+@keyframes slideIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0 8px; min-height: 56px;
+  position: sticky; top: 0; background: var(--color-bg); z-index: 10;
+}
+.back-btn {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--color-text); font-size: 15px; font-weight: 500;
+  min-height: 44px; padding: 8px 4px; background: none; border: none;
+}
+.back-btn svg { flex-shrink: 0; }
+.top-bar-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 56px; padding: 12px 20px; border-radius: var(--radius-md);
+  font-size: 16px; font-weight: 600; width: 100%; transition: all var(--transition);
+  border: none; cursor: pointer;
+}
+.btn-amber { background: var(--color-amber); color: #0F1A24; }
+.btn-amber:hover { background: var(--color-amber-dark); }
+.btn-amber:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-slate { background: var(--color-slate); color: var(--color-text-light); }
+.btn-slate:hover { opacity: 0.85; }
+.btn-outline {
+  background: transparent; color: var(--color-text);
+  border: 1.5px solid var(--color-border-strong);
+}
+.btn-outline:hover { background: var(--color-bg-secondary); }
+.btn-ghost {
+  background: transparent; color: var(--color-text-muted);
+  font-size: 14px; font-weight: 500; min-height: 44px;
+}
+.btn-ghost:hover { color: var(--color-text); }
+.btn-danger { background: var(--color-error-bg); color: var(--color-error); }
+.btn-red { background: #DC2626; color: #fff; }
+.btn-red:hover { background: #B91C1C; }
+.btn-sm { min-height: 40px; font-size: 14px; padding: 8px 16px; }
+
+/* ===== INPUTS ===== */
+.input-group { margin-bottom: 16px; }
+.input-label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--color-text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.input-field {
+  width: 100%; padding: 14px 16px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border); background: var(--color-bg-secondary);
+  color: var(--color-text); font-size: 16px; min-height: 56px;
+  transition: border-color var(--transition);
+}
+.input-field:focus { outline: none; border-color: var(--color-amber); }
+.input-helper { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
+textarea.input-field { min-height: 100px; resize: vertical; }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--color-bg-secondary); border-radius: var(--radius-lg);
+  padding: 20px; margin-bottom: 16px; border: 1px solid var(--color-border);
+}
+.card-amber { background: var(--color-amber); color: #0F1A24; }
+.card-slate { background: var(--color-slate); color: var(--color-text-light); }
+
+/* ===== ACTION CARDS ===== */
+.action-card {
+  border-radius: var(--radius-lg); padding: 20px 20px 20px 20px;
+  margin-bottom: 12px; cursor: pointer; transition: transform var(--transition);
+  display: flex; align-items: center; gap: 16px; min-height: 80px;
+  border: none; width: 100%; text-align: left;
+}
+.action-card:hover { transform: scale(1.01); }
+.action-card-icon {
+  width: 48px; height: 48px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.action-card-text h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+.action-card-text p { font-size: 13px; opacity: 0.75; }
+
+/* ===== ICON CIRCLES ===== */
+.icon-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.icon-circle-amber { background: var(--color-amber); }
+.icon-circle-success { background: var(--color-success-bg); }
+.icon-circle-error { background: var(--color-error-bg); }
+.icon-circle-slate { background: var(--color-slate); }
+
+/* ===== CALLOUT BOX ===== */
+.callout {
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start;
+}
+.callout-amber { background: var(--color-amber-light); border-left: 3px solid var(--color-amber); }
+.callout-info { background: var(--color-info-bg); border-left: 3px solid var(--color-info); }
+.callout-success { background: var(--color-success-bg); border-left: 3px solid var(--color-success); }
+.callout-error { background: var(--color-error-bg); border-left: 3px solid var(--color-error); }
+
+/* ===== DIVIDER ===== */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--color-text-muted); font-size: 13px; margin: 20px 0;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--color-border);
+}
+
+/* ===== CHECK ITEMS ===== */
+.check-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 8px 0;
+}
+.check-icon {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.check-icon-success { background: var(--color-success-bg); }
+.check-icon-error { background: var(--color-error-bg); }
+
+/* ===== PROGRESS DOTS ===== */
+.progress-dots {
+  display: flex; gap: 8px; justify-content: center; margin: 24px 0;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--color-border-strong); transition: background var(--transition);
+}
+.dot.active { background: var(--color-amber); width: 24px; border-radius: 4px; }
+
+/* ===== AUTH CARD ===== */
+.auth-card {
+  background: var(--color-bg); border-radius: var(--radius-lg);
+  padding: 32px 24px; margin-top: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  border: 1px solid var(--color-border);
+}
+
+/* ===== LOGO ===== */
+.logo {
+  font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
+  color: var(--color-text); display: flex; align-items: center; gap: 8px;
+}
+.logo-dot { color: var(--color-amber); }
+.tagline { font-size: 14px; color: var(--color-text-muted); margin-top: 4px; text-align: center; }
+
+/* ===== AVATAR ===== */
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--color-amber); color: #0F1A24;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+  cursor: pointer; flex-shrink: 0;
+}
+
+/* ===== BANNER ===== */
+.banner {
+  border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 16px;
+}
+.banner-amber { background: var(--color-amber); color: #0F1A24; }
+.banner-info { background: var(--color-info-bg); color: var(--color-info); }
+.banner-dark { background: var(--color-surface-dark); color: var(--color-text-light); }
+
+/* ===== STATUS BADGE ===== */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600;
+}
+.badge-success { background: var(--color-success-bg); color: var(--color-success); }
+.badge-error { background: var(--color-error-bg); color: var(--color-error); }
+.badge-info { background: var(--color-info-bg); color: var(--color-info); }
+.badge-amber { background: var(--color-amber-light); color: var(--color-amber-dark); }
+
+/* ===== STATUS DOT ===== */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot-success { background: var(--color-success); }
+.status-dot-amber { background: var(--color-amber); }
+.status-dot-error { background: var(--color-error); }
+
+/* ===== TOGGLE ===== */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-bottom: 1px solid var(--color-border);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-size: 15px; font-weight: 500; }
+.toggle-desc { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.toggle {
+  width: 44px; height: 26px; border-radius: 13px;
+  background: var(--color-border-strong); position: relative;
+  cursor: pointer; transition: background var(--transition);
+  flex-shrink: 0;
+  border: none;
+}
+.toggle.on { background: var(--color-amber); }
+.toggle::after {
+  content: ''; width: 20px; height: 20px; border-radius: 50%; background: #fff;
+  position: absolute; top: 3px; left: 3px;
+  transition: transform var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ===== ORG CODE INPUTS ===== */
+.org-code-inputs {
+  display: flex; gap: 8px; justify-content: center; margin: 24px 0;
+}
+.org-code-input {
+  width: 44px; height: 56px; text-align: center; font-size: 20px;
+  font-weight: 700; border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm); background: var(--color-bg-secondary);
+  color: var(--color-text); transition: border-color var(--transition);
+  text-transform: uppercase;
+}
+.org-code-input:focus { outline: none; border-color: var(--color-amber); }
+
+/* ===== MIC BUTTON ===== */
+.mic-container {
+  display: flex; flex-direction: column; align-items: center;
+  margin: 32px 0;
+}
+.mic-btn {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--color-amber); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; transition: all var(--transition);
+  box-shadow: 0 4px 16px rgba(245,158,11,0.4);
+}
+.mic-btn:hover { transform: scale(1.05); }
+.mic-btn.recording { background: #DC2626; box-shadow: 0 4px 16px rgba(220,38,38,0.4); }
+.mic-pulse {
+  position: absolute; width: 80px; height: 80px; border-radius: 50%;
+  border: 2px solid var(--color-amber); opacity: 0;
+}
+.mic-btn.recording .mic-pulse { animation: pulse 1.2s ease-out infinite; }
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* ===== TRANSCRIPT BOX ===== */
+.transcript-box {
+  background: var(--color-bg-secondary); border-radius: var(--radius-md);
+  padding: 16px; margin: 16px 0; min-height: 80px;
+  border: 1px solid var(--color-border); font-style: italic;
+  color: var(--color-text-muted);
+}
+.rewrite-box {
+  background: var(--color-amber-light); border-radius: var(--radius-md);
+  padding: 16px; margin: 16px 0; min-height: 80px;
+  border: 1px solid var(--color-amber-ring);
+}
+
+/* ===== TONE BUTTONS ===== */
+.tone-buttons {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0;
+}
+.tone-btn {
+  padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  background: var(--color-bg-secondary); border: 1.5px solid var(--color-border);
+  color: var(--color-text); cursor: pointer; transition: all var(--transition);
+  min-height: 40px;
+}
+.tone-btn.active { background: var(--color-amber-light); border-color: var(--color-amber); color: var(--color-amber-dark); }
+
+/* ===== FIELD CARD ===== */
+.field-card {
+  background: var(--color-bg-secondary); border-radius: var(--radius-md);
+  padding: 16px; margin-bottom: 12px; border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+}
+.field-card.ai-rewritten { border-left-color: var(--color-amber); }
+.field-label-small { font-size: 12px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.field-value { font-size: 15px; color: var(--color-text); }
+
+/* ===== SIGNATURE TABS ===== */
+.sig-tabs { display: flex; border-bottom: 1px solid var(--color-border); margin-bottom: 20px; }
+.sig-tab {
+  flex: 1; padding: 12px; text-align: center; font-size: 14px;
+  font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all var(--transition); color: var(--color-text-muted);
+  background: none; border-top: none; border-left: none; border-right: none;
+}
+.sig-tab.active { color: var(--color-amber-dark); border-bottom-color: var(--color-amber); }
+.sig-tab-content { display: none; }
+.sig-tab-content.active { display: block; }
+
+/* ===== CANVAS ===== */
+#sig-canvas {
+  width: 100%; height: 140px; background: #fff;
+  border: 1.5px dashed var(--color-slate); border-radius: var(--radius-sm);
+  touch-action: none; cursor: crosshair;
+}
+.sig-line {
+  border-top: 1.5px solid var(--color-text-muted);
+  margin: 8px 0 4px; padding-top: 6px;
+  font-size: 12px; color: var(--color-text-muted);
+}
+
+/* ===== FORM LIST ITEMS ===== */
+.list-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--color-border); cursor: pointer;
+}
+.list-item:last-child { border-bottom: none; }
+.list-item-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.list-item-text { flex: 1; }
+.list-item-title { font-weight: 600; font-size: 15px; }
+.list-item-sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+
+/* ===== FILTER CHIPS ===== */
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  white-space: nowrap; cursor: pointer; border: 1.5px solid var(--color-border);
+  background: var(--color-bg-secondary); color: var(--color-text-muted);
+  transition: all var(--transition); min-height: 40px;
+  display: flex; align-items: center;
+}
+.chip.active { background: var(--color-amber); border-color: var(--color-amber); color: #0F1A24; }
+
+/* ===== TYPE TAG ===== */
+.type-tag {
+  display: inline-flex; align-items: center; padding: 10px 16px;
+  border-radius: var(--radius-sm); font-size: 14px; font-weight: 600;
+  border: 2px solid var(--color-border); background: var(--color-bg-secondary);
+  cursor: pointer; transition: all var(--transition); margin: 4px;
+  min-height: 44px;
+}
+.type-tag.active { border-color: var(--color-amber); background: var(--color-amber-light); color: var(--color-amber-dark); }
+
+/* ===== PHOTO THUMBNAIL GRID ===== */
+.photo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0;
+}
+.photo-thumb {
+  aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+  position: relative; background: var(--color-bg-secondary);
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ===== SUMMARY INFO BOX ===== */
+.summary-box {
+  background: var(--color-bg-secondary); border-radius: var(--radius-md);
+  padding: 16px; margin: 16px 0; border: 1px solid var(--color-border);
+}
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 14px;
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-key { color: var(--color-text-muted); font-weight: 500; }
+.summary-val { font-weight: 600; text-align: right; }
+
+/* ===== SEARCH BAR ===== */
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--color-bg-secondary); border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px;
+}
+.search-bar input {
+  flex: 1; background: none; border: none; color: var(--color-text);
+  font-size: 15px;
+}
+.search-bar input:focus { outline: none; }
+.search-bar input::placeholder { color: var(--color-text-muted); }
+
+/* ===== CONFIDENTIAL BANNER ===== */
+.confidential-banner {
+  background: var(--color-surface-dark); color: var(--color-text-light);
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  font-size: 13px;
+}
+
+/* ===== OVERLAY MODAL ===== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 500; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-panel {
+  background: var(--color-bg); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 24px; max-width: 480px; width: 100%; max-height: 85vh; overflow-y: auto;
+  animation: slideUp 300ms ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ===== LOADING SPINNER ===== */
+.spinner {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-amber);
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== DOCUMENT PREVIEW ===== */
+.doc-preview {
+  border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;
+}
+.doc-header {
+  background: var(--color-slate); color: var(--color-text-light);
+  padding: 20px 16px;
+}
+.doc-header h2 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+.doc-header p { font-size: 12px; color: var(--color-text-light-muted); margin-top: 4px; }
+.doc-body { padding: 16px; }
+.doc-field { padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.doc-field:last-child { border-bottom: none; }
+.doc-field-label { font-size: 11px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.doc-field-value { font-size: 14px; color: var(--color-text); }
+
+/* ===== EXPANDABLE ===== */
+.expandable-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; padding: 12px 0; user-select: none;
+}
+.expandable-content { display: none; padding-bottom: 12px; }
+.expandable-content.open { display: block; }
+
+/* ===== SECTION HEADER ===== */
+.section-header {
+  font-size: 11px; font-weight: 700; color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--color-border);
+}
+
+/* ===== SETTINGS GROUP ===== */
+.settings-group {
+  background: var(--color-bg-secondary); border-radius: var(--radius-md);
+  padding: 4px 16px; margin-bottom: 16px; border: 1px solid var(--color-border);
+}
+
+/* ===== SIG STYLE CARDS ===== */
+.sig-style-cards { display: flex; gap: 8px; margin: 12px 0; }
+.sig-style-card {
+  flex: 1; padding: 12px 8px; border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm); cursor: pointer; text-align: center;
+  transition: all var(--transition); font-size: 18px;
+  background: var(--color-bg-secondary); min-height: 56px;
+  display: flex; align-items: center; justify-content: center;
+}
+.sig-style-card.active { border-color: var(--color-amber); background: var(--color-amber-light); }
+.sig-style-serif { font-family: Georgia, serif; font-style: italic; }
+.sig-style-mono { font-family: 'Courier New', monospace; }
+.sig-style-spaced { letter-spacing: 0.1em; }
+
+/* ===== VERIFIED BADGE ===== */
+.verified-stamp {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+  background: var(--color-success-bg); color: var(--color-success);
+  border-radius: 100px; font-size: 13px; font-weight: 700; border: 1.5px solid var(--color-success);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center; padding: 48px 24px; color: var(--color-text-muted);
+}
+.empty-state svg { margin-bottom: 16px; opacity: 0.3; }
+.empty-state h3 { font-family: 'Syne', sans-serif; font-size: 18px; color: var(--color-text); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; }
+
+/* ===== YES/NO BUTTONS ===== */
+.yesno-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+.yesno-btn {
+  min-height: 64px; border-radius: var(--radius-md); font-size: 18px;
+  font-weight: 700; border: 2px solid var(--color-border);
+  background: var(--color-bg-secondary); color: var(--color-text);
+  cursor: pointer; transition: all var(--transition);
+}
+.yesno-btn:hover { border-color: var(--color-amber); background: var(--color-amber-light); }
+
+/* ===== FORM TYPE GRID ===== */
+.type-tags-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
+
+/* ===== PWA INSTALL BANNER ===== */
+.install-banner {
+  background: var(--color-bg-secondary); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .screen:not(.active) { display: none !important; }
+  .no-print, .back-btn, .btn, #progress-bar, .top-bar { display: none !important; }
+  body { background: white; color: black; }
+  .doc-preview { border: 1px solid #ccc; }
+  .doc-header { background: #1C2B3A !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: letter; margin: 1in; }
+  #screen-preview { display: block !important; max-width: 100% !important; }
+  .print-footer { display: block !important; }
+}
+.print-footer { display: none; }
+
+/* ===== MISC ===== */
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.text-center { text-align: center; }
+.text-muted { color: var(--color-text-muted); font-size: 14px; }
+.text-small { font-size: 13px; }
+.text-amber { color: var(--color-amber-dark); font-weight: 600; }
+.font-bold { font-weight: 700; }
+.flex { display: flex; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.gap-8 { gap: 8px; }
+.w-full { width: 100%; }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+
+<!-- ===================== AUTH SCREENS ===================== -->
+
+<!-- SCREEN: auth-signin -->
+<div id="screen-auth-signin" class="screen">
+  <div style="text-align:center;padding-top:48px;">
+    <div class="logo" style="justify-content:center;font-size:28px;">Talk It Out<span class="logo-dot">.</span></div>
+    <p class="tagline">Just talk. We handle the rest.</p>
+  </div>
+  <div class="auth-card">
+    <div class="input-group">
+      <label class="input-label">Email</label>
+      <input id="signin-email" type="email" class="input-field" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Password</label>
+      <input id="signin-password" type="password" class="input-field" placeholder="••••••••" autocomplete="current-password">
+      <div style="text-align:right;margin-top:6px;">
+        <button class="btn-ghost" style="font-size:13px;min-height:auto;width:auto;padding:0;" onclick="showScreen('screen-auth-forgot')">Forgot password?</button>
+      </div>
+    </div>
+    <button class="btn btn-amber mt-8" onclick="handleSignIn()">Sign in</button>
+    <div class="divider">or</div>
+    <button class="btn btn-outline" onclick="showScreen('screen-auth-create')">Create account</button>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn-ghost" onclick="showScreen('screen-auth-orgcode')">Enter org code instead</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: auth-create -->
+<div id="screen-auth-create" class="screen">
+  <div style="text-align:center;padding-top:40px;margin-bottom:8px;">
+    <div class="logo" style="justify-content:center;">Talk It Out<span class="logo-dot">.</span></div>
+  </div>
+  <div class="auth-card">
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:20px;">Create your account</h2>
+    <div class="input-group">
+      <label class="input-label">Full name</label>
+      <input id="create-name" type="text" class="input-field" placeholder="Jane Smith" autocomplete="name">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Email</label>
+      <input id="create-email" type="email" class="input-field" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Password</label>
+      <input id="create-password" type="password" class="input-field" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Org code <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <input id="create-orgcode" type="text" class="input-field" placeholder="e.g. NYC123" autocomplete="off" maxlength="6" style="text-transform:uppercase;">
+      <p class="input-helper">Your administrator provides this — connects you to your org's form library.</p>
+    </div>
+    <button class="btn btn-amber" onclick="handleCreateAccount()">Create account</button>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn-ghost" onclick="showScreen('screen-auth-signin')">Already have an account? Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: auth-orgcode -->
+<div id="screen-auth-orgcode" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-auth-signin')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+  </div>
+  <div style="text-align:center;padding-top:24px;">
+    <div class="icon-circle icon-circle-amber" style="width:64px;height:64px;margin:0 auto 20px;">
+      <svg width="28" height="28" fill="none" stroke="#0F1A24" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px;">Enter your org code</h2>
+    <p class="text-muted">Your administrator provides this 6-character code</p>
+  </div>
+  <div class="org-code-inputs" id="org-code-inputs">
+    <input class="org-code-input" type="text" maxlength="1" inputmode="text" autocomplete="off">
+    <input class="org-code-input" type="text" maxlength="1" inputmode="text" autocomplete="off">
+    <input class="org-code-input" type="text" maxlength="1" inputmode="text" autocomplete="off">
+    <input class="org-code-input" type="text" maxlength="1" inputmode="text" autocomplete="off">
+    <input class="org-code-input" type="text" maxlength="1" inputmode="text" autocomplete="off">
+    <input class="org-code-input" type="text" maxlength="1" inputmode="text" autocomplete="off">
+  </div>
+  <button class="btn btn-amber" onclick="handleOrgCode()">Continue</button>
+  <div style="text-align:center;margin-top:12px;">
+    <button class="btn-ghost" onclick="skipOrgCode()">Skip for now</button>
+  </div>
+</div>
+
+<!-- SCREEN: auth-forgot -->
+<div id="screen-auth-forgot" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-auth-signin')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+  </div>
+  <div id="forgot-form-state">
+    <div style="text-align:center;padding-top:24px;">
+      <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;">Forgot password?</h2>
+      <p class="text-muted">We'll send a reset link to your email.</p>
+    </div>
+    <div class="input-group mt-24">
+      <label class="input-label">Email</label>
+      <input id="forgot-email" type="email" class="input-field" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <button class="btn btn-amber" onclick="handleForgotPassword()">Send reset link</button>
+  </div>
+  <div id="forgot-confirm-state" style="display:none;text-align:center;padding-top:48px;">
+    <div class="icon-circle icon-circle-amber" style="margin:0 auto 20px;">
+      <svg width="32" height="32" fill="none" stroke="#0F1A24" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px;">Check your email</h2>
+    <p class="text-muted mb-8">We sent a reset link to</p>
+    <p id="forgot-email-shown" style="font-weight:600;margin-bottom:24px;"></p>
+    <button class="btn btn-outline mt-8" onclick="handleForgotPassword()">Resend email</button>
+    <div style="margin-top:12px;">
+      <button class="btn-ghost" onclick="showScreen('screen-auth-signin')">Back to sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PRIVACY + ONBOARDING ===================== -->
+
+<!-- SCREEN: privacy-notice -->
+<div id="screen-privacy-notice" class="screen">
+  <div style="padding-top:40px;">
+    <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:6px;">Before you start</h2>
+    <p class="text-muted mb-24">Here's what we store and why</p>
+    <div class="card">
+      <div class="check-item">
+        <div class="check-icon check-icon-success">
+          <svg width="14" height="14" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <p style="font-size:15px;">Your form data and submissions belong to you</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon check-icon-success">
+          <svg width="14" height="14" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <p style="font-size:15px;">Your employer cannot access your data through this app</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon check-icon-success">
+          <svg width="14" height="14" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <p style="font-size:15px;">Voice recordings are used only for live transcription — not stored</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon check-icon-error">
+          <svg width="14" height="14" fill="none" stroke="#A32D2D" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+        <p style="font-size:15px;">We never sell your data to anyone</p>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--color-text-muted);text-align:center;margin:20px 0;" class="mt-16">
+      By continuing you agree to our <a href="#" style="color:var(--color-amber-dark);font-weight:600;">Privacy Policy</a> and <a href="#" style="color:var(--color-amber-dark);font-weight:600;">Terms of Service</a>
+    </p>
+    <button class="btn btn-amber" onclick="acceptPrivacy()">I understand, continue</button>
+  </div>
+</div>
+
+<!-- SCREEN: onboard-1 -->
+<div id="screen-onboard-1" class="screen">
+  <div style="text-align:center;padding-top:48px;">
+    <div class="icon-circle icon-circle-amber" style="width:88px;height:88px;">
+      <svg width="40" height="40" fill="none" stroke="#0F1A24" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:12px;">Scan any form</h2>
+    <p class="text-muted" style="font-size:16px;max-width:300px;margin:0 auto;">Take a photo of any workplace form and we read every field for you automatically.</p>
+    <div class="progress-dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn btn-amber mt-8" onclick="showScreen('screen-onboard-2')">Next</button>
+    <div style="margin-top:12px;">
+      <button class="btn-ghost" onclick="skipOnboarding()">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: onboard-2 -->
+<div id="screen-onboard-2" class="screen">
+  <div style="text-align:center;padding-top:48px;">
+    <div class="icon-circle icon-circle-amber" style="width:88px;height:88px;">
+      <svg width="40" height="40" fill="none" stroke="#0F1A24" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:12px;">Just speak naturally</h2>
+    <p class="text-muted" style="font-size:16px;max-width:300px;margin:0 auto;">Answer each field out loud in your own words. AI rewrites it into professional formal language.</p>
+    <div class="progress-dots">
+      <div class="dot"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn btn-amber mt-8" onclick="showScreen('screen-onboard-3')">Next</button>
+    <div style="margin-top:12px;">
+      <button class="btn-ghost" onclick="skipOnboarding()">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: onboard-3 -->
+<div id="screen-onboard-3" class="screen">
+  <div style="text-align:center;padding-top:48px;">
+    <div class="icon-circle icon-circle-amber" style="width:88px;height:88px;">
+      <svg width="40" height="40" fill="none" stroke="#0F1A24" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:12px;">Send, print, or save</h2>
+    <p class="text-muted" style="font-size:16px;max-width:300px;margin:0 auto;">Email it to HR, print it out, or save to your device. Your record is locked and timestamped.</p>
+    <div class="progress-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot active"></div>
+    </div>
+    <button class="btn btn-amber mt-8" onclick="finishOnboarding()">Get started</button>
+  </div>
+</div>
+
+<!-- ===================== MAIN APP ===================== -->
+
+<!-- SCREEN: welcome -->
+<div id="screen-welcome" class="screen" style="padding-top:0;">
+  <div class="top-bar">
+    <div class="logo" style="font-size:18px;">Talk It Out<span class="logo-dot">.</span></div>
+    <div id="welcome-avatar" class="avatar" onclick="showScreen('screen-profile')">?</div>
+  </div>
+  <div id="draft-resume-banner" style="display:none;" class="banner banner-amber mb-16">
+    <div style="display:flex;align-items:center;gap:10px;flex:1;">
+      <svg width="20" height="20" fill="none" stroke="#0F1A24" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div>
+        <div style="font-weight:700;font-size:14px;" id="draft-banner-name">Draft form</div>
+        <div style="font-size:12px;" id="draft-banner-progress">0 of 0 fields</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-slate btn-sm" style="width:auto;min-height:36px;" onclick="resumeDraft()">Resume</button>
+      <button style="background:none;border:none;cursor:pointer;padding:4px;" onclick="dismissDraftBanner()">
+        <svg width="16" height="16" fill="none" stroke="#0F1A24" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+  <p id="welcome-greeting" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px;">Good morning!</p>
+  <button class="action-card card-amber" onclick="showScreen('screen-scan')">
+    <div class="action-card-icon" style="background:rgba(0,0,0,0.1);">
+      <svg width="24" height="24" fill="none" stroke="#0F1A24" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    </div>
+    <div class="action-card-text">
+      <h3>Scan a form</h3>
+      <p>Take a photo of any workplace form</p>
+    </div>
+  </button>
+  <button class="action-card card-slate" onclick="triggerFileUpload()">
+    <div class="action-card-icon" style="background:rgba(255,255,255,0.1);">
+      <svg width="24" height="24" fill="none" stroke="#F5F0E8" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    </div>
+    <div class="action-card-text" style="color:var(--color-text-light);">
+      <h3>Upload image</h3>
+      <p style="color:var(--color-text-light-muted);">Choose from your files</p>
+    </div>
+  </button>
+  <input id="welcome-file-input" type="file" accept="image/*" style="display:none;" onchange="handleWelcomeUpload(event)">
+  <div style="text-align:center;margin:8px 0 20px;">
+    <button class="btn-ghost" style="color:var(--color-amber-dark);font-size:15px;" onclick="showScreen('screen-quick-photo')">Quick photo capture</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+    <button class="btn btn-outline" onclick="showScreen('screen-form-library')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      Form library
+    </button>
+    <button class="btn btn-outline" onclick="showScreen('screen-history')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      My history
+    </button>
+  </div>
+  <div id="install-banner" style="display:none;" class="install-banner">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <div style="flex:1;">
+      <div style="font-weight:600;font-size:14px;">Add to home screen</div>
+      <div style="font-size:12px;color:var(--color-text-muted);">For offline access anytime</div>
+    </div>
+    <button class="btn btn-amber btn-sm" style="width:auto;min-height:40px;" onclick="triggerInstall()">Install</button>
+  </div>
+</div>
+
+<!-- SCREEN: quick-photo -->
+<div id="screen-quick-photo" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span id="photo-count-badge" style="display:none;" class="badge badge-amber">0 photos</span>
+    </div>
+  </div>
+  <div style="text-align:center;padding-bottom:24px;">
+    <div class="icon-circle" style="background:#FEE2E2;width:72px;height:72px;">
+      <svg width="32" height="32" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px;">Document the scene</h2>
+    <p class="text-muted">Capture evidence now before anything gets moved or cleaned up.</p>
+  </div>
+  <div class="callout callout-amber">
+    <svg width="18" height="18" fill="none" stroke="var(--color-amber-dark)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <p style="font-size:13px;">Evidence disappears fast. Photograph the scene, any hazards, and your injuries before anything changes.</p>
+  </div>
+  <div id="photo-grid" class="photo-grid"></div>
+  <input id="qp-camera-input" type="file" accept="image/*" capture="environment" style="display:none;" multiple onchange="handleQuickPhotos(event)">
+  <input id="qp-file-input" type="file" accept="image/*" style="display:none;" multiple onchange="handleQuickPhotos(event)">
+  <button class="btn btn-red mt-8" onclick="document.getElementById('qp-camera-input').click()">
+    <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    Take photos now
+  </button>
+  <button class="btn btn-outline mt-8" onclick="document.getElementById('qp-file-input').click()">Upload from camera roll</button>
+  <button class="btn btn-amber mt-16" id="qp-done-btn" style="display:none;" onclick="doneQuickPhoto()">Done capturing</button>
+</div>
+
+<!-- SCREEN: scan -->
+<div id="screen-scan" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Scan your form</span>
+  </div>
+  <div id="scan-dropzone" style="border:2px dashed var(--color-border-strong);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;cursor:pointer;margin-bottom:16px;" onclick="document.getElementById('scan-camera').click()">
+    <svg width="40" height="40" fill="none" stroke="var(--color-text-muted)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    <p style="font-weight:600;font-size:15px;margin-bottom:4px;">Tap to photograph form</p>
+    <p class="text-small text-muted">Camera opens automatically</p>
+  </div>
+  <input id="scan-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleScanFile(event)">
+  <input id="scan-file" type="file" accept="image/*" style="display:none;" onchange="handleScanFile(event)">
+  <button class="btn btn-outline" onclick="document.getElementById('scan-file').click()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    Upload from files
+  </button>
+  <div id="scan-preview" style="display:none;margin-top:20px;">
+    <img id="scan-preview-img" style="width:100%;border-radius:var(--radius-md);max-height:200px;object-fit:cover;" alt="Form preview">
+    <div id="scan-loading" style="text-align:center;padding:24px;">
+      <div class="spinner"></div>
+      <p class="text-muted mt-12">Reading your form…</p>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: confirm-type -->
+<div id="screen-confirm-type" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-scan')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+  </div>
+  <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px;">Is this correct?</h2>
+  <p class="text-muted mb-16">We detected the following form type</p>
+  <div style="border:2px solid var(--color-amber);border-radius:var(--radius-lg);padding:24px;text-align:center;margin-bottom:8px;">
+    <div id="detected-form-name" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">Incident Report</div>
+  </div>
+  <p id="detected-field-count" class="text-muted text-center mb-24">7 fields detected</p>
+  <button class="btn btn-amber" onclick="confirmFormType()">Yes, that's right</button>
+  <button class="btn btn-outline mt-8" onclick="toggleTypeSelector()">No, change form type</button>
+  <div id="type-selector" style="display:none;margin-top:16px;">
+    <div class="type-tags-grid" id="type-tags-grid"></div>
+    <button class="btn btn-amber mt-12" id="confirm-type-btn" style="display:none;" onclick="confirmFormType()">Confirm</button>
+  </div>
+</div>
+
+<!-- SCREEN: confidential-prompt -->
+<div id="screen-confidential-prompt" class="screen">
+  <div class="banner banner-dark" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin:-0px -0px 0 -0px;border-radius:var(--radius-md);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg width="20" height="20" fill="none" stroke="var(--color-text-light)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">Confidential mode</div>
+        <div style="font-size:12px;color:var(--color-text-light-muted);">For sensitive disclosures — extra privacy protection.</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:20px;">
+    <div class="check-item">
+      <div class="check-icon check-icon-success"><svg width="14" height="14" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <p style="font-size:15px;">Only your designated confidential HR contact can view this</p>
+    </div>
+    <div class="check-item">
+      <div class="check-icon check-icon-success"><svg width="14" height="14" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <p style="font-size:15px;">Does not appear in org admin reports</p>
+    </div>
+    <div class="check-item">
+      <div class="check-icon check-icon-success"><svg width="14" height="14" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <p style="font-size:15px;">Your direct supervisor is not notified</p>
+    </div>
+  </div>
+  <button class="btn btn-slate mt-24" onclick="enableConfidential()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Enable confidential mode
+  </button>
+  <div style="text-align:center;margin-top:12px;">
+    <button class="btn-ghost" onclick="skipConfidential()">Continue without confidential mode</button>
+  </div>
+</div>
+
+<!-- SCREEN: voice -->
+<div id="screen-voice" class="screen">
+  <div id="voice-confidential-banner" style="display:none;" class="confidential-banner">
+    <svg width="16" height="16" fill="none" stroke="var(--color-text-light-muted)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    <span style="font-size:12px;">Confidential mode active</span>
+  </div>
+  <div class="top-bar" style="position:relative;top:auto;">
+    <button class="back-btn" onclick="backFromVoice()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span id="voice-field-counter" class="text-muted" style="font-size:13px;">Field 1 of 1</span>
+  </div>
+  <div style="text-align:center;padding:8px 0 0;">
+    <p id="voice-field-label" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;">Field Label</p>
+    <p class="text-muted" style="font-size:14px;">Speak naturally — we'll write it up</p>
+  </div>
+  <!-- Checkbox field UI -->
+  <div id="voice-checkbox-ui" style="display:none;">
+    <div class="yesno-buttons">
+      <button class="yesno-btn" onclick="answerCheckbox(true)">Yes</button>
+      <button class="yesno-btn" onclick="answerCheckbox(false)">No</button>
+    </div>
+  </div>
+  <!-- Mic UI -->
+  <div id="voice-mic-ui">
+    <div class="mic-container">
+      <div style="position:relative;">
+        <div class="mic-pulse" id="mic-pulse-ring"></div>
+        <button id="mic-btn" class="mic-btn" onclick="toggleMic()">
+          <svg width="28" height="28" fill="none" stroke="#0F1A24" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+        </button>
+      </div>
+      <p id="mic-status" class="text-muted mt-12" style="font-size:13px;">Tap to start recording</p>
+    </div>
+    <div id="transcript-display" class="transcript-box" style="min-height:60px;">
+      <span style="color:var(--color-text-muted);font-size:13px;font-style:italic;">Your answer will appear here…</span>
+    </div>
+    <div id="voice-next-row" style="display:none;">
+      <button class="btn btn-amber" onclick="nextVoiceField()">Next field</button>
+    </div>
+  </div>
+  <!-- Manual entry toggle -->
+  <div id="voice-manual-ui" style="display:none;">
+    <textarea id="voice-manual-input" class="input-field" rows="4" placeholder="Type your answer here…"></textarea>
+    <button class="btn btn-amber mt-8" onclick="useManualAnswer()">Use this answer</button>
+  </div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="btn-ghost" id="voice-type-toggle" onclick="toggleVoiceManual()">Can't use voice? Type instead</button>
+  </div>
+</div>
+
+<!-- SCREEN: rewrite -->
+<div id="screen-rewrite" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-voice')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">AI rewrote your account</span>
+  </div>
+  <div style="margin-bottom:12px;">
+    <div style="font-size:10px;color:var(--color-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">You said</div>
+    <div id="rewrite-original" class="transcript-box" style="font-style:italic;"></div>
+  </div>
+  <div style="margin-bottom:16px;">
+    <div style="font-size:10px;color:var(--color-amber-dark);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Professional version</div>
+    <div id="rewrite-result" class="rewrite-box"></div>
+    <div id="rewrite-loading" style="display:none;text-align:center;padding:16px;"><div class="spinner"></div></div>
+  </div>
+  <div class="tone-buttons">
+    <button class="tone-btn active" data-tone="formal" onclick="setTone(this)">Formal</button>
+    <button class="tone-btn" data-tone="concise" onclick="setTone(this)">Concise</button>
+    <button class="tone-btn" data-tone="detailed" onclick="setTone(this)">Detailed</button>
+    <button class="tone-btn" data-tone="plain" onclick="setTone(this)">Plain English</button>
+  </div>
+  <!-- Expandable explanation -->
+  <div style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:0 14px;margin:16px 0;">
+    <div class="expandable-header" onclick="toggleExpandable('rewrite-explain')">
+      <span style="font-size:14px;font-weight:600;">Why did my words change?</span>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="expandable-content" id="rewrite-explain">
+      <div class="check-item"><div class="check-icon check-icon-success"><svg width="12" height="12" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><p style="font-size:13px;">All facts from your account are preserved exactly</p></div>
+      <div class="check-item"><div class="check-icon check-icon-success"><svg width="12" height="12" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><p style="font-size:13px;">Language is made formal for workplace documentation</p></div>
+      <div class="check-item"><div class="check-icon check-icon-success"><svg width="12" height="12" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><p style="font-size:13px;">You are always in control — edit or redo at any time</p></div>
+      <div style="margin-top:8px;padding:10px;background:var(--color-bg-secondary);border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px;">
+        <div style="color:var(--color-text-muted);font-style:italic;margin-bottom:4px;">"i hurt my back on the loading dock"</div>
+        <div>→ "I sustained a back injury while working at the loading dock area."</div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" id="dont-show-rewrite-explain" onchange="saveRewriteExplainPref()"> Don't show this again
+      </label>
+    </div>
+  </div>
+  <button class="btn btn-amber" onclick="approveRewrite()">Approve</button>
+  <button class="btn btn-outline mt-8" onclick="redoRewrite()">Redo</button>
+  <!-- Manual edit toggle -->
+  <div id="rewrite-edit-area" style="display:none;margin-top:12px;">
+    <textarea id="rewrite-manual-edit" class="input-field" rows="5"></textarea>
+    <button class="btn btn-amber mt-8" onclick="useManualRewrite()">Use this</button>
+  </div>
+  <div style="text-align:center;margin-top:12px;">
+    <button class="btn-ghost" onclick="toggleRewriteEdit()">Edit manually</button>
+  </div>
+</div>
+
+<!-- SCREEN: fields-done -->
+<div id="screen-fields-done" class="screen">
+  <div style="text-align:center;padding-top:64px;">
+    <div class="icon-circle icon-circle-success" style="width:88px;height:88px;">
+      <svg width="40" height="40" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:8px;">All fields complete</h2>
+    <div class="summary-box mt-16">
+      <div class="summary-row"><span class="summary-key">Fields answered</span><span class="summary-val" id="done-fields-count">0 of 0</span></div>
+      <div class="summary-row"><span class="summary-key">AI rewrites applied</span><span class="summary-val" id="done-rewrites-count">0</span></div>
+      <div class="summary-row"><span class="summary-key">Time taken</span><span class="summary-val" id="done-time">0:00</span></div>
+    </div>
+    <button class="btn btn-amber mt-16" onclick="showScreen('screen-review')">Review my answers</button>
+  </div>
+</div>
+
+<!-- SCREEN: review -->
+<div id="screen-review" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-voice')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Review your answers</span>
+  </div>
+  <div id="review-fields-list" style="margin-bottom:20px;"></div>
+  <button class="btn btn-amber" onclick="showScreen('screen-preview')">Preview form</button>
+</div>
+
+<!-- SCREEN: preview -->
+<div id="screen-preview" class="screen">
+  <div class="top-bar no-print">
+    <button class="back-btn" onclick="showScreen('screen-review')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+  </div>
+  <p class="text-muted mb-16" style="font-size:13px;">How your completed form will appear</p>
+  <div class="doc-preview">
+    <div class="doc-header">
+      <h2 id="preview-form-title">Form Title</h2>
+      <p id="preview-ref-number">Ref: TIO-XXXX</p>
+      <p id="preview-timestamp" style="margin-top:4px;"></p>
+    </div>
+    <div class="doc-body" id="preview-fields-body"></div>
+  </div>
+  <div class="print-footer" style="margin-top:20px;text-align:center;font-size:11px;color:#999;">
+    Talk It Out &nbsp;|&nbsp; <span id="preview-ref-footer"></span> &nbsp;|&nbsp; <span id="preview-ts-footer"></span>
+  </div>
+  <div class="no-print" style="margin-top:20px;">
+    <button class="btn btn-outline" onclick="showScreen('screen-review')">Edit fields</button>
+    <button class="btn btn-amber mt-8" onclick="showScreen('screen-signature')">Approve form</button>
+  </div>
+</div>
+
+<!-- SCREEN: signature -->
+<div id="screen-signature" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-preview')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+  </div>
+  <!-- Saved signature shortcut -->
+  <div id="saved-sig-option" style="display:none;" class="card mb-16">
+    <p style="font-weight:600;margin-bottom:10px;">Use your saved signature?</p>
+    <img id="saved-sig-img" style="max-width:100%;border-radius:var(--radius-sm);border:1px solid var(--color-border);" alt="Saved signature">
+    <button class="btn btn-amber mt-12" onclick="useSavedSignature()">Use saved signature</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('saved-sig-option').style.display='none'">Use a different signature</button>
+  </div>
+  <div id="sig-new-section">
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;">Sign your document</h2>
+    <p class="text-muted text-small mb-12">This constitutes a legally binding electronic signature under the ESIGN Act.</p>
+    <div class="callout callout-amber mb-16">
+      <svg width="16" height="16" fill="none" stroke="var(--color-amber-dark)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <p style="font-size:13px;">Review all answers for accuracy before signing.</p>
+    </div>
+    <div class="sig-tabs">
+      <button class="sig-tab active" onclick="setSigTab('draw',this)">Draw</button>
+      <button class="sig-tab" onclick="setSigTab('type',this)">Type</button>
+      <button class="sig-tab" onclick="setSigTab('upload',this)">Upload</button>
+    </div>
+    <!-- Draw tab -->
+    <div id="sig-tab-draw" class="sig-tab-content active">
+      <canvas id="sig-canvas"></canvas>
+      <div style="text-align:right;margin-top:6px;">
+        <button class="btn-ghost btn-sm" onclick="clearCanvas()" style="min-height:36px;width:auto;">Clear</button>
+      </div>
+      <button class="btn btn-amber mt-8" onclick="useDrawSignature()">Use signature</button>
+    </div>
+    <!-- Type tab -->
+    <div id="sig-tab-type" class="sig-tab-content">
+      <div class="input-group">
+        <label class="input-label">Your full name</label>
+        <input id="sig-type-input" type="text" class="input-field" placeholder="Jane Smith" oninput="updateTypeSigPreview()">
+      </div>
+      <div class="sig-style-cards">
+        <div class="sig-style-card sig-style-serif active" data-style="serif" onclick="selectSigStyle(this)" id="sig-style-serif">Aa</div>
+        <div class="sig-style-card sig-style-mono" data-style="mono" onclick="selectSigStyle(this)">Aa</div>
+        <div class="sig-style-card sig-style-spaced" data-style="spaced" onclick="selectSigStyle(this)">Aa</div>
+      </div>
+      <div id="sig-type-preview" style="font-family:Georgia,serif;font-style:italic;font-size:28px;padding:12px;border-bottom:1.5px solid var(--color-text-muted);margin:12px 0;min-height:56px;"></div>
+      <button class="btn btn-amber" onclick="useTypeSignature()">Use this signature</button>
+    </div>
+    <!-- Upload tab -->
+    <div id="sig-tab-upload" class="sig-tab-content">
+      <input id="sig-upload-input" type="file" accept="image/*" style="display:none;" onchange="handleSigUpload(event)">
+      <button class="btn btn-outline" onclick="document.getElementById('sig-upload-input').click()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Upload signature image
+      </button>
+      <div id="sig-upload-preview" style="display:none;margin-top:12px;">
+        <img id="sig-upload-img" style="max-width:100%;border-radius:var(--radius-sm);" alt="Signature">
+        <button class="btn btn-amber mt-8" onclick="useUploadSignature()">Use this signature</button>
+      </div>
+    </div>
+  </div>
+  <!-- Signature confirmed state -->
+  <div id="sig-confirmed" style="display:none;">
+    <div style="text-align:center;margin:20px 0;">
+      <img id="sig-confirmed-img" style="max-width:240px;border-radius:var(--radius-sm);border:1px solid var(--color-border);" alt="Your signature">
+      <div class="sig-line mt-8">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="sig-confirmed-name" style="font-weight:600;font-size:14px;"></span>
+          <span class="verified-stamp"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Verified</span>
+        </div>
+        <div id="sig-confirmed-ts" style="font-size:11px;color:var(--color-text-muted);margin-top:2px;"></div>
+      </div>
+      <p class="text-small text-muted mt-8">ESIGN Act compliant electronic signature</p>
+    </div>
+    <button class="btn btn-amber" onclick="showScreen('screen-approve')">Continue to approve</button>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="btn-ghost" onclick="redoSignature()">Redo signature</button>
+    </div>
+  </div>
+  <!-- Supervisor section -->
+  <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--color-border);">
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Request supervisor co-signature</div>
+        <div class="toggle-desc">Optional — sends an email to your supervisor</div>
+      </div>
+      <button class="toggle" id="supervisor-toggle" onclick="toggleSupervisor(this)"></button>
+    </div>
+    <div id="supervisor-fields" style="display:none;margin-top:12px;">
+      <div class="input-group">
+        <label class="input-label">Supervisor email</label>
+        <input id="supervisor-email" type="email" class="input-field" placeholder="supervisor@org.com">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Supervisor name</label>
+        <input id="supervisor-name" type="text" class="input-field" placeholder="John Manager">
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="sendSupervisorRequest()" style="width:auto;">Send co-signature request</button>
+      <div id="supervisor-pending" style="display:none;" class="callout callout-info mt-8">
+        <svg width="16" height="16" fill="none" stroke="var(--color-info)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p style="font-size:13px;">Co-signature request sent. Pending supervisor response.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: approve -->
+<div id="screen-approve" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-preview')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Confirm and approve</span>
+  </div>
+  <div class="summary-box">
+    <div class="summary-row"><span class="summary-key">Form type</span><span class="summary-val" id="approve-form-type">—</span></div>
+    <div class="summary-row"><span class="summary-key">Fields completed</span><span class="summary-val" id="approve-fields">—</span></div>
+    <div class="summary-row"><span class="summary-key">Submitted by</span><span class="summary-val" id="approve-name">—</span></div>
+    <div class="summary-row"><span class="summary-key">Timestamp</span><span class="summary-val" id="approve-timestamp">—</span></div>
+  </div>
+  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;margin:20px 0;padding:16px;background:var(--color-bg-secondary);border-radius:var(--radius-md);border:1px solid var(--color-border);">
+    <input type="checkbox" id="approve-checkbox" onchange="updateApproveButton()" style="margin-top:2px;width:20px;height:20px;accent-color:var(--color-amber);flex-shrink:0;">
+    <span style="font-size:15px;line-height:1.5;">I confirm this information is accurate to the best of my knowledge</span>
+  </label>
+  <button class="btn btn-slate" id="approve-btn" disabled onclick="submitApproval()">Approve and complete</button>
+  <button class="btn btn-danger mt-12" onclick="showScreen('screen-preview')">Go back and edit</button>
+</div>
+
+<!-- SCREEN: output -->
+<div id="screen-output" class="screen">
+  <div style="text-align:center;padding-top:48px;">
+    <div class="icon-circle icon-circle-success" style="width:80px;height:80px;margin:0 auto 16px;">
+      <svg width="36" height="36" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:4px;">Approved</h2>
+    <p id="output-ref" class="text-muted mb-32">TIO-XXXX</p>
+  </div>
+  <!-- Email -->
+  <div id="output-email-area" style="margin-bottom:12px;">
+    <button class="btn btn-outline" onclick="toggleEmailForm()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      Email
+    </button>
+    <div id="output-email-form" style="display:none;margin-top:10px;padding:14px;background:var(--color-bg-secondary);border-radius:var(--radius-md);border:1px solid var(--color-border);">
+      <div class="input-group">
+        <label class="input-label">Recipient email</label>
+        <input id="output-email-to" type="email" class="input-field" placeholder="hr@company.com">
+      </div>
+      <button class="btn btn-amber btn-sm" style="width:auto;" onclick="sendEmail()">Send</button>
+    </div>
+    <div id="output-email-confirm" style="display:none;margin-top:10px;" class="callout callout-success">
+      <svg width="16" height="16" fill="none" stroke="var(--color-success)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>
+      <div style="font-size:13px;">
+        <div>Sent to <span id="output-email-sent-to" style="font-weight:600;"></span></div>
+        <div id="output-email-cc-line" style="display:none;">CC: <span id="output-email-cc"></span></div>
+        <div id="output-resend-btn-area" style="margin-top:6px;"><button class="btn-ghost" style="min-height:auto;font-size:13px;padding:0;" onclick="toggleEmailForm()">Resend</button></div>
+      </div>
+    </div>
+  </div>
+  <!-- Print -->
+  <button class="btn btn-outline mb-12" onclick="window.print()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Print
+  </button>
+  <!-- Save -->
+  <button class="btn btn-outline mb-24" onclick="saveDocument()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    Save document
+  </button>
+  <div style="text-align:center;">
+    <button class="btn-ghost" onclick="fileAnotherForm()">File another form</button>
+  </div>
+</div>
+
+<!-- SCREEN: complete -->
+<div id="screen-complete" class="screen">
+  <div style="text-align:center;padding-top:64px;">
+    <div class="icon-circle icon-circle-success" style="width:88px;height:88px;margin:0 auto 20px;">
+      <svg width="40" height="40" fill="none" stroke="#3B6D11" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px;">All done</h2>
+    <p class="text-muted">Your form has been approved, timestamped, and saved to your history.</p>
+    <div class="summary-box mt-20">
+      <div class="summary-row"><span class="summary-key">Reference</span><span class="summary-val" id="complete-ref">—</span></div>
+      <div class="summary-row"><span class="summary-key">Approved</span><span class="summary-val" id="complete-ts">—</span></div>
+      <div class="summary-row"><span class="summary-key">Status</span><span class="summary-val"><span class="badge badge-success">Locked and saved</span></span></div>
+    </div>
+    <button class="btn btn-amber mt-20" onclick="fileAnotherForm()">File another form</button>
+    <button class="btn btn-outline mt-8" onclick="showScreen('screen-history')">View my history</button>
+  </div>
+</div>
+
+<!-- SCREEN: history -->
+<div id="screen-history" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">My submissions</span>
+  </div>
+  <div class="search-bar">
+    <svg width="16" height="16" fill="none" stroke="var(--color-text-muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input id="history-search" type="text" placeholder="Search by form type, date, or ref…" oninput="filterHistory()">
+  </div>
+  <div class="filter-chips" id="history-filter-chips">
+    <button class="chip active" data-filter="all" onclick="setHistoryFilter(this)">All</button>
+    <button class="chip" data-filter="sent" onclick="setHistoryFilter(this)">Sent</button>
+    <button class="chip" data-filter="pending" onclick="setHistoryFilter(this)">Pending</button>
+    <button class="chip" data-filter="saved" onclick="setHistoryFilter(this)">Saved</button>
+  </div>
+  <div id="history-list"></div>
+  <div style="position:sticky;bottom:16px;margin-top:16px;">
+    <button class="btn btn-amber" onclick="fileAnotherForm()">File new form</button>
+  </div>
+</div>
+
+<!-- SCREEN: drafts -->
+<div id="screen-drafts" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Your drafts</span>
+  </div>
+  <div id="drafts-list"></div>
+  <p class="text-muted text-small text-center mt-16">Drafts are saved for 30 days.</p>
+</div>
+
+<!-- SCREEN: form-library -->
+<div id="screen-form-library" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Form library</span>
+  </div>
+  <div class="search-bar">
+    <svg width="16" height="16" fill="none" stroke="var(--color-text-muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input id="library-search" type="text" placeholder="Search forms…" oninput="filterLibrary()">
+  </div>
+  <div id="offline-banner" style="display:none;" class="callout callout-error mb-16">
+    <svg width="16" height="16" fill="none" stroke="var(--color-error)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+    <p style="font-size:13px;">You're offline. Showing cached forms only.</p>
+  </div>
+  <div class="section-header">Your org's forms</div>
+  <div id="library-list"></div>
+  <button class="btn btn-outline mt-16" onclick="showScreen('screen-scan')">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    Scan a new form
+  </button>
+</div>
+
+<!-- SCREEN: amendment -->
+<div id="screen-amendment" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-history')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">File an amendment</span>
+  </div>
+  <div class="card mb-16">
+    <div class="field-label-small">Original submission</div>
+    <div style="font-weight:700;font-size:16px;" id="amendment-orig-type">—</div>
+    <div style="font-size:13px;color:var(--color-text-muted);" id="amendment-orig-ref">—</div>
+    <div style="font-size:13px;color:var(--color-text-muted);" id="amendment-orig-date">—</div>
+  </div>
+  <p style="font-size:12px;font-weight:600;color:var(--color-amber-dark);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Amending original submission</p>
+  <p style="font-weight:600;margin-bottom:8px;">What are you correcting?</p>
+  <div class="type-tags-grid" id="amendment-reason-tags">
+    <div class="type-tag" onclick="selectAmendmentReason(this)">Correct a date</div>
+    <div class="type-tag" onclick="selectAmendmentReason(this)">Add missing detail</div>
+    <div class="type-tag" onclick="selectAmendmentReason(this)">Fix a name</div>
+    <div class="type-tag" onclick="selectAmendmentReason(this)">Add photos</div>
+    <div class="type-tag" onclick="selectAmendmentReason(this)">Other correction</div>
+  </div>
+  <p style="font-weight:600;margin:20px 0 8px;">Describe what changed</p>
+  <textarea id="amendment-description" class="input-field" rows="4" placeholder="Describe what you are correcting and why…"></textarea>
+  <button class="btn btn-amber mt-16" onclick="submitAmendment()">Submit amendment</button>
+</div>
+
+<!-- SCREEN: profile -->
+<div id="screen-profile" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">My profile</span>
+  </div>
+  <div style="text-align:center;margin-bottom:24px;">
+    <div id="profile-avatar" class="avatar" style="width:56px;height:56px;font-size:20px;margin:0 auto 10px;">?</div>
+    <div id="profile-name-display" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;"></div>
+    <div id="profile-email-display" class="text-muted text-small"></div>
+    <button class="btn-ghost" style="margin-top:4px;font-size:13px;min-height:auto;" onclick="toggleProfileEdit()">Edit profile</button>
+  </div>
+  <div id="profile-edit-area" style="display:none;" class="card mb-16">
+    <div class="input-group">
+      <label class="input-label">Full name</label>
+      <input id="profile-edit-name" type="text" class="input-field">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Email</label>
+      <input id="profile-edit-email" type="email" class="input-field">
+    </div>
+    <button class="btn btn-amber btn-sm" style="width:auto;" onclick="saveProfileEdit()">Save changes</button>
+  </div>
+  <!-- Appearance -->
+  <div class="section-header">Appearance</div>
+  <div class="settings-group">
+    <div class="toggle-row">
+      <div><div class="toggle-label">Dark mode</div></div>
+      <button class="toggle" id="dark-mode-toggle" onclick="toggleDarkMode(this)"></button>
+    </div>
+  </div>
+  <!-- Notifications -->
+  <div class="section-header">Notifications</div>
+  <div class="settings-group">
+    <div class="toggle-row">
+      <div><div class="toggle-label">Push notifications</div></div>
+      <button class="toggle" id="notifs-push-toggle" onclick="toggleSetting(this,'notifsPush')"></button>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Email notifications</div></div>
+      <button class="toggle" id="notifs-email-toggle" onclick="toggleSetting(this,'notifsEmail')"></button>
+    </div>
+    <div class="toggle-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+      <div class="toggle-label">Deadline reminders</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="chip active" data-reminder="24h" onclick="setReminder(this)">24h</button>
+        <button class="chip" data-reminder="48h" onclick="setReminder(this)">48h</button>
+        <button class="chip" data-reminder="3d" onclick="setReminder(this)">3 days</button>
+        <button class="chip" data-reminder="1w" onclick="setReminder(this)">1 week</button>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Status updates</div></div>
+      <button class="toggle" id="notifs-status-toggle" onclick="toggleSetting(this,'notifsStatus')"></button>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Rep review ready</div></div>
+      <button class="toggle" id="notifs-rep-toggle" onclick="toggleSetting(this,'notifsRep')"></button>
+    </div>
+  </div>
+  <!-- Privacy -->
+  <div class="section-header">Privacy</div>
+  <div class="settings-group">
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Auto-copy to personal email</div>
+        <div class="toggle-desc">Automatically CC yourself on all submissions</div>
+      </div>
+      <button class="toggle" id="autocopy-toggle" onclick="toggleAutoCopy(this)"></button>
+    </div>
+    <div id="personal-email-row" style="display:none;padding:12px 0;">
+      <div class="input-group" style="margin-bottom:0;">
+        <label class="input-label">Personal email</label>
+        <input id="personal-email-input" type="email" class="input-field" placeholder="personal@gmail.com" onchange="savePersonalEmail()">
+      </div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Offline form caching</div></div>
+      <button class="toggle" id="offline-cache-toggle" onclick="toggleSetting(this,'offlineForms')"></button>
+    </div>
+  </div>
+  <!-- My signature -->
+  <div class="section-header">My signature</div>
+  <div class="settings-group" style="padding:16px;">
+    <div id="profile-sig-display">
+      <p class="text-muted text-small" id="profile-sig-empty">No signature saved yet.</p>
+      <img id="profile-sig-img" style="display:none;max-width:100%;border-radius:var(--radius-sm);border:1px solid var(--color-border);margin-bottom:10px;" alt="Saved signature">
+      <div id="profile-sig-actions" style="display:none;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" style="width:auto;" onclick="showScreen('screen-signature')">Update</button>
+        <button class="btn btn-sm btn-danger" style="width:auto;" onclick="deleteSignature()">Delete</button>
+      </div>
+    </div>
+  </div>
+  <!-- Account -->
+  <div class="section-header">Account</div>
+  <div class="settings-group" style="padding:16px;">
+    <div class="flex-between mb-12">
+      <span style="font-weight:600;">Org code</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="profile-orgcode" class="text-muted">None</span>
+        <button class="btn-ghost" style="font-size:13px;min-height:auto;padding:0;" onclick="showScreen('screen-auth-orgcode')">Update</button>
+      </div>
+    </div>
+    <div class="flex-between mb-12">
+      <span style="font-weight:600;">Language</span>
+      <select id="language-select" class="input-field" style="width:auto;min-height:40px;padding:8px 12px;" onchange="saveLanguage()">
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="ht">Haitian Creole</option>
+        <option value="zh">Mandarin</option>
+        <option value="ar">Arabic</option>
+      </select>
+    </div>
+    <button class="btn btn-outline mb-8" onclick="signOut()">Sign out</button>
+    <div style="text-align:center;">
+      <button style="background:none;border:none;color:var(--color-error);font-size:13px;cursor:pointer;padding:8px;" onclick="showDeleteConfirm()">Delete my account</button>
+    </div>
+  </div>
+  <div style="height:32px;"></div>
+</div>
+
+<!-- SCREEN: offline-settings -->
+<div id="screen-offline-settings" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-profile')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Offline access</span>
+  </div>
+  <p class="text-muted mb-16">Choose which forms to keep available without internet.</p>
+  <div class="settings-group" id="offline-toggles"></div>
+  <div class="flex-between mt-16" style="padding:0 4px;">
+    <span class="text-muted text-small">Total cache size</span>
+    <span id="cache-size-total" style="font-weight:600;font-size:14px;">0 KB</span>
+  </div>
+  <button class="btn btn-amber mt-16" onclick="saveOfflineSettings()">Save</button>
+</div>
+
+<!-- ===================== ERROR SCREENS ===================== -->
+
+<!-- SCREEN: err-scan -->
+<div id="screen-err-scan" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-scan')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+  </div>
+  <div style="text-align:center;padding-top:48px;">
+    <div class="icon-circle icon-circle-error" style="width:80px;height:80px;margin:0 auto 20px;">
+      <svg width="36" height="36" fill="none" stroke="#A32D2D" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;">Couldn't read this form</h2>
+    <p class="text-muted mb-32">The image was too blurry or the form layout wasn't recognized.</p>
+    <button class="btn btn-amber" onclick="showScreen('screen-scan')">Try scanning again</button>
+    <button class="btn btn-outline mt-8" onclick="showScreen('screen-scan')">Upload a clearer image</button>
+    <div style="text-align:center;margin-top:12px;">
+      <button class="btn-ghost" onclick="showScreen('screen-manual-entry')">Enter fields manually</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: manual-entry -->
+<div id="screen-manual-entry" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-err-scan')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Enter fields manually</span>
+  </div>
+  <p class="text-muted mb-16">Add each field name and your answer.</p>
+  <div id="manual-fields-container"></div>
+  <button class="btn btn-outline mb-16" onclick="addManualField()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add field
+  </button>
+  <button class="btn btn-amber" onclick="submitManualEntry()">Continue to review</button>
+</div>
+
+<!-- SCREEN: err-voice -->
+<div id="screen-err-voice" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-voice')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+  </div>
+  <div style="text-align:center;padding-top:48px;">
+    <div class="icon-circle icon-circle-error" style="width:80px;height:80px;margin:0 auto 20px;">
+      <svg width="36" height="36" fill="none" stroke="#A32D2D" stroke-width="2.5" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v4M8 23h8"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;">Microphone not available</h2>
+    <p class="text-muted mb-32">Check your browser permissions or type your answer instead.</p>
+    <button class="btn btn-amber" onclick="retryMic()">Try voice again</button>
+    <button class="btn btn-outline mt-8" onclick="showVoiceManualMode()">Type my answer instead</button>
+    <div style="margin-top:16px;border-top:1px solid var(--color-border);padding-top:16px;">
+      <div class="expandable-header" onclick="toggleExpandable('mic-help')">
+        <span style="font-size:14px;font-weight:600;">How to enable microphone</span>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="expandable-content" id="mic-help">
+        <div class="callout callout-info mt-8">
+          <svg width="16" height="16" fill="none" stroke="var(--color-info)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div style="font-size:13px;">
+            <strong>Chrome/Edge:</strong> Click the lock icon in the address bar → Site settings → Microphone → Allow<br><br>
+            <strong>Safari:</strong> Settings → Safari → Microphone → Allow<br><br>
+            <strong>Firefox:</strong> Click the shield icon → Permissions → Microphone → Allow
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: err-network -->
+<div id="screen-err-network" class="screen">
+  <div style="text-align:center;padding-top:64px;">
+    <div class="icon-circle icon-circle-error" style="width:80px;height:80px;margin:0 auto 20px;">
+      <svg width="36" height="36" fill="none" stroke="#A32D2D" stroke-width="2" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;">You're offline</h2>
+    <p class="text-muted mb-16">Your answers are saved locally and will sync when you reconnect.</p>
+    <div class="summary-box">
+      <div class="summary-row"><span class="summary-key">Saved locally</span><span class="summary-val"><span class="badge badge-success">Yes</span></span></div>
+      <div class="summary-row"><span class="summary-key">Fields completed</span><span class="summary-val" id="offline-fields-count">—</span></div>
+      <div class="summary-row"><span class="summary-key">Sync status</span><span class="summary-val">Will sync when online</span></div>
+    </div>
+    <button class="btn btn-amber mt-20" onclick="continueOffline()">Continue offline</button>
+    <button class="btn btn-outline mt-8" onclick="retryConnection()">Retry connection</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="history-detail-modal">
+  <div class="modal-panel">
+    <div class="flex-between mb-16">
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">Submission detail</h3>
+      <button onclick="closeModal('history-detail-modal')" style="background:none;border:none;cursor:pointer;padding:4px;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="history-detail-content"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="reEmailFromHistory()">Re-email</button>
+      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="window.print()">Re-print</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="delete-account-modal">
+  <div class="modal-panel">
+    <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--color-error);margin-bottom:12px;">Delete account</h3>
+    <p class="text-muted mb-16">This will permanently delete all your data. This action cannot be undone.</p>
+    <div class="input-group">
+      <label class="input-label">Type DELETE to confirm</label>
+      <input id="delete-confirm-input" type="text" class="input-field" placeholder="DELETE">
+    </div>
+    <button class="btn btn-red" onclick="confirmDeleteAccount()">Delete my account</button>
+    <button class="btn btn-ghost mt-8" onclick="closeModal('delete-account-modal')">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ===== API CONFIG =====
+const ANTHROPIC_API_KEY = "YOUR_KEY_HERE";
+const MODEL = "claude-sonnet-4-20250514";
+
+// ===== SESSION STATE =====
+let session = {
+  refNumber: "",
+  formType: "",
+  fields: [],
+  answers: [],
+  currentFieldIndex: 0,
+  photos: [],
+  confidential: false,
+  signature: null,
+  draft: false,
+  startTime: null,
+  rewriteCount: 0
+};
+
+// ===== SCREEN MANAGEMENT =====
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+  onScreenEnter(id);
+}
+
+function onScreenEnter(id) {
+  if (id === 'screen-welcome') initWelcome();
+  if (id === 'screen-profile') initProfile();
+  if (id === 'screen-history') renderHistory();
+  if (id === 'screen-drafts') renderDrafts();
+  if (id === 'screen-form-library') renderLibrary();
+  if (id === 'screen-review') renderReview();
+  if (id === 'screen-preview') renderPreview();
+  if (id === 'screen-approve') renderApprove();
+  if (id === 'screen-voice') renderVoiceField();
+  if (id === 'screen-output') renderOutput();
+  if (id === 'screen-complete') renderComplete();
+  if (id === 'screen-signature') initSignature();
+  if (id === 'screen-offline-settings') renderOfflineSettings();
+  if (id === 'screen-manual-entry') initManualEntry();
+  if (id === 'screen-form-library') checkOfflineBanner();
+}
+
+// ===== PROGRESS BAR =====
+function updateProgress(current, total) {
+  document.getElementById("progress-bar").style.width = total > 0 ? (current / total * 100) + "%" : "0%";
+}
+
+// ===== REFERENCE NUMBER =====
+function generateRef() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let r = "";
+  for (let i = 0; i < 4; i++) r += chars[Math.floor(Math.random() * chars.length)];
+  const d = new Date();
+  return "TIO-" + d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + r;
+}
+
+// ===== LOCALSTORAGE HELPERS =====
+function getLS(key, fallback = null) {
+  try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : fallback; } catch { return fallback; }
+}
+function setLS(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) { console.warn('LS error', e); }
+}
+function getUser() { return getLS('tio_user', {}); }
+function setUser(u) { setLS('tio_user', u); }
+function getSettings() { return getLS('tio_settings', {}); }
+function setSettings(s) { setLS('tio_settings', s); }
+function getHistory() { return getLS('tio_history', []); }
+function getDrafts() { return getLS('tio_drafts', []); }
+
+// ===== APP INIT =====
+window.addEventListener('load', () => {
+  const user = getUser();
+  const settings = getSettings();
+  if (settings.darkMode) document.body.classList.add('dark-mode');
+
+  if (!user.email) {
+    showScreen('screen-auth-signin');
+  } else if (!getLS('tio_privacy_accepted')) {
+    showScreen('screen-privacy-notice');
+  } else if (!getLS('tio_onboarded')) {
+    showScreen('screen-onboard-1');
+  } else {
+    showScreen('screen-welcome');
+  }
+
+  setupOrgCodeInputs();
+  setupPWAInstall();
+  setupNetworkListener();
+});
+
+// ===== AUTH =====
+function handleSignIn() {
+  const email = document.getElementById('signin-email').value.trim();
+  const password = document.getElementById('signin-password').value;
+  if (!email || !password) { alert('Please enter your email and password.'); return; }
+  const user = getUser();
+  const storedPass = getLS('tio_password');
+  if (user.email && user.email !== email) { alert('Account not found.'); return; }
+  // Accept any password for demo; real app would validate
+  if (!user.email) {
+    setUser({ name: email.split('@')[0], email });
+  }
+  afterAuth();
+}
+
+function handleCreateAccount() {
+  const name = document.getElementById('create-name').value.trim();
+  const email = document.getElementById('create-email').value.trim();
+  const password = document.getElementById('create-password').value;
+  const orgCode = document.getElementById('create-orgcode').value.trim().toUpperCase();
+  if (!name || !email || !password) { alert('Please fill all required fields.'); return; }
+  setUser({ name, email, personalEmail: '', orgCode });
+  setLS('tio_password', password);
+  afterAuth();
+}
+
+function afterAuth() {
+  if (!getLS('tio_privacy_accepted')) {
+    showScreen('screen-privacy-notice');
+  } else if (!getLS('tio_onboarded')) {
+    showScreen('screen-onboard-1');
+  } else {
+    showScreen('screen-welcome');
+  }
+}
+
+function setupOrgCodeInputs() {
+  const inputs = document.querySelectorAll('.org-code-input');
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.toUpperCase().slice(-1);
+      if (inp.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx - 1].focus();
+    });
+  });
+}
+
+function handleOrgCode() {
+  const inputs = document.querySelectorAll('.org-code-input');
+  const code = Array.from(inputs).map(i => i.value).join('');
+  if (code.length < 6) { alert('Please enter all 6 characters.'); return; }
+  const user = getUser();
+  user.orgCode = code;
+  setUser(user);
+  afterAuth();
+}
+
+function skipOrgCode() {
+  if (!getUser().email) {
+    showScreen('screen-auth-signin');
+  } else {
+    afterAuth();
+  }
+}
+
+function handleForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { alert('Please enter your email.'); return; }
+  document.getElementById('forgot-email-shown').textContent = email;
+  document.getElementById('forgot-form-state').style.display = 'none';
+  document.getElementById('forgot-confirm-state').style.display = 'block';
+}
+
+// ===== PRIVACY =====
+function acceptPrivacy() {
+  setLS('tio_privacy_accepted', true);
+  if (!getLS('tio_onboarded')) {
+    showScreen('screen-onboard-1');
+  } else {
+    showScreen('screen-welcome');
+  }
+}
+
+// ===== ONBOARDING =====
+function skipOnboarding() {
+  setLS('tio_onboarded', true);
+  showScreen('screen-welcome');
+}
+
+function finishOnboarding() {
+  setLS('tio_onboarded', true);
+  showScreen('screen-welcome');
+}
+
+// ===== WELCOME =====
+function initWelcome() {
+  const user = getUser();
+  const name = user.name || '';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('welcome-greeting').textContent = name ? `${greeting}, ${name.split(' ')[0]}` : greeting + '!';
+  const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : '?';
+  document.getElementById('welcome-avatar').textContent = initials;
+
+  // Check drafts
+  const drafts = getDrafts();
+  const banner = document.getElementById('draft-resume-banner');
+  if (drafts.length > 0) {
+    const d = drafts[0];
+    document.getElementById('draft-banner-name').textContent = d.formType || 'Draft form';
+    document.getElementById('draft-banner-progress').textContent = `${d.answers ? d.answers.filter(Boolean).length : 0} of ${d.fields ? d.fields.length : 0} fields`;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function resumeDraft() {
+  const drafts = getDrafts();
+  if (drafts.length === 0) return;
+  const d = drafts[0];
+  session = Object.assign(session, d);
+  session.draft = true;
+  showScreen('screen-voice');
+}
+
+function dismissDraftBanner() {
+  document.getElementById('draft-resume-banner').style.display = 'none';
+}
+
+function triggerFileUpload() {
+  document.getElementById('welcome-file-input').click();
+}
+
+function handleWelcomeUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const base64 = ev.target.result.split(',')[1];
+    processScannedImage(base64, file.type);
+    showScreen('screen-scan');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===== PWA INSTALL =====
+let deferredPrompt = null;
+function setupPWAInstall() {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('install-banner').style.display = 'flex';
+    }
+  });
+}
+function triggerInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-banner').style.display = 'none';
+    });
+  }
+}
+
+// ===== NETWORK =====
+function setupNetworkListener() {
+  window.addEventListener('offline', () => {
+    const s = document.querySelector('.screen.active');
+    if (s && s.id !== 'screen-err-network') showScreen('screen-err-network');
+  });
+}
+
+// ===== QUICK PHOTO =====
+let quickPhotos = [];
+function handleQuickPhotos(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      quickPhotos.push({ src: ev.target.result, note: '' });
+      renderPhotoGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = quickPhotos.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p.src}" alt="Photo ${i+1}">
+    </div>
+  `).join('');
+  const badge = document.getElementById('photo-count-badge');
+  if (quickPhotos.length > 0) {
+    badge.textContent = quickPhotos.length + ' photo' + (quickPhotos.length !== 1 ? 's' : '');
+    badge.style.display = 'flex';
+    document.getElementById('qp-done-btn').style.display = 'flex';
+  }
+}
+
+function doneQuickPhoto() {
+  session.photos = quickPhotos;
+  quickPhotos = [];
+  showScreen('screen-welcome');
+}
+
+// ===== SCAN =====
+function handleScanFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const base64 = ev.target.result.split(',')[1];
+    document.getElementById('scan-preview').style.display = 'block';
+    document.getElementById('scan-preview-img').src = ev.target.result;
+    document.getElementById('scan-loading').style.display = 'block';
+    processScannedImage(base64, file.type);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function processScannedImage(base64Data, mimeType) {
+  const mediaType = mimeType.startsWith('image/') ? mimeType : 'image/jpeg';
+  if (!navigator.onLine) {
+    showScreen('screen-err-network'); return;
+  }
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: base64Data } },
+            { type: "text", text: 'Extract all form fields from this workplace form image. Return ONLY a JSON array, no other text. Each item: { name: string, type: \'short_text\'|\'long_text\'|\'date\'|\'checkbox\'|\'signature\', required: boolean }. If you cannot read the form return { error: \'cannot_read\' }.' }
+          ]
+        }]
+      })
+    });
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    const text = data.content[0].text.trim();
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      const match = text.match(/\[[\s\S]*\]/);
+      parsed = match ? JSON.parse(match[0]) : null;
+    }
+    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed)) {
+      showScreen('screen-err-scan'); return;
+    }
+    session.fields = parsed;
+    session.refNumber = generateRef();
+    session.answers = new Array(parsed.length).fill(null);
+    session.formType = deriveFormType(parsed);
+    renderConfirmType();
+    showScreen('screen-confirm-type');
+  } catch {
+    showScreen('screen-err-scan');
+  }
+}
+
+function deriveFormType(fields) {
+  const names = fields.map(f => f.name.toLowerCase()).join(' ');
+  if (names.includes('incident') || names.includes('injury')) return 'Incident Report';
+  if (names.includes('grievance')) return 'Grievance';
+  if (names.includes('osha')) return 'OSHA Report';
+  if (names.includes('hr') || names.includes('complaint')) return 'HR Complaint';
+  if (names.includes('workers') || names.includes('comp')) return 'Workers Comp';
+  if (names.includes('ada')) return 'ADA Request';
+  if (names.includes('fmla')) return 'FMLA';
+  return 'Workplace Form';
+}
+
+// ===== CONFIRM TYPE =====
+const FORM_TYPES = ['Incident Report', 'Grievance', 'Workers Comp', 'OSHA Report', 'HR Complaint', 'ADA Request', 'FMLA', 'Other'];
+const CONFIDENTIAL_TYPES = ['HR Complaint', 'OSHA Report', 'Grievance'];
+
+function renderConfirmType() {
+  document.getElementById('detected-form-name').textContent = session.formType;
+  document.getElementById('detected-field-count').textContent = session.fields.length + ' field' + (session.fields.length !== 1 ? 's' : '') + ' detected';
+  const grid = document.getElementById('type-tags-grid');
+  grid.innerHTML = FORM_TYPES.map(t => `<div class="type-tag${t === session.formType ? ' active' : ''}" onclick="selectFormType(this,'${t}')">${t}</div>`).join('');
+}
+
+function toggleTypeSelector() {
+  const sel = document.getElementById('type-selector');
+  sel.style.display = sel.style.display === 'none' ? 'block' : 'none';
+  renderConfirmType();
+}
+
+function selectFormType(el, type) {
+  document.querySelectorAll('#type-tags-grid .type-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  session.formType = type;
+  document.getElementById('detected-form-name').textContent = type;
+  document.getElementById('confirm-type-btn').style.display = 'flex';
+}
+
+function confirmFormType() {
+  if (CONFIDENTIAL_TYPES.includes(session.formType)) {
+    showScreen('screen-confidential-prompt');
+  } else {
+    startVoiceCapture();
+  }
+}
+
+// ===== CONFIDENTIAL =====
+function enableConfidential() {
+  session.confidential = true;
+  startVoiceCapture();
+}
+
+function skipConfidential() {
+  session.confidential = false;
+  startVoiceCapture();
+}
+
+function startVoiceCapture() {
+  session.currentFieldIndex = 0;
+  session.startTime = Date.now();
+  showScreen('screen-voice');
+}
+
+// ===== VOICE SCREEN =====
+let recognition = null;
+let currentTranscript = '';
+let isRecording = false;
+
+function renderVoiceField() {
+  const fields = session.fields;
+  if (!fields || fields.length === 0) return;
+  const idx = session.currentFieldIndex;
+  if (idx >= fields.length) { goToFieldsDone(); return; }
+  const field = fields[idx];
+  updateProgress(idx, fields.length);
+  document.getElementById('voice-field-counter').textContent = `Field ${idx + 1} of ${fields.length}`;
+  document.getElementById('voice-field-label').textContent = field.name;
+  document.getElementById('voice-confidential-banner').style.display = session.confidential ? 'flex' : 'none';
+  currentTranscript = '';
+  document.getElementById('transcript-display').innerHTML = '<span style="color:var(--color-text-muted);font-size:13px;font-style:italic;">Your answer will appear here…</span>';
+  document.getElementById('voice-next-row').style.display = 'none';
+  document.getElementById('voice-manual-ui').style.display = 'none';
+  document.getElementById('voice-type-toggle').style.display = 'block';
+
+  if (field.type === 'checkbox') {
+    document.getElementById('voice-checkbox-ui').style.display = 'block';
+    document.getElementById('voice-mic-ui').style.display = 'none';
+  } else if (field.type === 'signature') {
+    document.getElementById('voice-checkbox-ui').style.display = 'none';
+    document.getElementById('voice-mic-ui').style.display = 'none';
+    showScreen('screen-signature');
+  } else {
+    document.getElementById('voice-checkbox-ui').style.display = 'none';
+    document.getElementById('voice-mic-ui').style.display = 'block';
+  }
+  stopMic();
+}
+
+function toggleMic() {
+  if (isRecording) {
+    stopMic();
+  } else {
+    startMic();
+  }
+}
+
+function startMic() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showScreen('screen-err-voice'); return;
+  }
+  recognition = new SpeechRecognition();
+  const settings = getSettings();
+  recognition.lang = settings.language === 'es' ? 'es-US' : settings.language === 'ht' ? 'fr-HT' : settings.language === 'zh' ? 'zh-CN' : settings.language === 'ar' ? 'ar' : 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+    document.getElementById('mic-status').textContent = 'Listening…';
+    document.getElementById('mic-pulse-ring').style.animation = 'pulse 1.2s ease-out infinite';
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    if (final) {
+      currentTranscript = final;
+      document.getElementById('transcript-display').textContent = final;
+      stopMic();
+      handleTranscriptComplete(final);
+    } else if (interim) {
+      document.getElementById('transcript-display').innerHTML = `<span style="color:var(--color-text-muted);font-style:italic;">${interim}</span>`;
+    }
+  };
+
+  recognition.onerror = (e) => {
+    stopMic();
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      showScreen('screen-err-voice');
+    }
+  };
+
+  recognition.onend = () => {
+    stopMic();
+    if (currentTranscript) handleTranscriptComplete(currentTranscript);
+  };
+
+  try { recognition.start(); } catch { showScreen('screen-err-voice'); }
+}
+
+function stopMic() {
+  isRecording = false;
+  if (recognition) { try { recognition.stop(); } catch {} }
+  const btn = document.getElementById('mic-btn');
+  if (btn) btn.classList.remove('recording');
+  const status = document.getElementById('mic-status');
+  if (status) status.textContent = 'Tap to start recording';
+  const pulse = document.getElementById('mic-pulse-ring');
+  if (pulse) pulse.style.animation = '';
+}
+
+function handleTranscriptComplete(transcript) {
+  const field = session.fields[session.currentFieldIndex];
+  if (field.type === 'long_text') {
+    // Go to rewrite screen
+    document.getElementById('rewrite-original').textContent = transcript;
+    document.getElementById('rewrite-result').textContent = '';
+    document.getElementById('rewrite-loading').style.display = 'block';
+    showScreen('screen-rewrite');
+    callRewriteAPI(transcript, 'formal');
+  } else {
+    document.getElementById('voice-next-row').style.display = 'block';
+    document.getElementById('voice-mic-ui').style.display = 'block';
+  }
+}
+
+function nextVoiceField() {
+  saveCurrentAnswer(currentTranscript || document.getElementById('transcript-display').textContent);
+  advanceField();
+}
+
+function answerCheckbox(val) {
+  saveCurrentAnswer(val ? 'Yes' : 'No');
+  advanceField();
+}
+
+function saveCurrentAnswer(answer) {
+  if (!session.answers) session.answers = new Array(session.fields.length).fill(null);
+  session.answers[session.currentFieldIndex] = { value: answer, aiRewritten: false };
+  autoSaveDraft();
+}
+
+function advanceField() {
+  session.currentFieldIndex++;
+  if (session.currentFieldIndex >= session.fields.length) {
+    goToFieldsDone();
+  } else {
+    renderVoiceField();
+  }
+}
+
+function goToFieldsDone() {
+  updateProgress(session.fields.length, session.fields.length);
+  const elapsed = Math.floor((Date.now() - (session.startTime || Date.now())) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  document.getElementById('done-fields-count').textContent = `${session.answers.filter(a => a && a.value).length} of ${session.fields.length}`;
+  document.getElementById('done-rewrites-count').textContent = session.rewriteCount || 0;
+  document.getElementById('done-time').textContent = `${mins}:${String(secs).padStart(2,'0')}`;
+  showScreen('screen-fields-done');
+}
+
+function toggleVoiceManual() {
+  const manual = document.getElementById('voice-manual-ui');
+  const mic = document.getElementById('voice-mic-ui');
+  const toggle = document.getElementById('voice-type-toggle');
+  const isManual = manual.style.display === 'block';
+  manual.style.display = isManual ? 'none' : 'block';
+  mic.style.display = isManual ? 'block' : 'none';
+  toggle.textContent = isManual ? "Can't use voice? Type instead" : "Use voice instead";
+  if (!isManual) stopMic();
+}
+
+function useManualAnswer() {
+  const val = document.getElementById('voice-manual-input').value.trim();
+  if (!val) { alert('Please enter an answer.'); return; }
+  currentTranscript = val;
+  document.getElementById('transcript-display').textContent = val;
+  const field = session.fields[session.currentFieldIndex];
+  if (field.type === 'long_text') {
+    document.getElementById('rewrite-original').textContent = val;
+    document.getElementById('rewrite-result').textContent = '';
+    document.getElementById('rewrite-loading').style.display = 'block';
+    showScreen('screen-rewrite');
+    callRewriteAPI(val, 'formal');
+  } else {
+    saveCurrentAnswer(val);
+    advanceField();
+  }
+}
+
+function backFromVoice() {
+  if (session.currentFieldIndex > 0) {
+    session.currentFieldIndex--;
+    renderVoiceField();
+  } else {
+    showScreen('screen-confirm-type');
+  }
+}
+
+// ===== REWRITE =====
+async function callRewriteAPI(transcript, tone) {
+  document.getElementById('rewrite-loading').style.display = 'block';
+  document.getElementById('rewrite-result').textContent = '';
+  if (!navigator.onLine) {
+    document.getElementById('rewrite-loading').style.display = 'none';
+    document.getElementById('rewrite-result').textContent = transcript;
+    return;
+  }
+  let toneInstr = '';
+  if (tone === 'concise') toneInstr = ' Be concise and brief.';
+  else if (tone === 'detailed') toneInstr = ' Include thorough detail.';
+  else if (tone === 'plain') toneInstr = ' Use simple, plain language.';
+  else toneInstr = ' Use formal, professional workplace documentation language.';
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 500,
+        messages: [{
+          role: "user",
+          content: `Rewrite the following spoken account into formal, professional workplace documentation language. Preserve all facts exactly.${toneInstr} Return only the rewritten text, no preamble:\n\n${transcript}`
+        }]
+      })
+    });
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    document.getElementById('rewrite-result').textContent = data.content[0].text.trim();
+  } catch {
+    document.getElementById('rewrite-result').textContent = transcript;
+  } finally {
+    document.getElementById('rewrite-loading').style.display = 'none';
+  }
+}
+
+function setTone(btn) {
+  document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const original = document.getElementById('rewrite-original').textContent;
+  callRewriteAPI(original, btn.dataset.tone);
+}
+
+function approveRewrite() {
+  const rewritten = document.getElementById('rewrite-result').textContent;
+  if (!rewritten) { alert('Please wait for the AI to finish.'); return; }
+  if (!session.answers) session.answers = new Array(session.fields.length).fill(null);
+  session.answers[session.currentFieldIndex] = { value: rewritten, aiRewritten: true };
+  session.rewriteCount = (session.rewriteCount || 0) + 1;
+  advanceField();
+}
+
+function redoRewrite() {
+  currentTranscript = '';
+  showScreen('screen-voice');
+}
+
+function toggleRewriteEdit() {
+  const area = document.getElementById('rewrite-edit-area');
+  const isOpen = area.style.display === 'block';
+  area.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    document.getElementById('rewrite-manual-edit').value = document.getElementById('rewrite-result').textContent;
+  }
+}
+
+function useManualRewrite() {
+  const val = document.getElementById('rewrite-manual-edit').value.trim();
+  if (!val) return;
+  if (!session.answers) session.answers = new Array(session.fields.length).fill(null);
+  session.answers[session.currentFieldIndex] = { value: val, aiRewritten: false };
+  advanceField();
+}
+
+function toggleExpandable(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function saveRewriteExplainPref() {
+  const settings = getSettings();
+  settings.hideRewriteExplain = document.getElementById('dont-show-rewrite-explain').checked;
+  setSettings(settings);
+}
+
+// ===== REVIEW =====
+function renderReview() {
+  const list = document.getElementById('review-fields-list');
+  if (!session.fields || session.fields.length === 0) { list.innerHTML = '<p class="text-muted">No fields to review.</p>'; return; }
+  list.innerHTML = session.fields.map((f, i) => {
+    const ans = session.answers && session.answers[i];
+    const val = ans ? ans.value : '—';
+    const isAI = ans && ans.aiRewritten;
+    return `
+      <div class="field-card ${isAI ? 'ai-rewritten' : ''}">
+        <div class="flex-between">
+          <div class="field-label-small">${f.name}${f.required ? ' *' : ''}</div>
+          <button onclick="editFieldFromReview(${i})" style="background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+        <div class="field-value">${val}</div>
+        ${isAI ? '<div style="font-size:11px;color:var(--color-amber-dark);margin-top:4px;">AI rewritten</div>' : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function editFieldFromReview(index) {
+  session.currentFieldIndex = index;
+  showScreen('screen-voice');
+}
+
+// ===== PREVIEW =====
+function renderPreview() {
+  document.getElementById('preview-form-title').textContent = session.formType || 'Workplace Form';
+  document.getElementById('preview-ref-number').textContent = 'Ref: ' + (session.refNumber || '—');
+  const ts = new Date().toLocaleString();
+  document.getElementById('preview-timestamp').textContent = ts;
+  document.getElementById('preview-ref-footer').textContent = session.refNumber;
+  document.getElementById('preview-ts-footer').textContent = ts;
+  const body = document.getElementById('preview-fields-body');
+  if (!session.fields || session.fields.length === 0) { body.innerHTML = '<p class="text-muted">No fields.</p>'; return; }
+  body.innerHTML = session.fields.map((f, i) => {
+    const ans = session.answers && session.answers[i];
+    return `
+      <div class="doc-field">
+        <div class="doc-field-label">${f.name}</div>
+        <div class="doc-field-value">${ans ? ans.value : '—'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== SIGNATURE =====
+let sigCanvas, sigCtx, sigDrawing = false;
+let selectedSigStyle = 'serif';
+
+function initSignature() {
+  updateProgress(85, 100);
+  const saved = localStorage.getItem('tio_signature');
+  if (saved) {
+    document.getElementById('saved-sig-option').style.display = 'block';
+    document.getElementById('saved-sig-img').src = saved;
+  } else {
+    document.getElementById('saved-sig-option').style.display = 'none';
+  }
+  initCanvas();
+}
+
+function initCanvas() {
+  sigCanvas = document.getElementById('sig-canvas');
+  if (!sigCanvas) return;
+  sigCtx = sigCanvas.getContext('2d');
+  sigCanvas.width = sigCanvas.offsetWidth || 300;
+  sigCanvas.height = 140;
+  sigCtx.strokeStyle = '#0F1A24';
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+
+  sigCanvas.addEventListener('mousedown', startDraw);
+  sigCanvas.addEventListener('mousemove', draw);
+  sigCanvas.addEventListener('mouseup', endDraw);
+  sigCanvas.addEventListener('mouseleave', endDraw);
+  sigCanvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0]); }, {passive:false});
+  sigCanvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e.touches[0]); }, {passive:false});
+  sigCanvas.addEventListener('touchend', endDraw);
+}
+
+function getCanvasPos(e) {
+  const rect = sigCanvas.getBoundingClientRect();
+  const scaleX = sigCanvas.width / rect.width;
+  const scaleY = sigCanvas.height / rect.height;
+  return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+}
+
+function startDraw(e) { sigDrawing = true; const p = getCanvasPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); }
+function draw(e) { if (!sigDrawing) return; const p = getCanvasPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); }
+function endDraw() { sigDrawing = false; }
+function clearCanvas() { if (sigCtx) sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); }
+
+function setSigTab(tab, btn) {
+  document.querySelectorAll('.sig-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.sig-tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('sig-tab-' + tab).classList.add('active');
+  if (tab === 'draw') { setTimeout(initCanvas, 50); }
+}
+
+function selectSigStyle(el) {
+  document.querySelectorAll('.sig-style-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  selectedSigStyle = el.dataset.style;
+  updateTypeSigPreview();
+}
+
+function updateTypeSigPreview() {
+  const name = document.getElementById('sig-type-input').value;
+  const prev = document.getElementById('sig-type-preview');
+  const styles = { serif: 'font-family:Georgia,serif;font-style:italic;', mono: 'font-family:"Courier New",monospace;', spaced: 'letter-spacing:0.1em;' };
+  prev.style.cssText = styles[selectedSigStyle] || styles.serif;
+  prev.textContent = name;
+}
+
+function confirmSignature(dataUrl) {
+  session.signature = dataUrl;
+  localStorage.setItem('tio_signature', dataUrl);
+  const user = getUser();
+  document.getElementById('sig-confirmed-name').textContent = user.name || '';
+  document.getElementById('sig-confirmed-ts').textContent = new Date().toLocaleString();
+  document.getElementById('sig-confirmed-img').src = dataUrl;
+  document.getElementById('sig-new-section').style.display = 'none';
+  document.getElementById('sig-confirmed').style.display = 'block';
+  document.getElementById('saved-sig-option').style.display = 'none';
+}
+
+function useDrawSignature() {
+  if (!sigCanvas) return;
+  const data = sigCanvas.toDataURL('image/png');
+  confirmSignature(data);
+}
+
+function useTypeSignature() {
+  const name = document.getElementById('sig-type-input').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = 300; canvas.height = 80;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 300, 80);
+  ctx.fillStyle = '#0F1A24';
+  const fonts = { serif: '32px Georgia', mono: '28px "Courier New"', spaced: '28px "IBM Plex Sans"' };
+  ctx.font = fonts[selectedSigStyle] || fonts.serif;
+  if (selectedSigStyle === 'serif') ctx.font = 'italic 32px Georgia';
+  ctx.fillText(name, 12, 56);
+  confirmSignature(canvas.toDataURL('image/png'));
+}
+
+function useSavedSignature() {
+  const saved = localStorage.getItem('tio_signature');
+  if (saved) confirmSignature(saved);
+}
+
+function handleSigUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('sig-upload-img').src = ev.target.result;
+    document.getElementById('sig-upload-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function useUploadSignature() {
+  const src = document.getElementById('sig-upload-img').src;
+  if (src) confirmSignature(src);
+}
+
+function redoSignature() {
+  document.getElementById('sig-confirmed').style.display = 'none';
+  document.getElementById('sig-new-section').style.display = 'block';
+  session.signature = null;
+}
+
+function toggleSupervisor(btn) {
+  btn.classList.toggle('on');
+  document.getElementById('supervisor-fields').style.display = btn.classList.contains('on') ? 'block' : 'none';
+}
+
+function sendSupervisorRequest() {
+  const email = document.getElementById('supervisor-email').value.trim();
+  const name = document.getElementById('supervisor-name').value.trim();
+  if (!email) { alert('Please enter supervisor email.'); return; }
+  const subject = encodeURIComponent(`Co-signature request — ${session.formType} — ${session.refNumber}`);
+  const body = encodeURIComponent(`${name || 'Hello'},\n\nYou are requested to co-sign a ${session.formType} (Ref: ${session.refNumber}).\n\nPlease contact the submitter.\n\nTalk It Out`);
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  document.getElementById('supervisor-pending').style.display = 'flex';
+}
+
+// ===== APPROVE =====
+function renderApprove() {
+  const user = getUser();
+  document.getElementById('approve-form-type').textContent = session.formType || '—';
+  document.getElementById('approve-fields').textContent = `${session.answers ? session.answers.filter(a => a && a.value).length : 0} of ${session.fields ? session.fields.length : 0}`;
+  document.getElementById('approve-name').textContent = user.name || user.email || '—';
+  document.getElementById('approve-timestamp').textContent = new Date().toLocaleString();
+  document.getElementById('approve-checkbox').checked = false;
+  updateApproveButton();
+}
+
+function updateApproveButton() {
+  document.getElementById('approve-btn').disabled = !document.getElementById('approve-checkbox').checked;
+}
+
+function submitApproval() {
+  const user = getUser();
+  const ts = new Date().toISOString();
+  const record = {
+    refNumber: session.refNumber,
+    formType: session.formType,
+    fields: session.fields,
+    answers: session.answers,
+    timestamp: ts,
+    signature: session.signature,
+    confidential: session.confidential,
+    status: 'sent'
+  };
+  const history = getHistory();
+  history.unshift(record);
+  setLS('tio_history', history);
+
+  // Remove from drafts if it was one
+  const drafts = getDrafts();
+  const newDrafts = drafts.filter(d => d.refNumber !== session.refNumber);
+  setLS('tio_drafts', newDrafts);
+
+  showScreen('screen-output');
+}
+
+// ===== OUTPUT =====
+function renderOutput() {
+  document.getElementById('output-ref').textContent = session.refNumber;
+  document.getElementById('output-email-form').style.display = 'none';
+  document.getElementById('output-email-confirm').style.display = 'none';
+}
+
+function toggleEmailForm() {
+  const form = document.getElementById('output-email-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function sendEmail() {
+  const to = document.getElementById('output-email-to').value.trim();
+  if (!to) { alert('Please enter a recipient email.'); return; }
+  const settings = getSettings();
+  const user = getUser();
+  const subject = encodeURIComponent(`Workplace Documentation — ${session.formType} — ${session.refNumber}`);
+  let body = `Workplace Documentation\nForm: ${session.formType}\nReference: ${session.refNumber}\nTimestamp: ${new Date().toLocaleString()}\n\n`;
+  if (session.fields) {
+    session.fields.forEach((f, i) => {
+      const ans = session.answers && session.answers[i];
+      body += `${f.name}: ${ans ? ans.value : '—'}\n`;
+    });
+  }
+  let cc = '';
+  if (settings.autoCopy && (settings.personalEmail || user.personalEmail)) {
+    cc = settings.personalEmail || user.personalEmail;
+  }
+  let mailtoUrl = `mailto:${to}?subject=${subject}&body=${encodeURIComponent(body)}`;
+  if (cc) mailtoUrl += `&cc=${cc}`;
+  window.location.href = mailtoUrl;
+
+  document.getElementById('output-email-sent-to').textContent = to;
+  const ccLine = document.getElementById('output-email-cc-line');
+  if (cc) {
+    ccLine.style.display = 'block';
+    document.getElementById('output-email-cc').textContent = cc;
+  } else {
+    ccLine.style.display = 'none';
+  }
+  document.getElementById('output-email-form').style.display = 'none';
+  document.getElementById('output-email-confirm').style.display = 'flex';
+}
+
+function saveDocument() {
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${session.formType} — ${session.refNumber}</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;}
+h1{font-size:22px;}table{width:100%;border-collapse:collapse;margin:20px 0;}
+td{padding:10px;border-bottom:1px solid #eee;}td:first-child{font-weight:600;color:#666;width:35%;}
+.footer{margin-top:30px;font-size:12px;color:#999;border-top:1px solid #eee;padding-top:12px;}
+</style></head><body>
+<h1>${session.formType}</h1>
+<p style="color:#666;">Ref: ${session.refNumber} &nbsp;|&nbsp; ${new Date().toLocaleString()}</p>
+<table>`;
+  if (session.fields) {
+    session.fields.forEach((f, i) => {
+      const ans = session.answers && session.answers[i];
+      html += `<tr><td>${f.name}</td><td>${ans ? ans.value : '—'}</td></tr>`;
+    });
+  }
+  html += `</table>`;
+  if (session.signature) html += `<p>Signature:</p><img src="${session.signature}" style="max-width:200px;border:1px solid #eee;">`;
+  html += `<div class="footer">Talk It Out &nbsp;|&nbsp; ${session.refNumber} &nbsp;|&nbsp; ${new Date().toLocaleString()}</div>
+</body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `TIO-${session.refNumber}-${(session.formType || 'form').replace(/\s+/g, '-')}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function fileAnotherForm() {
+  session = { refNumber: '', formType: '', fields: [], answers: [], currentFieldIndex: 0, photos: [], confidential: false, signature: null, draft: false, startTime: null, rewriteCount: 0 };
+  updateProgress(0, 1);
+  showScreen('screen-welcome');
+}
+
+// ===== COMPLETE =====
+function renderComplete() {
+  const history = getHistory();
+  const latest = history[0];
+  document.getElementById('complete-ref').textContent = latest ? latest.refNumber : '—';
+  document.getElementById('complete-ts').textContent = latest ? new Date(latest.timestamp).toLocaleString() : '—';
+}
+
+// ===== HISTORY =====
+let historyFilter = 'all';
+function renderHistory() {
+  const history = getHistory();
+  const search = document.getElementById('history-search') ? document.getElementById('history-search').value.toLowerCase() : '';
+  const list = document.getElementById('history-list');
+  let items = history;
+  if (historyFilter !== 'all') items = items.filter(h => h.status === historyFilter);
+  if (search) items = items.filter(h => (h.formType || '').toLowerCase().includes(search) || (h.refNumber || '').toLowerCase().includes(search) || (h.timestamp || '').includes(search));
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><h3>No submissions yet</h3><p>Your completed forms will appear here.</p></div>';
+    return;
+  }
+  list.innerHTML = items.map((h, i) => `
+    <div class="list-item" onclick="openHistoryDetail(${history.indexOf(h)})">
+      <div class="list-item-icon" style="background:var(--color-amber-light);">
+        <svg width="20" height="20" fill="none" stroke="var(--color-amber-dark)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="list-item-text">
+        <div class="list-item-title">${h.formType || 'Form'}</div>
+        <div class="list-item-sub">${new Date(h.timestamp).toLocaleDateString()} &nbsp;·&nbsp; ${h.refNumber}</div>
+      </div>
+      <span class="status-dot status-dot-${h.status === 'sent' ? 'success' : h.status === 'pending' ? 'amber' : 'info'}"></span>
+    </div>
+  `).join('');
+}
+
+function filterHistory() { renderHistory(); }
+function setHistoryFilter(btn) {
+  document.querySelectorAll('#history-filter-chips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  historyFilter = btn.dataset.filter;
+  renderHistory();
+}
+
+let currentHistoryIndex = -1;
+function openHistoryDetail(index) {
+  currentHistoryIndex = index;
+  const history = getHistory();
+  const h = history[index];
+  if (!h) return;
+  const content = document.getElementById('history-detail-content');
+  let html = `<div class="summary-box mb-12">
+    <div class="summary-row"><span class="summary-key">Form</span><span class="summary-val">${h.formType}</span></div>
+    <div class="summary-row"><span class="summary-key">Ref</span><span class="summary-val">${h.refNumber}</span></div>
+    <div class="summary-row"><span class="summary-key">Date</span><span class="summary-val">${new Date(h.timestamp).toLocaleString()}</span></div>
+  </div>`;
+  if (h.fields) {
+    h.fields.forEach((f, i) => {
+      const ans = h.answers && h.answers[i];
+      html += `<div class="field-card"><div class="field-label-small">${f.name}</div><div class="field-value">${ans ? ans.value : '—'}</div></div>`;
+    });
+  }
+  if (h.signature) html += `<div class="mt-12"><div class="field-label-small">Signature</div><img src="${h.signature}" style="max-width:200px;border:1px solid var(--color-border);border-radius:var(--radius-sm);margin-top:6px;"></div>`;
+  content.innerHTML = html;
+  document.getElementById('history-detail-modal').classList.add('active');
+}
+
+function reEmailFromHistory() {
+  closeModal('history-detail-modal');
+  showScreen('screen-output');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// ===== DRAFTS =====
+function renderDrafts() {
+  const drafts = getDrafts();
+  const list = document.getElementById('drafts-list');
+  if (drafts.length === 0) {
+    list.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg><h3>No drafts yet</h3><p>In-progress forms will be saved here automatically.</p></div>';
+    return;
+  }
+  list.innerHTML = drafts.map((d, i) => `
+    <div class="card mb-12">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div class="list-item-icon" style="background:var(--color-amber-light);">
+          <svg width="20" height="20" fill="none" stroke="var(--color-amber-dark)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div style="font-weight:700;">${d.formType || 'Draft'}</div>
+          <div class="text-small text-muted">${d.answers ? d.answers.filter(Boolean).length : 0} of ${d.fields ? d.fields.length : 0} fields &nbsp;·&nbsp; ${new Date(d.savedAt || Date.now()).toLocaleDateString()}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-ghost" style="color:var(--color-amber-dark);font-size:14px;min-height:auto;" onclick="resumeSpecificDraft(${i})">Resume</button>
+        <button class="btn-ghost" style="color:var(--color-error);font-size:14px;min-height:auto;" onclick="discardDraft(${i})">Discard</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function resumeSpecificDraft(i) {
+  const drafts = getDrafts();
+  const d = drafts[i];
+  if (!d) return;
+  session = Object.assign(session, d);
+  session.draft = true;
+  showScreen('screen-voice');
+}
+
+function discardDraft(i) {
+  if (!confirm('Discard this draft? This cannot be undone.')) return;
+  const drafts = getDrafts();
+  drafts.splice(i, 1);
+  setLS('tio_drafts', drafts);
+  renderDrafts();
+}
+
+function autoSaveDraft() {
+  if (!session.formType) return;
+  const drafts = getDrafts();
+  const idx = drafts.findIndex(d => d.refNumber === session.refNumber);
+  const draftData = { ...session, savedAt: new Date().toISOString() };
+  if (idx >= 0) drafts[idx] = draftData;
+  else drafts.unshift(draftData);
+  setLS('tio_drafts', drafts);
+}
+
+// ===== FORM LIBRARY =====
+const LIBRARY_FORMS = [
+  { name: 'Incident Report', fields: 7, usageCount: 42, cached: true, color: '#FCEBEB', icon: '#A32D2D', type: 'Incident Report' },
+  { name: 'Workers Comp Claim', fields: 12, usageCount: 18, cached: true, color: '#E6F1FB', icon: '#185FA5', type: 'Workers Comp' },
+  { name: 'HR Complaint', fields: 9, usageCount: 11, cached: false, color: '#EEEDFE', icon: '#534AB7', type: 'HR Complaint' },
+  { name: 'Grievance Form', fields: 8, usageCount: 23, cached: true, color: '#EAF3DE', icon: '#3B6D11', type: 'Grievance' },
+  { name: 'OSHA Report', fields: 15, usageCount: 7, cached: false, color: '#FAEEDA', icon: '#BA7517', type: 'OSHA Report' },
+  { name: 'ADA Request', fields: 6, usageCount: 5, cached: false, color: '#F8F7F4', icon: '#6B7280', type: 'ADA Request' },
+  { name: 'FMLA Documentation', fields: 11, usageCount: 9, cached: false, color: '#E6F1FB', icon: '#185FA5', type: 'FMLA' }
+];
+
+function renderLibrary() {
+  const list = document.getElementById('library-list');
+  const search = document.getElementById('library-search') ? document.getElementById('library-search').value.toLowerCase() : '';
+  let forms = LIBRARY_FORMS;
+  if (search) forms = forms.filter(f => f.name.toLowerCase().includes(search));
+  list.innerHTML = forms.map(f => `
+    <div class="list-item" onclick="selectLibraryForm('${f.type}')">
+      <div class="list-item-icon" style="background:${f.color};">
+        <svg width="20" height="20" fill="none" stroke="${f.icon}" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="list-item-text">
+        <div class="list-item-title">${f.name}</div>
+        <div class="list-item-sub">${f.fields} fields &nbsp;·&nbsp; Used ${f.usageCount}x ${f.cached ? '· <span style="color:var(--color-success)">●</span> Offline' : ''}</div>
+      </div>
+      <svg width="16" height="16" fill="none" stroke="var(--color-text-muted)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  `).join('');
+}
+
+function filterLibrary() { renderLibrary(); }
+
+function selectLibraryForm(type) {
+  session.formType = type;
+  session.refNumber = generateRef();
+  const form = LIBRARY_FORMS.find(f => f.type === type);
+  session.fields = generateDefaultFields(type, form ? form.fields : 5);
+  session.answers = new Array(session.fields.length).fill(null);
+  renderConfirmType();
+  showScreen('screen-confirm-type');
+}
+
+function generateDefaultFields(formType, count) {
+  const fieldSets = {
+    'Incident Report': [
+      {name:'Date of Incident',type:'date',required:true},
+      {name:'Time of Incident',type:'short_text',required:true},
+      {name:'Location',type:'short_text',required:true},
+      {name:'Description of Incident',type:'long_text',required:true},
+      {name:'Injuries Sustained',type:'long_text',required:false},
+      {name:'Witnesses',type:'short_text',required:false},
+      {name:'Immediate Action Taken',type:'long_text',required:false}
+    ],
+    'Workers Comp': [
+      {name:'Employee Name',type:'short_text',required:true},
+      {name:'Date of Injury',type:'date',required:true},
+      {name:'Description of Injury',type:'long_text',required:true},
+      {name:'Body Part Affected',type:'short_text',required:true},
+      {name:'How Injury Occurred',type:'long_text',required:true},
+      {name:'Medical Treatment Received',type:'short_text',required:false},
+      {name:'Lost Time from Work',type:'checkbox',required:false}
+    ],
+    'HR Complaint': [
+      {name:'Nature of Complaint',type:'short_text',required:true},
+      {name:'Date(s) of Incident',type:'date',required:true},
+      {name:'Persons Involved',type:'short_text',required:true},
+      {name:'Description of Events',type:'long_text',required:true},
+      {name:'Witnesses',type:'short_text',required:false},
+      {name:'Previous Reports Filed',type:'checkbox',required:false},
+      {name:'Desired Resolution',type:'long_text',required:false}
+    ]
+  };
+  const set = fieldSets[formType];
+  if (set) return set;
+  const defaults = [];
+  for (let i = 0; i < count; i++) defaults.push({ name: `Field ${i+1}`, type: 'short_text', required: false });
+  return defaults;
+}
+
+function checkOfflineBanner() {
+  document.getElementById('offline-banner').style.display = navigator.onLine ? 'none' : 'flex';
+}
+
+// ===== AMENDMENT =====
+let amendmentTarget = null;
+function openAmendment(refNumber) {
+  const history = getHistory();
+  const item = history.find(h => h.refNumber === refNumber);
+  if (!item) return;
+  amendmentTarget = item;
+  document.getElementById('amendment-orig-type').textContent = item.formType;
+  document.getElementById('amendment-orig-ref').textContent = item.refNumber;
+  document.getElementById('amendment-orig-date').textContent = new Date(item.timestamp).toLocaleString();
+  showScreen('screen-amendment');
+}
+
+function selectAmendmentReason(el) {
+  document.querySelectorAll('#amendment-reason-tags .type-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function submitAmendment() {
+  const reason = document.querySelector('#amendment-reason-tags .type-tag.active');
+  const desc = document.getElementById('amendment-description').value.trim();
+  if (!reason) { alert('Please select a reason.'); return; }
+  if (!desc) { alert('Please describe what changed.'); return; }
+  if (!amendmentTarget) return;
+  const newRef = amendmentTarget.refNumber + '-A' + (Math.floor(Math.random() * 9) + 1);
+  const record = {
+    refNumber: newRef,
+    formType: amendmentTarget.formType + ' (Amendment)',
+    fields: [{ name: 'Amendment Reason', type: 'short_text', required: true }, { name: 'Description of Change', type: 'long_text', required: true }],
+    answers: [{ value: reason.textContent, aiRewritten: false }, { value: desc, aiRewritten: false }],
+    timestamp: new Date().toISOString(),
+    signature: null,
+    confidential: false,
+    status: 'sent',
+    parentRef: amendmentTarget.refNumber
+  };
+  const history = getHistory();
+  history.unshift(record);
+  setLS('tio_history', history);
+  session.refNumber = newRef;
+  showScreen('screen-complete');
+}
+
+// ===== PROFILE =====
+function initProfile() {
+  const user = getUser();
+  const settings = getSettings();
+  const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : '?';
+  document.getElementById('profile-avatar').textContent = initials;
+  document.getElementById('profile-name-display').textContent = user.name || 'Unknown';
+  document.getElementById('profile-email-display').textContent = user.email || '';
+  document.getElementById('profile-orgcode').textContent = user.orgCode || 'None';
+  if (settings.language) document.getElementById('language-select').value = settings.language;
+
+  // Toggles
+  setToggle('dark-mode-toggle', settings.darkMode);
+  setToggle('notifs-push-toggle', settings.notifsPush);
+  setToggle('notifs-email-toggle', settings.notifsEmail);
+  setToggle('notifs-status-toggle', settings.notifsStatus);
+  setToggle('notifs-rep-toggle', settings.notifsRep);
+  setToggle('autocopy-toggle', settings.autoCopy);
+  setToggle('offline-cache-toggle', settings.offlineForms);
+
+  if (settings.autoCopy) {
+    document.getElementById('personal-email-row').style.display = 'block';
+    document.getElementById('personal-email-input').value = settings.personalEmail || user.personalEmail || '';
+  }
+
+  // Signature
+  const sig = localStorage.getItem('tio_signature');
+  if (sig) {
+    document.getElementById('profile-sig-empty').style.display = 'none';
+    document.getElementById('profile-sig-img').style.display = 'block';
+    document.getElementById('profile-sig-img').src = sig;
+    document.getElementById('profile-sig-actions').style.display = 'flex';
+  } else {
+    document.getElementById('profile-sig-empty').style.display = 'block';
+    document.getElementById('profile-sig-img').style.display = 'none';
+    document.getElementById('profile-sig-actions').style.display = 'none';
+  }
+}
+
+function setToggle(id, value) {
+  const el = document.getElementById(id);
+  if (el) { if (value) el.classList.add('on'); else el.classList.remove('on'); }
+}
+
+function toggleProfileEdit() {
+  const area = document.getElementById('profile-edit-area');
+  const user = getUser();
+  const isOpen = area.style.display === 'block';
+  area.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    document.getElementById('profile-edit-name').value = user.name || '';
+    document.getElementById('profile-edit-email').value = user.email || '';
+  }
+}
+
+function saveProfileEdit() {
+  const name = document.getElementById('profile-edit-name').value.trim();
+  const email = document.getElementById('profile-edit-email').value.trim();
+  const user = getUser();
+  user.name = name; user.email = email;
+  setUser(user);
+  document.getElementById('profile-name-display').textContent = name;
+  document.getElementById('profile-email-display').textContent = email;
+  document.getElementById('profile-edit-area').style.display = 'none';
+  const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : '?';
+  document.getElementById('profile-avatar').textContent = initials;
+}
+
+function toggleDarkMode(btn) {
+  btn.classList.toggle('on');
+  const on = btn.classList.contains('on');
+  document.body.classList.toggle('dark-mode', on);
+  const settings = getSettings(); settings.darkMode = on; setSettings(settings);
+}
+
+function toggleSetting(btn, key) {
+  btn.classList.toggle('on');
+  const settings = getSettings();
+  settings[key] = btn.classList.contains('on');
+  setSettings(settings);
+}
+
+function toggleAutoCopy(btn) {
+  btn.classList.toggle('on');
+  const on = btn.classList.contains('on');
+  document.getElementById('personal-email-row').style.display = on ? 'block' : 'none';
+  const settings = getSettings(); settings.autoCopy = on; setSettings(settings);
+}
+
+function savePersonalEmail() {
+  const email = document.getElementById('personal-email-input').value.trim();
+  const settings = getSettings(); settings.personalEmail = email; setSettings(settings);
+  const user = getUser(); user.personalEmail = email; setUser(user);
+}
+
+function saveLanguage() {
+  const lang = document.getElementById('language-select').value;
+  const settings = getSettings(); settings.language = lang; setSettings(settings);
+}
+
+function setReminder(btn) {
+  btn.closest('div').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const settings = getSettings(); settings.reminder = btn.dataset.reminder; setSettings(settings);
+}
+
+function deleteSignature() {
+  if (!confirm('Delete your saved signature?')) return;
+  localStorage.removeItem('tio_signature');
+  initProfile();
+}
+
+function signOut() {
+  if (!confirm('Sign out?')) return;
+  localStorage.removeItem('tio_user');
+  localStorage.removeItem('tio_password');
+  showScreen('screen-auth-signin');
+}
+
+function showDeleteConfirm() {
+  document.getElementById('delete-confirm-input').value = '';
+  document.getElementById('delete-account-modal').classList.add('active');
+}
+
+function confirmDeleteAccount() {
+  const val = document.getElementById('delete-confirm-input').value;
+  if (val !== 'DELETE') { alert('Please type DELETE to confirm.'); return; }
+  localStorage.clear();
+  closeModal('delete-account-modal');
+  showScreen('screen-auth-signin');
+}
+
+// ===== OFFLINE SETTINGS =====
+const OFFLINE_FORMS_LIST = [
+  { name: 'Incident Report', size: '24 KB' },
+  { name: 'Workers Comp Claim', size: '31 KB' },
+  { name: 'HR Complaint', size: '28 KB' },
+  { name: 'Grievance Form', size: '22 KB' },
+  { name: 'OSHA Report', size: '35 KB' },
+  { name: 'ADA Request', size: '19 KB' },
+  { name: 'FMLA Documentation', size: '29 KB' }
+];
+
+function renderOfflineSettings() {
+  const settings = getSettings();
+  const offlineMap = settings.offlineFormMap || {};
+  const container = document.getElementById('offline-toggles');
+  container.innerHTML = OFFLINE_FORMS_LIST.map((f, i) => `
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">${f.name}</div>
+        <div class="toggle-desc" id="offline-size-${i}">${offlineMap[f.name] ? f.size : '—'}</div>
+      </div>
+      <button class="toggle ${offlineMap[f.name] ? 'on' : ''}" id="offline-toggle-${i}" onclick="toggleOfflineForm(this,'${f.name}','${f.size}',${i})"></button>
+    </div>
+  `).join('');
+  updateCacheSize();
+}
+
+function toggleOfflineForm(btn, name, size, idx) {
+  btn.classList.toggle('on');
+  const on = btn.classList.contains('on');
+  const settings = getSettings();
+  if (!settings.offlineFormMap) settings.offlineFormMap = {};
+  settings.offlineFormMap[name] = on;
+  setSettings(settings);
+  document.getElementById(`offline-size-${idx}`).textContent = on ? size : '—';
+  updateCacheSize();
+}
+
+function updateCacheSize() {
+  const settings = getSettings();
+  const map = settings.offlineFormMap || {};
+  let total = 0;
+  OFFLINE_FORMS_LIST.forEach(f => { if (map[f.name]) total += parseInt(f.size); });
+  document.getElementById('cache-size-total').textContent = total > 0 ? total + ' KB' : '0 KB';
+}
+
+function saveOfflineSettings() {
+  showScreen('screen-profile');
+}
+
+// ===== MANUAL ENTRY =====
+let manualFieldCount = 0;
+
+function initManualEntry() {
+  manualFieldCount = 0;
+  document.getElementById('manual-fields-container').innerHTML = '';
+  addManualField();
+}
+
+function addManualField() {
+  manualFieldCount++;
+  const container = document.getElementById('manual-fields-container');
+  const id = manualFieldCount;
+  const div = document.createElement('div');
+  div.className = 'card mb-8';
+  div.id = `manual-field-${id}`;
+  div.innerHTML = `
+    <div class="flex-between mb-8">
+      <span style="font-size:13px;font-weight:700;">Field ${id}</span>
+      <button onclick="removeManualField(${id})" style="background:none;border:none;cursor:pointer;color:var(--color-error);font-size:12px;">Remove</button>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Field name</label>
+      <input type="text" class="input-field" id="mf-name-${id}" placeholder="e.g. Date of Incident">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Type</label>
+      <select class="input-field" id="mf-type-${id}" style="min-height:44px;">
+        <option value="short_text">Short text</option>
+        <option value="long_text">Long text</option>
+        <option value="date">Date</option>
+        <option value="checkbox">Checkbox</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Your answer</label>
+      <textarea class="input-field" id="mf-answer-${id}" rows="2" placeholder="Type your answer…"></textarea>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+function removeManualField(id) {
+  const el = document.getElementById(`manual-field-${id}`);
+  if (el) el.remove();
+}
+
+function submitManualEntry() {
+  const fields = [], answers = [];
+  for (let i = 1; i <= manualFieldCount; i++) {
+    const nameEl = document.getElementById(`mf-name-${i}`);
+    const typeEl = document.getElementById(`mf-type-${i}`);
+    const ansEl = document.getElementById(`mf-answer-${i}`);
+    if (!nameEl) continue;
+    const name = nameEl.value.trim();
+    if (!name) continue;
+    fields.push({ name, type: typeEl.value, required: false });
+    answers.push({ value: ansEl.value.trim(), aiRewritten: false });
+  }
+  if (fields.length === 0) { alert('Please add at least one field.'); return; }
+  session.fields = fields;
+  session.answers = answers;
+  if (!session.refNumber) session.refNumber = generateRef();
+  if (!session.formType) session.formType = 'Workplace Form';
+  showScreen('screen-review');
+}
+
+// ===== ERR VOICE HELPERS =====
+function retryMic() {
+  showScreen('screen-voice');
+  setTimeout(startMic, 300);
+}
+
+function showVoiceManualMode() {
+  showScreen('screen-voice');
+  document.getElementById('voice-manual-ui').style.display = 'block';
+  document.getElementById('voice-mic-ui').style.display = 'none';
+}
+
+// ===== ERR NETWORK HELPERS =====
+function continueOffline() {
+  document.getElementById('offline-fields-count').textContent = `${session.answers ? session.answers.filter(a => a && a.value).length : 0} of ${session.fields ? session.fields.length : 0}`;
+  if (session.fields && session.fields.length > 0) {
+    showScreen('screen-voice');
+  } else {
+    showScreen('screen-manual-entry');
+  }
+}
+
+function retryConnection() {
+  if (navigator.onLine) {
+    if (session.fields && session.fields.length > 0) showScreen('screen-voice');
+    else showScreen('screen-welcome');
+  } else {
+    alert('Still offline. Please check your connection.');
+  }
+}
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  const swCode = `
+const CACHE = 'tio-v1';
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './app.html'])));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('./app.html'))));
+});
+  `.trim();
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(err => console.log('SW reg failed', err));
+}
+</script>
+</body>
+</html>

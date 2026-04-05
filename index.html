@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1C2B3A">
+  <meta name="description" content="Scan any workplace form, speak your account, get professionally written documentation — instantly.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Talk It Out">
+  <title>Talk It Out — Just talk. We handle the rest.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===================== RESET ===================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ===================== VARIABLES ===================== */
+    :root {
+      --color-bg: #FFFFFF;
+      --color-bg-secondary: #F8F7F4;
+      --color-bg-dark: #1C2B3A;
+      --color-text: #0F1A24;
+      --color-text-muted: #6B7280;
+      --color-text-light: #F5F0E8;
+      --color-text-light-muted: #9CB3C9;
+      --color-amber: #F59E0B;
+      --color-amber-dark: #BA7517;
+      --color-amber-light: #FAEEDA;
+      --color-border: rgba(0,0,0,0.08);
+      --color-border-strong: rgba(0,0,0,0.15);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+      --transition: 200ms ease;
+    }
+
+    /* ===================== BASE ===================== */
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Syne', sans-serif; line-height: 1.2; }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; }
+    img { max-width: 100%; display: block; }
+
+    /* ===================== LAYOUT ===================== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 96px 0; }
+
+    /* ===================== TYPOGRAPHY ===================== */
+    .section-heading { font-size: 36px; font-weight: 700; text-align: center; color: var(--color-text); }
+    .section-subheading { font-size: 18px; color: var(--color-text-muted); text-align: center; margin-top: 16px; line-height: 1.6; }
+
+    /* ===================== BUTTONS ===================== */
+    .btn {
+      display: inline-block;
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 500;
+      line-height: 1;
+      text-align: center;
+    }
+    .btn-amber { background: var(--color-amber); color: #412402; border-radius: var(--radius-sm); }
+    .btn-amber:hover { background: var(--color-amber-dark); }
+    .btn-outline { background: transparent; color: var(--color-text); border-radius: var(--radius-sm); border: 1.5px solid var(--color-border-strong); }
+    .btn-outline:hover { background: var(--color-bg-secondary); }
+    .btn-dark { background: var(--color-bg-dark); color: var(--color-text-light); border-radius: var(--radius-sm); border: none; }
+    .btn-dark:hover { background: #162130; }
+    .btn-sm { padding: 10px 20px; font-size: 14px; font-weight: 500; }
+    .btn-md { padding: 14px 28px; font-size: 16px; font-family: 'Syne', sans-serif; font-weight: 500; }
+    .btn-lg { padding: 16px 36px; font-size: 18px; font-family: 'Syne', sans-serif; font-weight: 500; }
+
+    /* ===================== NAV ===================== */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: var(--color-bg);
+      height: 64px;
+      border-bottom: 1px solid transparent;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .nav.scrolled {
+      border-bottom-color: var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text);
+      white-space: nowrap;
+    }
+    .nav-center {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      flex: 1;
+      justify-content: center;
+    }
+    .nav-center a {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      color: var(--color-text-muted);
+      transition: color var(--transition);
+      white-space: nowrap;
+    }
+    .nav-center a:hover { color: var(--color-text); }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .nav-install {
+      display: none;
+      background: none;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 13px;
+      color: var(--color-text-muted);
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    .nav-install:hover { background: var(--color-bg-secondary); }
+    .nav-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      padding: 6px;
+      color: var(--color-text);
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===================== MOBILE NAV ===================== */
+    .mobile-nav {
+      position: fixed;
+      inset: 0;
+      background: var(--color-bg);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateX(100%);
+      pointer-events: none;
+      transition: opacity 300ms ease, transform 300ms ease;
+    }
+    body.mobile-nav-open .mobile-nav {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+    body.mobile-nav-open { overflow: hidden; }
+    .mobile-nav-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      padding: 8px;
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-nav-links {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+    .mobile-nav-links a {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      color: var(--color-text);
+      transition: color var(--transition);
+    }
+    .mobile-nav-links a:hover { color: var(--color-amber-dark); }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      min-height: 100vh;
+      padding-top: 64px;
+      display: flex;
+      align-items: center;
+    }
+    .hero-inner {
+      display: flex;
+      align-items: center;
+      gap: 64px;
+      padding: 80px 0;
+      width: 100%;
+    }
+    .hero-content { flex: 0 0 55%; min-width: 0; }
+    .hero-visual { flex: 0 0 45%; display: flex; justify-content: center; }
+
+    /* Hero load animations */
+    @keyframes fadeUp10 {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp20 {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp30 {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--color-amber-light);
+      color: var(--color-amber-dark);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      animation: fadeUp10 400ms ease both;
+    }
+    .hero-headline {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--color-text);
+      margin-bottom: 24px;
+      animation: fadeUp20 600ms ease 150ms both;
+    }
+    .hero-subheadline {
+      font-size: 18px;
+      color: var(--color-text-muted);
+      max-width: 480px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+      animation: fadeUp20 600ms ease 300ms both;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      animation: fadeUp20 600ms ease 450ms both;
+    }
+
+    /* ===================== PHONE FRAME ===================== */
+    .phone-frame {
+      width: 280px;
+      height: 560px;
+      border-radius: 36px;
+      background: var(--color-bg-dark);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+      animation: fadeUp30 800ms ease 200ms both;
+    }
+    .phone-notch {
+      width: 80px;
+      height: 28px;
+      background: #0A1520;
+      border-radius: 0 0 16px 16px;
+      margin: 0 auto;
+    }
+    .phone-status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px 0;
+    }
+    .phone-status-time {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+    .phone-status-icons {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .phone-progress-track {
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin: 10px 16px 0;
+    }
+    .phone-progress-fill {
+      height: 3px;
+      width: 60%;
+      background: var(--color-amber);
+      border-radius: 2px;
+    }
+    .phone-form-label {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 11px;
+      color: var(--color-text-light-muted);
+      padding: 14px 16px 0;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .phone-field-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      color: var(--color-text-light);
+      padding: 10px 16px 0;
+      line-height: 1.3;
+    }
+    .phone-hr { height: 1px; background: rgba(255,255,255,0.07); margin: 18px 16px; }
+    .phone-mic-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 0 16px;
+    }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(1); opacity: 0.55; }
+      100% { transform: scale(1.375); opacity: 0; }
+    }
+
+    .phone-mic-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--color-amber);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .phone-mic-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--color-amber);
+      animation: pulse-ring 2s ease-out infinite;
+    }
+    .phone-mic-btn svg { position: relative; z-index: 1; }
+    .phone-listening {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      color: var(--color-amber);
+    }
+    .phone-transcript {
+      margin: 0 16px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.6;
+      font-style: italic;
+    }
+    .phone-ai-box {
+      margin: 12px 16px 0;
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+    .phone-ai-label {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 10px;
+      color: var(--color-amber);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .phone-ai-text {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.6;
+    }
+
+    /* ===================== TRUST BAR ===================== */
+    .trust-bar {
+      background: var(--color-bg-secondary);
+      padding: 24px 0;
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      overflow: hidden;
+    }
+    .trust-bar-inner {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .trust-bar-label {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .marquee-wrapper {
+      overflow: hidden;
+      flex: 1;
+      min-width: 0;
+    }
+    .marquee-track {
+      display: flex;
+      gap: 12px;
+      animation: marquee 30s linear infinite;
+      width: max-content;
+    }
+    .marquee-track.pause-animation { animation-play-state: paused; }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .industry-chip {
+      border: 1px solid var(--color-border-strong);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--color-text-muted);
+      background: white;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ===================== HOW IT WORKS ===================== */
+    #how-it-works { background: var(--color-bg); }
+    .steps-wrap { margin-top: 64px; position: relative; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .steps-connecting-line {
+      position: absolute;
+      top: 52px;
+      left: calc(12.5% + 4px);
+      right: calc(12.5% + 4px);
+      height: 2px;
+      background-image: repeating-linear-gradient(
+        90deg,
+        var(--color-amber) 0px,
+        var(--color-amber) 8px,
+        transparent 8px,
+        transparent 16px
+      );
+      z-index: 0;
+    }
+    .step-card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-amber);
+      color: #412402;
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .step-icon {
+      color: var(--color-amber);
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .step-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ===================== FEATURES ===================== */
+    #features { background: var(--color-bg-secondary); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 64px;
+    }
+    .feature-card {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 32px 28px;
+      transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-amber);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--color-amber-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-amber);
+      flex-shrink: 0;
+    }
+    .feature-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--color-text);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ===================== FOR ORGS ===================== */
+    #for-orgs { background: var(--color-bg); }
+    .for-orgs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 64px;
+    }
+    .workers-card {
+      background: var(--color-bg-dark);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+    }
+    .workers-card h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 16px;
+    }
+    .orgs-card {
+      background: white;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+    }
+    .orgs-card h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 16px;
+    }
+    .amber-rule { width: 40px; height: 3px; background: var(--color-amber); border-radius: 2px; margin-bottom: 28px; }
+    .gray-rule { width: 40px; height: 3px; background: var(--color-border-strong); border-radius: 2px; margin-bottom: 28px; }
+    .check-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .check-list li .chk {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .workers-card .check-list li { color: rgba(255,255,255,0.88); }
+
+    /* ===================== PRICING ===================== */
+    #pricing { background: var(--color-bg-secondary); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 64px;
+      align-items: start;
+    }
+    .pricing-card-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .most-popular-badge {
+      background: var(--color-amber);
+      color: #412402;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .pricing-card {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      width: 100%;
+    }
+    .pricing-card.featured { border: 2px solid var(--color-amber); }
+    .pricing-plan-label {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+    .pricing-amount {
+      font-family: 'Syne', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--color-text);
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .pricing-amount.amber-price { color: var(--color-amber); }
+    .pricing-period {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+    }
+    .pricing-billing {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+    }
+    .pricing-forever {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+    }
+    .pricing-divider { height: 1px; background: var(--color-border); margin: 24px 0; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      color: var(--color-text);
+    }
+    .pricing-features li .pchk { color: var(--color-amber); flex-shrink: 0; }
+    .btn-full {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+      border: 1.5px solid var(--color-border-strong);
+      background: transparent;
+      color: var(--color-text);
+    }
+    .btn-full:hover { background: var(--color-bg-secondary); }
+    .btn-full.amber-full {
+      background: var(--color-amber);
+      color: #412402;
+      border-color: var(--color-amber);
+    }
+    .btn-full.amber-full:hover { background: var(--color-amber-dark); border-color: var(--color-amber-dark); }
+    .btn-full.dark-full {
+      background: var(--color-bg-dark);
+      color: white;
+      border-color: var(--color-bg-dark);
+    }
+    .btn-full.dark-full:hover { background: #162130; border-color: #162130; }
+    .pricing-footnote {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      color: var(--color-text-muted);
+      text-align: center;
+      margin-top: 32px;
+    }
+
+    /* ===================== FINAL CTA ===================== */
+    .final-cta {
+      background: var(--color-bg-dark);
+      padding: 96px 0;
+      text-align: center;
+    }
+    .final-cta-headline {
+      font-family: 'Syne', sans-serif;
+      font-size: 40px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.2;
+    }
+    .final-cta-headline .amber-line { color: var(--color-amber); display: block; }
+    .final-cta-sub {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 18px;
+      color: var(--color-text-light-muted);
+      margin-top: 24px;
+    }
+    .final-cta-note {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--color-text-light-muted);
+      margin-top: 16px;
+    }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      background: #0A1520;
+      padding: 64px 0 32px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 48px;
+    }
+    .footer-brand-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      color: white;
+      margin-bottom: 8px;
+    }
+    .footer-tagline {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--color-text-light-muted);
+      line-height: 1.6;
+    }
+    .footer-socials {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .social-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      transition: background var(--transition);
+      color: rgba(255,255,255,0.55);
+      flex-shrink: 0;
+    }
+    .social-btn:hover { background: rgba(255,255,255,0.16); }
+    .footer-col-heading {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-light-muted);
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+      display: block;
+      transition: color var(--transition);
+    }
+    .footer-links a:hover { color: white; }
+    .footer-links a.legal-amber { color: var(--color-amber); }
+    .footer-links a.legal-amber:hover { color: var(--color-amber-light); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-bottom span {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* ===================== SCROLL ANIMATIONS ===================== */
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===================== MEDIA QUERIES ===================== */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-connecting-line { display: none; }
+      .hero-headline { font-size: 46px; }
+    }
+
+    @media (max-width: 768px) {
+      section { padding: 64px 0; }
+      .section-heading { font-size: 28px; }
+      .section-subheading { font-size: 16px; }
+
+      /* Nav mobile */
+      .nav-center { display: none; }
+      .nav-right .btn { display: none; }
+      .nav-hamburger { display: flex; }
+
+      /* Hero mobile */
+      .hero-inner { flex-direction: column; gap: 40px; padding: 48px 0 64px; }
+      .hero-content { flex: none; width: 100%; }
+      .hero-visual { display: none; }
+      .hero-headline { font-size: 36px; }
+      .hero-subheadline { font-size: 16px; max-width: 100%; }
+
+      /* Steps */
+      .steps-grid { grid-template-columns: 1fr; }
+      .steps-connecting-line { display: none; }
+
+      /* Features */
+      .features-grid { grid-template-columns: 1fr; }
+
+      /* For Orgs */
+      .for-orgs-grid { grid-template-columns: 1fr; }
+      .workers-card, .orgs-card { padding: 36px 28px; }
+
+      /* Pricing */
+      .pricing-grid { grid-template-columns: 1fr; }
+
+      /* Final CTA */
+      .final-cta-headline { font-size: 28px; }
+      .final-cta { padding: 64px 0; }
+
+      /* Footer */
+      .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+
+      /* Trust bar */
+      .trust-bar-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE NAV OVERLAY -->
+  <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Navigation">
+    <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close navigation">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <nav class="mobile-nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#for-orgs">For Orgs</a>
+    </nav>
+    <a href="app.html" class="btn btn-amber btn-md">Get started</a>
+  </div>
+
+  <!-- NAV -->
+  <header class="nav" id="mainNav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">Talk It Out</a>
+      <nav class="nav-center" aria-label="Main navigation">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#for-orgs">For Orgs</a>
+      </nav>
+      <div class="nav-right">
+        <button class="nav-install" id="navInstall" aria-label="Install app">Install app</button>
+        <a href="app.html" class="btn btn-amber btn-sm">Get started</a>
+        <button class="nav-hamburger" id="hamburger" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileNav">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- SECTION 2: HERO -->
+    <section class="hero" aria-labelledby="hero-headline">
+      <div class="container">
+        <div class="hero-inner">
+          <div class="hero-content">
+            <div class="hero-badge" aria-label="Built for workers">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2l2.09 6.26L20 10l-5 4.87L16.18 22 12 19.27 7.82 22 9 14.87 4 10l5.91-1.74L12 2z"/>
+              </svg>
+              Built for workers
+            </div>
+            <h1 class="hero-headline" id="hero-headline">Just talk.<br>We handle the rest.</h1>
+            <p class="hero-subheadline">Scan any workplace form, speak your account, get professionally written documentation — instantly.</p>
+            <div class="hero-buttons">
+              <a href="app.html" class="btn btn-amber btn-md">Try it free</a>
+              <a href="#how-it-works" class="btn btn-outline btn-md">See how it works</a>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="phone-frame" role="img" aria-label="App showing voice-powered workplace form filing">
+              <div class="phone-notch"></div>
+              <div class="phone-status-bar">
+                <span class="phone-status-time">9:41</span>
+                <div class="phone-status-icons">
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="rgba(255,255,255,0.5)" aria-hidden="true">
+                    <rect x="0" y="6" width="2" height="4" rx="0.5"/><rect x="3" y="4" width="2" height="6" rx="0.5"/><rect x="6" y="2" width="2" height="8" rx="0.5"/><rect x="9" y="0" width="2" height="10" rx="0.5"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="phone-progress-track">
+                <div class="phone-progress-fill"></div>
+              </div>
+              <div class="phone-form-label">Workplace Incident Report</div>
+              <div class="phone-field-label">Describe what happened</div>
+              <div class="phone-hr"></div>
+              <div class="phone-mic-area">
+                <div class="phone-mic-btn">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#412402" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                </div>
+                <div class="phone-listening">Listening...</div>
+              </div>
+              <div class="phone-transcript">"I was in the break room when my manager asked me to..."</div>
+              <div class="phone-ai-box">
+                <div class="phone-ai-label">AI rewriting</div>
+                <div class="phone-ai-text">On April 3rd at approximately 2:15 PM, while present in the designated employee break room, this reporter was approached by their direct supervisor who verbally requested...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: TRUST BAR -->
+    <div class="trust-bar" role="complementary" aria-label="Industries served">
+      <div class="trust-bar-inner">
+        <span class="trust-bar-label">Trusted by workers in</span>
+        <div class="marquee-wrapper" id="marqueeWrapper">
+          <div class="marquee-track" id="marqueeTrack" aria-hidden="true">
+            <span class="industry-chip">Healthcare</span>
+            <span class="industry-chip">Construction</span>
+            <span class="industry-chip">Education</span>
+            <span class="industry-chip">Manufacturing</span>
+            <span class="industry-chip">Hospitality</span>
+            <span class="industry-chip">Logistics</span>
+            <span class="industry-chip">Transportation</span>
+            <span class="industry-chip">Government</span>
+            <span class="industry-chip">Retail</span>
+            <span class="industry-chip">Agriculture</span>
+            <span class="industry-chip">Security</span>
+            <span class="industry-chip">Warehousing</span>
+            <!-- Duplicate for seamless loop -->
+            <span class="industry-chip">Healthcare</span>
+            <span class="industry-chip">Construction</span>
+            <span class="industry-chip">Education</span>
+            <span class="industry-chip">Manufacturing</span>
+            <span class="industry-chip">Hospitality</span>
+            <span class="industry-chip">Logistics</span>
+            <span class="industry-chip">Transportation</span>
+            <span class="industry-chip">Government</span>
+            <span class="industry-chip">Retail</span>
+            <span class="industry-chip">Agriculture</span>
+            <span class="industry-chip">Security</span>
+            <span class="industry-chip">Warehousing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: HOW IT WORKS -->
+    <section id="how-it-works" aria-labelledby="how-heading">
+      <div class="container">
+        <h2 class="section-heading" id="how-heading">How it works</h2>
+        <p class="section-subheading">Four steps from incident to documentation</p>
+        <div class="steps-wrap">
+          <div class="steps-connecting-line" aria-hidden="true"></div>
+          <div class="steps-grid">
+
+            <div class="step-card animate-on-scroll" data-delay="0">
+              <div class="step-number" aria-hidden="true">1</div>
+              <div class="step-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </div>
+              <div class="step-name">Scan the form</div>
+              <div class="step-desc">Take a photo of any workplace form. AI reads every field instantly.</div>
+            </div>
+
+            <div class="step-card animate-on-scroll" data-delay="150">
+              <div class="step-number" aria-hidden="true">2</div>
+              <div class="step-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+              </div>
+              <div class="step-name">Speak your account</div>
+              <div class="step-desc">Answer each field out loud. AI rewrites it into professional formal language.</div>
+            </div>
+
+            <div class="step-card animate-on-scroll" data-delay="300">
+              <div class="step-number" aria-hidden="true">3</div>
+              <div class="step-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <polyline points="9 15 11 17 15 13"/>
+                </svg>
+              </div>
+              <div class="step-name">Review and approve</div>
+              <div class="step-desc">Preview the completed form and sign electronically with ESIGN compliance.</div>
+            </div>
+
+            <div class="step-card animate-on-scroll" data-delay="450">
+              <div class="step-number" aria-hidden="true">4</div>
+              <div class="step-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </div>
+              <div class="step-name">Send, print, or save</div>
+              <div class="step-desc">Email to HR, print for your records, or download. Locked and timestamped.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: FEATURES -->
+    <section id="features" aria-labelledby="features-heading">
+      <div class="container">
+        <h2 class="section-heading" id="features-heading">Everything a worker needs</h2>
+        <p class="section-subheading">Built for the moment something goes wrong at work</p>
+        <div class="features-grid">
+
+          <div class="feature-card animate-on-scroll" data-delay="0">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </div>
+            <div class="feature-name">Voice Filing</div>
+            <div class="feature-desc">Speak naturally in any language. We transcribe and rewrite into formal professional documentation.</div>
+          </div>
+
+          <div class="feature-card animate-on-scroll" data-delay="100">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l2.09 6.26L20 10l-5 4.87L16.18 22 12 19.27 7.82 22 9 14.87 4 10l5.91-1.74L12 2z"/>
+              </svg>
+            </div>
+            <div class="feature-name">AI Rewrite</div>
+            <div class="feature-desc">Choose your tone — Formal, Concise, Detailed, or Plain English. Always review before approving.</div>
+          </div>
+
+          <div class="feature-card animate-on-scroll" data-delay="200">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+            <div class="feature-name">Form Preview</div>
+            <div class="feature-desc">See exactly how your completed form will appear before signing and submitting.</div>
+          </div>
+
+          <div class="feature-card animate-on-scroll" data-delay="0">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="1" y1="1" x2="23" y2="23"/>
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+                <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                <line x1="12" y1="20" x2="12.01" y2="20"/>
+              </svg>
+            </div>
+            <div class="feature-name">Offline Mode</div>
+            <div class="feature-desc">Works in tunnels, basements, and dead zones. Syncs automatically when you reconnect.</div>
+          </div>
+
+          <div class="feature-card animate-on-scroll" data-delay="100">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div class="feature-name">Know Your Rights</div>
+            <div class="feature-desc">Relevant policies and filing deadlines surfaced automatically based on your form type.</div>
+          </div>
+
+          <div class="feature-card animate-on-scroll" data-delay="200">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <div class="feature-name">Pattern Alerts</div>
+            <div class="feature-desc">Org admins see anonymized safety trends across locations, departments, and time periods.</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: FOR ORGS -->
+    <section id="for-orgs" aria-labelledby="for-orgs-heading">
+      <div class="container">
+        <h2 class="section-heading" id="for-orgs-heading">Built for workers. Trusted by organizations.</h2>
+        <div class="for-orgs-grid">
+
+          <div class="workers-card animate-on-scroll" data-delay="0">
+            <h3>For workers</h3>
+            <div class="amber-rule" aria-hidden="true"></div>
+            <ul class="check-list">
+              <li>
+                <span class="chk" style="color: var(--color-amber);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Scan any form in seconds</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-amber);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Speak your account naturally</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-amber);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>AI writes it professionally</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-amber);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Sign electronically with ESIGN compliance</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-amber);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Email HR or print instantly</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-amber);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Your record locked and timestamped forever</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="orgs-card animate-on-scroll" data-delay="150">
+            <h3>For organizations</h3>
+            <div class="gray-rule" aria-hidden="true"></div>
+            <ul class="check-list">
+              <li>
+                <span class="chk" style="color: var(--color-text-muted);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Pattern detection dashboard</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-text-muted);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Anonymous incident reporting</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-text-muted);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Deadline and compliance tracking</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-text-muted);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Member management and invite codes</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-text-muted);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Bulk CSV and PDF export for audits</span>
+              </li>
+              <li>
+                <span class="chk" style="color: var(--color-text-muted);" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Full audit log and chain of custody</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: PRICING -->
+    <section id="pricing" aria-labelledby="pricing-heading">
+      <div class="container">
+        <h2 class="section-heading" id="pricing-heading">Simple pricing</h2>
+        <p class="section-subheading">Start free. Scale when you're ready.</p>
+        <div class="pricing-grid">
+
+          <!-- Individual -->
+          <div class="pricing-card-wrap animate-on-scroll" data-delay="0">
+            <div class="pricing-card">
+              <div class="pricing-plan-label">Individual</div>
+              <div class="pricing-amount">Free</div>
+              <div class="pricing-forever">forever</div>
+              <div class="pricing-divider"></div>
+              <ul class="pricing-features">
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Voice-powered filing
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Form library access
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Submission history
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Email and print output
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Offline mode
+                </li>
+              </ul>
+              <a href="app.html" class="btn-full">Get started free</a>
+            </div>
+          </div>
+
+          <!-- Org Starter -->
+          <div class="pricing-card-wrap animate-on-scroll" data-delay="150">
+            <div class="most-popular-badge">Most popular</div>
+            <div class="pricing-card featured">
+              <div class="pricing-plan-label">Org Starter</div>
+              <div class="pricing-amount amber-price">
+                $500<span class="pricing-period">/month</span>
+              </div>
+              <div class="pricing-billing">billed monthly</div>
+              <div class="pricing-divider"></div>
+              <ul class="pricing-features">
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Everything in Individual
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Up to 500 members
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Admin dashboard
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Pattern detection
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Deadline tracking
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Priority support
+                </li>
+              </ul>
+              <a href="app.html" class="btn-full amber-full">Start free trial</a>
+            </div>
+          </div>
+
+          <!-- Org Pro -->
+          <div class="pricing-card-wrap animate-on-scroll" data-delay="300">
+            <div class="pricing-card">
+              <div class="pricing-plan-label">Org Pro</div>
+              <div class="pricing-amount">
+                $2,500<span class="pricing-period">/month</span>
+              </div>
+              <div class="pricing-billing">billed monthly</div>
+              <div class="pricing-divider"></div>
+              <ul class="pricing-features">
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Everything in Starter
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Unlimited members
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Custom form library
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  White label option
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  API access
+                </li>
+                <li>
+                  <span class="pchk" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  Dedicated support
+                </li>
+              </ul>
+              <a href="mailto:hello@talkitout.app" class="btn-full dark-full">Contact us</a>
+            </div>
+          </div>
+
+        </div>
+        <p class="pricing-footnote">All org plans include a 30-day free trial. No credit card required.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 8: FINAL CTA -->
+    <section class="final-cta" aria-labelledby="cta-heading">
+      <div class="container">
+        <h2 class="final-cta-headline" id="cta-heading">
+          The moment something goes wrong at work —
+          <span class="amber-line">this is the first thing you open.</span>
+        </h2>
+        <p class="final-cta-sub">Built for workers. Trusted by organizations.</p>
+        <div style="margin-top: 40px;">
+          <a href="app.html" class="btn btn-amber btn-lg">Get started free</a>
+        </div>
+        <p class="final-cta-note">No credit card required · Free individual plan forever</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SECTION 9: FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-brand-name">Talk It Out</div>
+          <div class="footer-tagline">Just talk. We handle the rest.</div>
+          <div class="footer-socials" aria-label="Social media links">
+            <button class="social-btn" aria-label="Follow on Twitter / X">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+              </svg>
+            </button>
+            <button class="social-btn" aria-label="Connect on LinkedIn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                <rect x="2" y="9" width="4" height="12"/>
+                <circle cx="4" cy="4" r="2"/>
+              </svg>
+            </button>
+            <button class="social-btn" aria-label="Follow on Instagram">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </button>
+            <button class="social-btn" aria-label="Follow on Facebook">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-heading">Product</div>
+          <ul class="footer-links">
+            <li><a href="#">About</a></li>
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-heading">Support</div>
+          <ul class="footer-links">
+            <li><a href="#">Help center</a></li>
+            <li><a href="mailto:hello@talkitout.app">Contact us</a></li>
+            <li><a href="#">Status</a></li>
+            <li><a href="#">Accessibility</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-heading">Legal</div>
+          <ul class="footer-links">
+            <li><a href="privacy.html" class="legal-amber">Privacy Policy</a></li>
+            <li><a href="terms.html" class="legal-amber">Terms of Service</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">CCPA / GDPR Rights</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Talk It Out. All rights reserved.</span>
+        <span>hello@talkitout.app</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ==================== NAV SCROLL EFFECT ====================
+    const mainNav = document.getElementById('mainNav');
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 10) {
+        mainNav.classList.add('scrolled');
+      } else {
+        mainNav.classList.remove('scrolled');
+      }
+    }, { passive: true });
+
+    // ==================== SMOOTH SCROLL ====================
+    document.querySelectorAll('a[href^="#"]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        var href = link.getAttribute('href');
+        if (!href || href === '#') return;
+        var target = document.querySelector(href);
+        if (!target) return;
+        e.preventDefault();
+        // Close mobile nav if open
+        document.body.classList.remove('mobile-nav-open');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        var offset = target.getBoundingClientRect().top + window.scrollY - 64;
+        window.scrollTo({ top: offset, behavior: 'smooth' });
+      });
+    });
+
+    // ==================== MOBILE NAV ====================
+    var hamburgerBtn = document.getElementById('hamburger');
+    var mobileNav = document.getElementById('mobileNav');
+    var mobileNavClose = document.getElementById('mobileNavClose');
+
+    function openMobileNav() {
+      document.body.classList.add('mobile-nav-open');
+      hamburgerBtn.setAttribute('aria-expanded', 'true');
+      // Focus first link
+      var firstLink = mobileNav.querySelector('a, button');
+      if (firstLink) { setTimeout(function() { firstLink.focus(); }, 320); }
+    }
+
+    function closeMobileNav() {
+      document.body.classList.remove('mobile-nav-open');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      hamburgerBtn.focus();
+    }
+
+    hamburgerBtn.addEventListener('click', openMobileNav);
+    mobileNavClose.addEventListener('click', closeMobileNav);
+
+    // Close on backdrop tap
+    mobileNav.addEventListener('click', function(e) {
+      if (e.target === mobileNav) { closeMobileNav(); }
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.body.classList.contains('mobile-nav-open')) {
+        closeMobileNav();
+      }
+    });
+
+    // Close on nav link tap
+    mobileNav.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        closeMobileNav();
+      });
+    });
+
+    // ==================== MARQUEE PAUSE ON HOVER ====================
+    var marqueeWrapper = document.getElementById('marqueeWrapper');
+    var marqueeTrack = document.getElementById('marqueeTrack');
+
+    marqueeWrapper.addEventListener('mouseenter', function() {
+      marqueeTrack.classList.add('pause-animation');
+    });
+    marqueeWrapper.addEventListener('mouseleave', function() {
+      marqueeTrack.classList.remove('pause-animation');
+    });
+
+    // ==================== INTERSECTION OBSERVER ANIMATIONS ====================
+    var animatedEls = document.querySelectorAll('.animate-on-scroll');
+
+    var scrollObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var delay = parseInt(el.getAttribute('data-delay')) || 0;
+          setTimeout(function() {
+            el.classList.add('visible');
+          }, delay);
+          scrollObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    animatedEls.forEach(function(el) {
+      scrollObserver.observe(el);
+    });
+
+    // ==================== PWA INSTALL PROMPT ====================
+    var deferredPrompt = null;
+    var navInstallBtn = document.getElementById('navInstall');
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Show install button only on mobile
+      if (window.innerWidth < 768) {
+        navInstallBtn.style.display = 'inline-block';
+      }
+    });
+
+    navInstallBtn.addEventListener('click', async function() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      var result = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      navInstallBtn.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', function() {
+      navInstallBtn.style.display = 'none';
+      deferredPrompt = null;
+    });
+  </script>
+</body>
+</html>

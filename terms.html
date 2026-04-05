@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — Talk It Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F8F7F4;
+  --color-bg-dark: #1C2B3A;
+  --color-bg-footer: #0A1520;
+  --color-text: #0F1A24;
+  --color-text-muted: #6B7280;
+  --color-text-light: #F5F0E8;
+  --color-text-light-muted: #9CB3C9;
+  --color-amber: #F59E0B;
+  --color-amber-dark: #BA7517;
+  --color-amber-light: #FAEEDA;
+  --color-success: #3B6D11;
+  --color-success-bg: #EAF3DE;
+  --color-error: #A32D2D;
+  --color-error-bg: #FCEBEB;
+  --color-info: #185FA5;
+  --color-info-bg: #E6F1FB;
+  --color-border: rgba(0,0,0,0.08);
+  --color-border-strong: rgba(0,0,0,0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+  --transition: 200ms ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  padding-top: 64px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ==============================
+   NAV
+============================== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  height: 64px;
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-page-name {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-amber);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-center {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  justify-content: center;
+}
+.nav-center a {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition);
+  white-space: nowrap;
+}
+.nav-center a:hover { color: var(--color-amber); }
+.nav-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-amber);
+  color: var(--color-text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 20px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+}
+.btn-primary:hover { background: var(--color-amber-dark); color: #fff; }
+
+@media (max-width: 768px) {
+  .nav-inner { grid-template-columns: 1fr 1fr; }
+  .nav-center { display: none; }
+}
+
+/* ==============================
+   PAGE HEADER
+============================== */
+.page-header {
+  background: var(--color-bg-secondary);
+  padding: 64px 0 48px;
+}
+.page-header-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+.breadcrumb a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.breadcrumb a:hover { color: var(--color-amber); }
+.breadcrumb .chevron { opacity: 0.5; }
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 16px;
+  line-height: 1.2;
+}
+.effective-date {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .page-title { font-size: 30px; }
+}
+
+/* ==============================
+   MAIN LAYOUT GRID
+============================== */
+.content-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 64px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .sidebar { order: 2; }
+}
+
+/* ==============================
+   SIDEBAR
+============================== */
+.sidebar {
+  position: sticky;
+  top: 88px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+.sidebar-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-link {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-left: 2px solid transparent;
+  transition: color var(--transition), border-color var(--transition);
+  line-height: 1.4;
+}
+.sidebar-link:hover { color: var(--color-amber); }
+.sidebar-link.active {
+  border-left-color: var(--color-amber);
+  color: var(--color-text);
+}
+/* Terms-only: not legal advice card */
+.sidebar-legal-notice {
+  margin-top: 20px;
+  background: var(--color-error-bg);
+  border-left: 4px solid var(--color-error);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 14px;
+}
+.sidebar-legal-notice-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-error);
+  margin-bottom: 6px;
+}
+.sidebar-legal-notice-text {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-error);
+  line-height: 1.5;
+}
+.sidebar-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 20px 0;
+}
+.sidebar-contact-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+.sidebar-email {
+  display: block;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-amber);
+  text-decoration: none;
+  margin-bottom: 4px;
+  transition: color var(--transition);
+  word-break: break-all;
+}
+.sidebar-email:hover { color: var(--color-amber-dark); }
+.btn-outline {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  margin-top: 8px;
+}
+.btn-outline:hover {
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+  background: var(--color-amber-light);
+}
+
+/* ==============================
+   ARTICLE & CONTENT SECTIONS
+============================== */
+.article p {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+.article p:last-child { margin-bottom: 0; }
+
+.content-section { margin-top: 48px; }
+.content-section:first-child { margin-top: 0; }
+
+.section-heading {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ==============================
+   BULLET LIST
+============================== */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+.bullet-list li {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text);
+  padding-left: 20px;
+  position: relative;
+  margin-bottom: 6px;
+}
+.bullet-list li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: var(--color-text-muted);
+}
+
+/* ==============================
+   CHECK ITEMS
+============================== */
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.check-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.check-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.check-icon-yes { background: var(--color-success-bg); }
+.check-icon-x   { background: var(--color-error-bg); }
+.check-text {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+.check-text a { color: var(--color-amber); transition: color var(--transition); }
+.check-text a:hover { color: var(--color-amber-dark); }
+
+/* ==============================
+   CALLOUT BOXES
+============================== */
+.callout {
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.callout-heading {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.callout-text {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 !important;
+}
+.callout-amber  { background: var(--color-amber-light);   border-left-color: var(--color-amber); }
+.callout-amber  .callout-heading,
+.callout-amber  .callout-text  { color: var(--color-amber-dark); }
+.callout-green  { background: var(--color-success-bg);    border-left-color: var(--color-success); }
+.callout-green  .callout-heading,
+.callout-green  .callout-text  { color: var(--color-success); }
+.callout-blue   { background: var(--color-info-bg);       border-left-color: var(--color-info); }
+.callout-blue   .callout-heading,
+.callout-blue   .callout-text  { color: var(--color-info); }
+.callout-red    { background: var(--color-error-bg);      border-left-color: var(--color-error); }
+.callout-red    .callout-heading,
+.callout-red    .callout-text  { color: var(--color-error); }
+
+/* ==============================
+   LAST UPDATED BAR
+============================== */
+.last-updated-bar {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.last-updated-bar span {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.link-amber {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-amber);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.link-amber:hover { color: var(--color-amber-dark); }
+
+/* ==============================
+   INLINE AMBER LINKS
+============================== */
+.article a.inline-link {
+  color: var(--color-amber);
+  transition: color var(--transition);
+}
+.article a.inline-link:hover { color: var(--color-amber-dark); }
+
+/* ==============================
+   FOOTER
+============================== */
+.footer {
+  background: var(--color-bg-footer);
+  padding: 64px 0 32px;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+}
+.footer-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.footer-tagline {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-text-light-muted);
+  line-height: 1.5;
+}
+.footer-col-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-light-muted);
+  margin-bottom: 16px;
+}
+.footer-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-links a {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.footer-links a:hover { color: #fff; }
+.footer-links a.footer-link-amber { color: var(--color-amber); }
+.footer-links a.footer-link-amber:hover { color: #fff; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 48px;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.footer-bottom span,
+.footer-bottom a {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+}
+.footer-bottom a:hover { color: rgba(255,255,255,0.7); }
+
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+}
+
+/* ==============================
+   PRINT STYLES
+============================== */
+@media print {
+  .nav,
+  .sidebar,
+  .footer,
+  .last-updated-bar {
+    display: none !important;
+  }
+  body {
+    padding-top: 0;
+    font-size: 12px;
+  }
+  .breadcrumb {
+    display: none;
+  }
+  .page-header {
+    padding: 24px 0 16px;
+    background: none;
+  }
+  .content-wrapper {
+    display: block;
+    max-width: none;
+    padding: 24px 0;
+  }
+  .article { width: 100%; }
+  .callout {
+    background: none !important;
+    border-left-width: 4px;
+    border-left-style: solid;
+    padding: 8px 12px;
+  }
+  .section-heading,
+  .page-title {
+    page-break-after: avoid;
+  }
+  .content-section {
+    page-break-inside: avoid;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ==============================
+     NAV
+============================== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <a href="index.html" class="nav-logo">Talk It Out</a>
+      <span class="nav-page-name">Terms of Service</span>
+    </div>
+    <div class="nav-center">
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="index.html#features">Features</a>
+      <a href="index.html#pricing">Pricing</a>
+    </div>
+    <div class="nav-right">
+      <a href="app.html" class="btn-primary">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ==============================
+     PAGE HEADER
+============================== -->
+<section class="page-header">
+  <div class="page-header-inner">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Talk It Out</a>
+      <span class="chevron">›</span>
+      <span>Legal</span>
+      <span class="chevron">›</span>
+      <span>Terms of Service</span>
+    </nav>
+    <h1 class="page-title">Terms of Service</h1>
+    <p class="effective-date">Effective April 5, 2026 · Plain language version</p>
+  </div>
+</section>
+
+<!-- ==============================
+     MAIN
+============================== -->
+<main>
+  <div class="content-wrapper">
+
+    <!-- ARTICLE CONTENT -->
+    <article class="article">
+
+      <!-- 1. What Talk It Out is -->
+      <section class="content-section" id="what-it-is">
+        <div class="callout callout-amber">
+          <div class="callout-heading">Important</div>
+          <p class="callout-text">Talk It Out is a documentation tool, not a legal service. Content generated by the app — including AI-rewritten form answers — does not constitute legal advice. Always consult a qualified attorney for legal matters.</p>
+        </div>
+        <h2 class="section-heading">What Talk It Out is</h2>
+        <p>Talk It Out is a voice-powered workplace form documentation tool that helps workers scan forms, speak their account, receive AI-assisted professional writing, sign electronically, and submit documentation. By accessing or using Talk It Out you agree to be bound by these Terms of Service. If you do not agree to these terms do not use the service.</p>
+      </section>
+
+      <!-- 2. What it is not -->
+      <section class="content-section" id="what-it-is-not">
+        <h2 class="section-heading">What Talk It Out is not</h2>
+        <div class="check-list">
+          <div class="check-item">
+            <div class="check-icon check-icon-x">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M8 2L2 8" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <p class="check-text">Talk It Out is not a law firm and does not provide legal advice. Nothing in the app or its output should be construed as legal counsel.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-x">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M8 2L2 8" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <p class="check-text">Talk It Out is not responsible for the outcome of any form, claim, grievance, or legal proceeding that results from documentation created using the service.</p>
+          </div>
+          <div class="check-item">
+            <div class="check-icon check-icon-x">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M8 2L2 8" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <p class="check-text">Talk It Out is not a replacement for a union representative, HR professional, employment attorney, or any other qualified professional.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Your content -->
+      <section class="content-section" id="your-content">
+        <h2 class="section-heading">Your content</h2>
+        <p>You retain full ownership of all content you create using Talk It Out. This includes your form answers, voice inputs, documents, and e-signatures. You grant Talk It Out a limited, non-exclusive, royalty-free license to process and store your content solely for the purpose of providing the service to you.</p>
+        <p>We do not claim ownership of your content. We do not use your content to train AI models. We do not share your content with third parties except as described in our <a href="privacy.html" class="inline-link">Privacy Policy</a> and as necessary to operate the service.</p>
+      </section>
+
+      <!-- 4. Acceptable use -->
+      <section class="content-section" id="acceptable-use">
+        <h2 class="section-heading">Acceptable use</h2>
+        <p>You agree to use Talk It Out only for lawful workplace documentation purposes. The following uses are prohibited:</p>
+        <ul class="bullet-list">
+          <li>Filing false, fraudulent, or deliberately misleading workplace documentation.</li>
+          <li>Impersonating another employee, supervisor, or HR personnel.</li>
+          <li>Submitting forms on behalf of another person without their explicit written consent.</li>
+          <li>Attempting to access, scrape, or extract other users' data.</li>
+          <li>Using the service for any purpose that violates applicable local, state, or federal law.</li>
+          <li>Reverse engineering, decompiling, or attempting to extract source code from the application.</li>
+        </ul>
+        <p>Violation of this acceptable use policy may result in immediate account suspension or termination without notice.</p>
+      </section>
+
+      <!-- 5. Subscriptions -->
+      <section class="content-section" id="subscriptions">
+        <h2 class="section-heading">Subscriptions and billing</h2>
+        <p>Talk It Out offers the following plan types:</p>
+        <ul class="bullet-list">
+          <li>Individual plans are permanently free with no credit card required.</li>
+          <li>Org Starter and Org Pro plans are billed monthly or annually as selected at signup.</li>
+          <li>All paid subscriptions auto-renew at the end of each billing period unless cancelled before the renewal date.</li>
+          <li>Cancellations take effect at the end of the current billing period — you retain access until then.</li>
+        </ul>
+        <p>Refunds are not provided for partial billing periods or unused portions of a subscription term. Org admins may cancel at any time with 30 days written notice to <a href="mailto:hello@talkitout.app" class="inline-link">hello@talkitout.app</a>. We reserve the right to change pricing with 30 days advance notice to registered org admins.</p>
+      </section>
+
+      <!-- 6. Disclaimers -->
+      <section class="content-section" id="disclaimers">
+        <h2 class="section-heading">Disclaimers and limitation of liability</h2>
+        <div class="callout callout-blue">
+          <div class="callout-heading">AI-generated content disclaimer</div>
+          <p class="callout-text">The AI-rewritten content produced by Talk It Out is provided as-is for documentation assistance purposes only. We make no guarantee that AI-generated text will be accepted by any employer, insurance company, government agency, court, or claims processor. Always review all AI output carefully before signing or submitting any document.</p>
+        </div>
+        <p>To the maximum extent permitted by applicable law Talk It Out is provided without warranties of any kind, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.</p>
+        <p>In no event shall Talk It Out or its operators be liable for any indirect, incidental, special, exemplary, or consequential damages arising from your use of or inability to use the service, even if advised of the possibility of such damages. Our total liability to you for any claims arising from these terms shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
+      </section>
+
+      <!-- 7. Termination -->
+      <section class="content-section" id="termination">
+        <h2 class="section-heading">Termination</h2>
+        <p>You may delete your account at any time from the profile screen within the app. Upon deletion your personal data will be removed within 30 days in accordance with our <a href="privacy.html" class="inline-link">Privacy Policy</a>.</p>
+        <p>We reserve the right to suspend or terminate your account at any time if we determine you have violated these Terms of Service, engaged in fraudulent activity, or pose a risk to other users or the service. We will make reasonable efforts to notify you before termination except where immediate action is required.</p>
+        <p>Upon termination you lose access to the service and all data associated with your account. We are not liable for any loss of data resulting from termination for cause.</p>
+      </section>
+
+      <!-- 8. Governing law -->
+      <section class="content-section" id="governing-law">
+        <h2 class="section-heading">Governing law and disputes</h2>
+        <p>These Terms of Service are governed by and construed in accordance with the laws of the State of New York, without regard to its conflict of law principles.</p>
+        <p>Any dispute arising out of or relating to these terms or the service shall be resolved exclusively in the state or federal courts located in New York County, New York. You consent to the personal jurisdiction of such courts and waive any objection to venue.</p>
+        <p>Before initiating any legal proceedings you agree to first contact us at <a href="mailto:legal@talkitout.app" class="inline-link">legal@talkitout.app</a> and make a good faith effort to resolve the dispute informally within 30 days.</p>
+      </section>
+
+      <!-- 9. Changes to terms -->
+      <section class="content-section" id="changes">
+        <h2 class="section-heading">Changes to these terms</h2>
+        <p>We reserve the right to update these Terms of Service at any time. We will notify registered users of material changes by email at least 14 days before the changes take effect. The updated effective date will be displayed at the top of this page.</p>
+        <p>Your continued use of Talk It Out after the effective date of any changes constitutes your acceptance of the new terms. If you do not agree with the updated terms you must stop using the service and may delete your account.</p>
+        <p>The version of these terms in effect at the time of any dispute shall govern that dispute.</p>
+      </section>
+
+      <!-- Last updated bar -->
+      <div class="last-updated-bar">
+        <span>Last updated April 5, 2026</span>
+        <a href="#" class="link-amber">View change history</a>
+      </div>
+
+    </article>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <p class="sidebar-label">On this page</p>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="#what-it-is"      class="sidebar-link">1 What Talk It Out is</a>
+        <a href="#what-it-is-not" class="sidebar-link">2 What it is not</a>
+        <a href="#your-content"   class="sidebar-link">3 Your content</a>
+        <a href="#acceptable-use" class="sidebar-link">4 Acceptable use</a>
+        <a href="#subscriptions"  class="sidebar-link">5 Subscriptions</a>
+        <a href="#disclaimers"    class="sidebar-link">6 Disclaimers</a>
+        <a href="#termination"    class="sidebar-link">7 Termination</a>
+        <a href="#governing-law"  class="sidebar-link">8 Governing law</a>
+        <a href="#changes"        class="sidebar-link">9 Changes to terms</a>
+      </nav>
+      <div class="sidebar-legal-notice">
+        <p class="sidebar-legal-notice-title">Not legal advice</p>
+        <p class="sidebar-legal-notice-text">Talk It Out is a documentation tool. Content generated does not constitute legal advice. Consult a qualified attorney for legal matters.</p>
+      </div>
+      <hr class="sidebar-divider">
+      <p class="sidebar-contact-label">Contact</p>
+      <a href="mailto:legal@talkitout.app" class="sidebar-email">legal@talkitout.app</a>
+      <button class="btn-outline btn-print">Download PDF</button>
+    </aside>
+
+  </div>
+</main>
+
+<!-- ==============================
+     FOOTER
+============================== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-logo">Talk It Out</p>
+        <p class="footer-tagline">Just talk. We handle the rest.</p>
+      </div>
+      <div>
+        <p class="footer-col-label">Product</p>
+        <ul class="footer-links">
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#how-it-works">How it works</a></li>
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="index.html#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-label">Support</p>
+        <ul class="footer-links">
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Status</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-label">Legal</p>
+        <ul class="footer-links">
+          <li><a href="privacy.html" class="footer-link-amber">Privacy Policy</a></li>
+          <li><a href="terms.html"   class="footer-link-amber">Terms of Service</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+          <li><a href="#">CCPA / GDPR Rights</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Talk It Out. All rights reserved.</span>
+      <a href="mailto:hello@talkitout.app">hello@talkitout.app</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var sections = document.querySelectorAll('.content-section');
+  var links    = document.querySelectorAll('.sidebar-link');
+
+  // Scroll spy
+  function updateSpy() {
+    var current = '';
+    sections.forEach(function (sec) {
+      if (sec.getBoundingClientRect().top <= 100) {
+        current = sec.id;
+      }
+    });
+    links.forEach(function (link) {
+      var active = link.getAttribute('href') === '#' + current;
+      link.classList.toggle('active', active);
+    });
+    // highlight first section if none active yet
+    if (!current && links.length) {
+      links[0].classList.add('active');
+    }
+  }
+
+  window.addEventListener('scroll', updateSpy, { passive: true });
+  updateSpy();
+
+  // Smooth scroll
+  links.forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var id = this.getAttribute('href').slice(1);
+      var target = document.getElementById(id);
+      if (target) {
+        var top = target.getBoundingClientRect().top + window.scrollY - 88;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Print button
+  var printBtn = document.querySelector('.btn-print');
+  if (printBtn) {
+    printBtn.addEventListener('click', function () {
+      window.print();
+    });
+  }
+}());
+</script>
+</body>
+</html>
