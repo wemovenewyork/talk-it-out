@@ -3477,7 +3477,7 @@ function retryConnection() {
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
   const swCode = `
-const CACHE = 'tio-v1';
+const CACHE = 'tio-v2';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './app.html'])));
   self.skipWaiting();
