@@ -2434,8 +2434,8 @@ function stopMic() {
 }
 
 function handleTranscriptComplete(transcript) {
-  const field = session.fields[session.currentFieldIndex];
-  if (field.type === 'long_text') {
+  const field = session.fields?.[session.currentFieldIndex];
+  if (field?.type === 'long_text') {
     // Go to rewrite screen
     document.getElementById('rewrite-original').textContent = transcript;
     document.getElementById('rewrite-result').textContent = '';
@@ -2500,8 +2500,8 @@ function useManualAnswer() {
   if (!val) { alert('Please enter an answer.'); return; }
   currentTranscript = val;
   document.getElementById('transcript-display').textContent = val;
-  const field = session.fields[session.currentFieldIndex];
-  if (field.type === 'long_text') {
+  const field = session.fields?.[session.currentFieldIndex];
+  if (field?.type === 'long_text') {
     document.getElementById('rewrite-original').textContent = val;
     document.getElementById('rewrite-result').textContent = '';
     document.getElementById('rewrite-loading').style.display = 'block';
@@ -2510,6 +2510,7 @@ function useManualAnswer() {
   } else {
     saveCurrentAnswer(val);
     advanceField();
+    document.getElementById('voice-manual-input').value = '';
   }
 }
 
@@ -2553,7 +2554,7 @@ async function callRewriteAPI(transcript, tone) {
     });
     if (!resp.ok) throw new Error('API error');
     const data = await resp.json();
-    document.getElementById('rewrite-result').textContent = data.content[0].text.trim();
+    document.getElementById('rewrite-result').textContent = data.content?.[0]?.text?.trim() || transcript;
   } catch {
     document.getElementById('rewrite-result').textContent = transcript;
   } finally {
