@@ -861,6 +861,18 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       </button>
     </div>
   </div>
+  <div id="pattern-alert-banner" style="display:none;margin-bottom:16px;background:#FCEBEB;border:1px solid #F5C6C6;border-radius:var(--radius-md);padding:12px 14px;">
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <svg width="18" height="18" fill="none" stroke="#A32D2D" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:13px;color:#A32D2D;" id="pattern-alert-title">Pattern detected</div>
+        <div style="font-size:12px;color:#7A2222;margin-top:2px;" id="pattern-alert-body"></div>
+      </div>
+      <button onclick="dismissPatternAlert()" style="background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;">
+        <svg width="14" height="14" fill="none" stroke="#A32D2D" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
   <p id="welcome-greeting" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px;">Good morning!</p>
   <button class="action-card card-amber" onclick="showScreen('screen-scan')">
     <div class="action-card-icon" style="background:rgba(0,0,0,0.1);">
@@ -884,6 +896,10 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       My history
     </button>
+  </div>
+  <div id="draft-saved-toast" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--color-bg-secondary);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:10px 16px;font-size:13px;font-weight:600;color:var(--color-text-muted);z-index:999;box-shadow:0 4px 16px rgba(0,0,0,0.12);display:none;align-items:center;gap:8px;white-space:nowrap;">
+    <svg width="14" height="14" fill="none" stroke="var(--color-success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    Draft saved
   </div>
   <div id="install-banner" style="display:none;" class="install-banner">
     <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -949,6 +965,12 @@ textarea.input-field { min-height: 100px; resize: vertical; }
   <input id="scan-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleScanFile(event)">
   <input id="scan-file" type="file" accept="image/*,application/pdf,.docx,.doc" style="display:none;" onchange="handleScanFile(event)">
   <div id="scan-preview" style="display:none;margin-top:20px;">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+      <button onclick="retakeScan()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--color-text-muted);display:flex;align-items:center;gap:4px;padding:4px 0;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Retake / change
+      </button>
+    </div>
     <img id="scan-preview-img" style="width:100%;border-radius:var(--radius-md);" alt="Form preview">
     <div id="scan-loading" style="text-align:center;padding:24px;">
       <div class="spinner"></div>
@@ -1394,6 +1416,17 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <input id="pdf-password-input" type="password" class="input-field" placeholder="Set a password for this PDF" autocomplete="new-password">
     <p class="input-helper">Share this password separately with the recipient.</p>
   </div>
+  <!-- Google Drive setup banner (shown when Client ID not configured) -->
+  <div id="gdrive-setup-banner" style="display:none;background:#E6F1FB;border:1px solid #B3D4F0;border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px;align-items:flex-start;gap:10px;">
+    <svg width="18" height="18" fill="none" stroke="#185FA5" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div style="flex:1;font-size:12px;color:#185FA5;">
+      <div style="font-weight:700;margin-bottom:2px;">Google Drive not configured</div>
+      <div>Add your Google OAuth Client ID to <code>GOOGLE_CLIENT_ID</code> in <code>app.html</code>. Enable the Drive API at <strong>console.cloud.google.com</strong> and add your Vercel domain as an authorized origin.</div>
+    </div>
+    <button onclick="document.getElementById('gdrive-setup-banner').style.display='none'" style="background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;">
+      <svg width="14" height="14" fill="none" stroke="#185FA5" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
   <!-- Google Drive -->
   <button class="btn btn-outline mb-12" onclick="shareToGoogleDrive()">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 19h20L12 2z"/><path d="M12 2L6 19M12 2l6 17"/></svg>
@@ -1780,6 +1813,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button class="btn btn-outline btn-sm" style="flex:1;" onclick="reEmailFromHistory()">Re-email</button>
       <button class="btn btn-outline btn-sm" style="flex:1;" onclick="window.print()">Re-print</button>
+      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="exportHistoryItem()">Export</button>
     </div>
   </div>
 </div>
@@ -2055,6 +2089,30 @@ function initWelcome() {
   } else {
     banner.style.display = 'none';
   }
+
+  checkPatternAlerts();
+}
+
+function checkPatternAlerts() {
+  const dismissed = sessionStorage.getItem('tio_pattern_dismissed');
+  if (dismissed) return;
+  const history = getHistory();
+  if (history.length < 3) return;
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const recent = history.filter(h => new Date(h.timestamp).getTime() > thirtyDaysAgo);
+  // Count form types
+  const counts = {};
+  recent.forEach(h => { if (h.formType) counts[h.formType] = (counts[h.formType] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  if (!top || top[1] < 3) return;
+  document.getElementById('pattern-alert-title').textContent = 'Recurring pattern detected';
+  document.getElementById('pattern-alert-body').textContent = `You've filed ${top[1]} "${top[0]}" forms in the last 30 days. Consider filing a formal grievance or escalating to your union rep.`;
+  document.getElementById('pattern-alert-banner').style.display = 'block';
+}
+
+function dismissPatternAlert() {
+  sessionStorage.setItem('tio_pattern_dismissed', '1');
+  document.getElementById('pattern-alert-banner').style.display = 'none';
 }
 
 function resumeDraft() {
@@ -2242,6 +2300,19 @@ function proceedWithFilteredScan() {
   processScannedImage(filteredScanBase64, 'image/jpeg');
 }
 
+function retakeScan() {
+  document.getElementById('scan-preview').style.display = 'none';
+  document.getElementById('scan-filter-tray').style.display = 'none';
+  document.getElementById('scan-loading').style.display = 'none';
+  const placeholder = document.getElementById('scan-doc-placeholder');
+  if (placeholder) placeholder.style.display = 'none';
+  rawScanBase64 = null; filteredScanBase64 = null;
+  // Re-trigger file picker
+  document.getElementById('scan-file').value = '';
+  document.getElementById('scan-camera').value = '';
+  document.getElementById('scan-file').click();
+}
+
 // ===== SCAN =====
 function showDocPlaceholder(filename) {
   document.getElementById('scan-preview').style.display = 'block';
@@ -2371,6 +2442,16 @@ async function loadJsPDF() {
   await new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function loadPdfLib() {
+  if (window.PDFLib) return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';
     s.onload = resolve; s.onerror = reject;
     document.head.appendChild(s);
   });
@@ -2774,6 +2855,7 @@ function goToFieldsDone() {
   document.getElementById('done-rewrites-count').textContent = session.rewriteCount || 0;
   document.getElementById('done-time').textContent = `${mins}:${String(secs).padStart(2,'0')}`;
   showScreen('screen-fields-done');
+  syncBundleLabel();
 }
 
 function setInputTab(tab) {
@@ -3124,19 +3206,24 @@ function renderApprove() {
 }
 
 
-let sessionBundle = [];
+function getSessionBundle() {
+  try { return JSON.parse(sessionStorage.getItem('tio_bundle') || '[]'); } catch { return []; }
+}
+function setSessionBundle(b) { sessionStorage.setItem('tio_bundle', JSON.stringify(b)); }
 
 function addFormToBundle() {
   if (session.formType && session.fields && session.fields.length > 0) {
-    sessionBundle.push({
+    const bundle = getSessionBundle();
+    bundle.push({
       formType: session.formType,
       fields: [...session.fields],
       answers: [...(session.answers || [])],
       refNumber: session.refNumber
     });
+    setSessionBundle(bundle);
     const label = document.getElementById('bundle-count-label');
     label.style.display = 'block';
-    label.textContent = sessionBundle.length + ' form' + (sessionBundle.length !== 1 ? 's' : '') + ' in this package';
+    label.textContent = bundle.length + ' form' + (bundle.length !== 1 ? 's' : '') + ' in this package';
   }
   session.fields = [];
   session.answers = [];
@@ -3144,6 +3231,18 @@ function addFormToBundle() {
   session.currentFieldIndex = 0;
   session.refNumber = generateRef();
   showScreen('screen-scan');
+}
+
+function syncBundleLabel() {
+  const bundle = getSessionBundle();
+  const label = document.getElementById('bundle-count-label');
+  if (!label) return;
+  if (bundle.length > 0) {
+    label.style.display = 'block';
+    label.textContent = bundle.length + ' form' + (bundle.length !== 1 ? 's' : '') + ' in this package';
+  } else {
+    label.style.display = 'none';
+  }
 }
 
 function submitApproval() {
@@ -3159,9 +3258,10 @@ function submitApproval() {
     confidential: session.confidential,
     status: 'sent'
   };
-  if (sessionBundle.length > 0) {
-    record.bundledForms = sessionBundle.map(b => ({ formType: b.formType, refNumber: b.refNumber }));
-    sessionBundle = [];
+  const bundle = getSessionBundle();
+  if (bundle.length > 0) {
+    record.bundledForms = bundle.map(b => ({ formType: b.formType, refNumber: b.refNumber }));
+    setSessionBundle([]);
   }
   const history = getHistory();
   history.unshift(record);
@@ -3172,6 +3272,7 @@ function submitApproval() {
   const newDrafts = drafts.filter(d => d.refNumber !== session.refNumber);
   setLS('tio_drafts', newDrafts);
 
+  sendLocalNotification('Form submitted', `${session.formType} — ${session.refNumber} has been approved and saved.`);
   showScreen('screen-output');
 }
 
@@ -3286,6 +3387,10 @@ td{padding:10px;border-bottom:1px solid #eee;}td:first-child{font-weight:600;col
   }
 
   if (format === 'pdf') {
+    const pw = document.getElementById('pdf-lock-toggle') && document.getElementById('pdf-lock-toggle').classList.contains('on')
+      ? (document.getElementById('pdf-password-input').value || null) : null;
+
+    // Build PDF with jsPDF first, then optionally encrypt with pdf-lib
     await loadJsPDF();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
@@ -3312,14 +3417,36 @@ td{padding:10px;border-bottom:1px solid #eee;}td:first-child{font-weight:600;col
       if (y > 640) { doc.addPage(); y = margin; }
       try { doc.addImage(session.signature, 'PNG', margin, y, 150, 50); y += 60; } catch(e) {}
     }
-    const pw = document.getElementById('pdf-password-input') && document.getElementById('pdf-lock-toggle').classList.contains('on')
-      ? document.getElementById('pdf-password-input').value : null;
-    if (pw) {
-      doc.setFontSize(8); doc.setTextColor(180);
-      doc.text(`[Password protected — share password separately]`, margin, y + 34);
-    }
     doc.setFontSize(8); doc.setTextColor(150);
     doc.text(`Talk It Out   |   ${session.refNumber}   |   ${new Date().toLocaleString()}`, margin, y + 20);
+
+    if (pw) {
+      // Real AES-128 encryption via pdf-lib
+      try {
+        await loadPdfLib();
+        const rawBytes = doc.output('arraybuffer');
+        const pdfDoc = await PDFLib.PDFDocument.load(rawBytes);
+        const encryptedBytes = await pdfDoc.save({
+          userPassword: pw,
+          ownerPassword: pw + '_owner',
+          permissions: {
+            printing: 'lowResolution',
+            copying: false,
+            modifying: false,
+            annotating: false,
+            fillingForms: false,
+            contentAccessibility: true,
+            documentAssembly: false
+          }
+        });
+        const blob = new Blob([encryptedBytes], { type: 'application/pdf' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = filename + '.pdf'; a.click(); URL.revokeObjectURL(a.href);
+        return;
+      } catch(e) {
+        console.warn('pdf-lib encryption failed, falling back to unencrypted:', e);
+      }
+    }
     doc.save(filename + '.pdf');
     return;
   }
@@ -3346,12 +3473,132 @@ function togglePdfLock(btn) {
   document.getElementById('pdf-password-row').style.display = btn.classList.contains('on') ? 'block' : 'none';
 }
 
-function shareToGoogleDrive() {
-  alert('To save to Google Drive: export the file first using Save / Export, then upload it to drive.google.com');
+// Replace GOOGLE_CLIENT_ID with your OAuth 2.0 client ID from console.cloud.google.com
+// Enable the Google Drive API and add https://talk-it-out-two.vercel.app as an authorized origin.
+const GOOGLE_CLIENT_ID = '';
+
+async function shareToGoogleDrive() {
+  if (!GOOGLE_CLIENT_ID) {
+    // Show setup banner instead of dead alert
+    const banner = document.getElementById('gdrive-setup-banner');
+    if (banner) { banner.style.display = 'flex'; return; }
+    alert('Google Drive not configured yet. Ask your administrator to add the Google Client ID.');
+    return;
+  }
+  try {
+    const token = await getGoogleToken();
+    await loadJsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+    const margin = 60; let y = margin;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
+    doc.text(session.formType || 'Workplace Form', margin, y); y += 28;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.setTextColor(120); doc.text(`Ref: ${session.refNumber}   |   ${new Date().toLocaleString()}`, margin, y); y += 24;
+    doc.setTextColor(0);
+    if (session.fields) {
+      session.fields.forEach((f, i) => {
+        if (y > 720) { doc.addPage(); y = margin; }
+        const ans = session.answers && session.answers[i];
+        const val = ans ? ans.value : '—';
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100);
+        doc.text(f.name.toUpperCase(), margin, y); y += 14;
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
+        const lines = doc.splitTextToSize(val, 480);
+        lines.forEach(line => { if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15; });
+        y += 8;
+      });
+    }
+    const pdfBlob = doc.output('blob');
+    const filename = `${session.refNumber}-${(session.formType || 'form').replace(/\s+/g, '-')}.pdf`;
+    // Upload to Drive
+    const meta = new Blob([JSON.stringify({ name: filename, mimeType: 'application/pdf' })], { type: 'application/json' });
+    const form = new FormData();
+    form.append('metadata', meta);
+    form.append('file', pdfBlob);
+    const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      alert(`Saved to Google Drive: ${filename}`);
+    } else {
+      throw new Error('Drive upload failed: ' + resp.status);
+    }
+  } catch(e) {
+    alert('Google Drive upload failed: ' + e.message);
+  }
 }
 
-function shareViaWhatsApp() {
+let _googleToken = null;
+function getGoogleToken() {
+  return new Promise((resolve, reject) => {
+    if (_googleToken) { resolve(_googleToken); return; }
+    if (!window.google) {
+      const s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.onload = () => initGoogleToken(resolve, reject);
+      s.onerror = () => reject(new Error('Failed to load Google Identity Services'));
+      document.head.appendChild(s);
+    } else {
+      initGoogleToken(resolve, reject);
+    }
+  });
+}
+
+function initGoogleToken(resolve, reject) {
+  try {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: (resp) => {
+        if (resp.error) { reject(new Error(resp.error)); return; }
+        _googleToken = resp.access_token;
+        resolve(_googleToken);
+      }
+    });
+    client.requestAccessToken();
+  } catch(e) { reject(e); }
+}
+
+async function shareViaWhatsApp() {
   const text = `Workplace Documentation\nForm: ${session.formType}\nRef: ${session.refNumber}\nDate: ${new Date().toLocaleString()}\n\nFiled via Talk It Out.`;
+  // Try Web Share API with file (supported on Android Chrome, iOS Safari 15+)
+  if (navigator.canShare) {
+    try {
+      await loadJsPDF();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+      const margin = 60; let y = margin;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
+      doc.text(session.formType || 'Workplace Form', margin, y); y += 28;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      doc.setTextColor(120); doc.text(`Ref: ${session.refNumber}   |   ${new Date().toLocaleString()}`, margin, y); y += 24;
+      doc.setTextColor(0);
+      if (session.fields) {
+        session.fields.forEach((f, i) => {
+          if (y > 720) { doc.addPage(); y = margin; }
+          const ans = session.answers && session.answers[i];
+          const val = ans ? ans.value : '—';
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100);
+          doc.text(f.name.toUpperCase(), margin, y); y += 14;
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
+          const lines = doc.splitTextToSize(val, 480);
+          lines.forEach(line => { if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15; });
+          y += 8;
+        });
+      }
+      const pdfBlob = doc.output('blob');
+      const file = new File([pdfBlob], `${session.refNumber}.pdf`, { type: 'application/pdf' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: session.formType, text });
+        return;
+      }
+    } catch(e) { console.log('File share failed, falling back:', e); }
+  }
+  // Fallback: open WhatsApp with text
   window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
 }
 
@@ -3442,6 +3689,48 @@ function reEmailFromHistory() {
   showScreen('screen-output');
 }
 
+async function exportHistoryItem() {
+  const history = getHistory();
+  const h = history[currentHistoryIndex];
+  if (!h) return;
+  closeModal('history-detail-modal');
+  // Temporarily load history record into session for exportAs
+  const prev = { ...session };
+  session.formType = h.formType;
+  session.refNumber = h.refNumber;
+  session.fields = h.fields;
+  session.answers = h.answers;
+  session.signature = h.signature;
+  await loadJsPDF();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const margin = 60; let y = margin;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
+  doc.text(h.formType || 'Workplace Form', margin, y); y += 28;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+  doc.setTextColor(120); doc.text(`Ref: ${h.refNumber}   |   ${new Date(h.timestamp).toLocaleString()}`, margin, y); y += 24;
+  doc.setTextColor(0);
+  if (h.fields) {
+    h.fields.forEach((f, i) => {
+      if (y > 720) { doc.addPage(); y = margin; }
+      const ans = h.answers && h.answers[i];
+      const val = ans ? ans.value : '—';
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100);
+      doc.text(f.name.toUpperCase(), margin, y); y += 14;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
+      const lines = doc.splitTextToSize(val, 480);
+      lines.forEach(line => { if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15; });
+      y += 8;
+    });
+  }
+  if (h.signature) { try { doc.addImage(h.signature, 'PNG', margin, y, 150, 50); y += 60; } catch(e) {} }
+  doc.setFontSize(8); doc.setTextColor(150);
+  doc.text(`Talk It Out   |   ${h.refNumber}   |   ${new Date(h.timestamp).toLocaleString()}`, margin, y + 20);
+  doc.save(`${h.refNumber}-${(h.formType || 'form').replace(/\s+/g, '-')}.pdf`);
+  // Restore session
+  Object.assign(session, prev);
+}
+
 function closeModal(id) {
   document.getElementById(id).classList.remove('active');
 }
@@ -3498,6 +3787,15 @@ function autoSaveDraft() {
   if (idx >= 0) drafts[idx] = draftData;
   else drafts.unshift(draftData);
   setLS('tio_drafts', drafts);
+  showDraftToast();
+}
+
+function showDraftToast() {
+  const toast = document.getElementById('draft-saved-toast');
+  if (!toast) return;
+  toast.style.display = 'flex';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 2500);
 }
 
 // ===== FORM LIBRARY =====
@@ -3703,9 +4001,37 @@ function toggleDarkMode(btn) {
 
 function toggleSetting(btn, key) {
   btn.classList.toggle('on');
+  const on = btn.classList.contains('on');
   const settings = getSettings();
-  settings[key] = btn.classList.contains('on');
+  settings[key] = on;
   setSettings(settings);
+  if (key === 'notifsPush') {
+    if (on) requestNotificationPermission(btn);
+    else settings.notifsPush = false, setSettings(settings);
+  }
+}
+
+async function requestNotificationPermission(btn) {
+  if (!('Notification' in window)) {
+    alert('Your browser does not support notifications.');
+    btn.classList.remove('on');
+    const settings = getSettings(); settings.notifsPush = false; setSettings(settings);
+    return;
+  }
+  if (Notification.permission === 'granted') return;
+  const result = await Notification.requestPermission();
+  if (result !== 'granted') {
+    btn.classList.remove('on');
+    const settings = getSettings(); settings.notifsPush = false; setSettings(settings);
+    alert('Notification permission denied. Enable it in your browser settings.');
+  }
+}
+
+function sendLocalNotification(title, body) {
+  const settings = getSettings();
+  if (!settings.notifsPush) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try { new Notification(title, { body, icon: '/icon-192.png', badge: '/icon-192.png' }); } catch(e) {}
 }
 
 function toggleAutoCopy(btn) {
