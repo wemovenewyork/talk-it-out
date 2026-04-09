@@ -955,6 +955,17 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       <p class="text-muted mt-12">Reading your form…</p>
     </div>
   </div>
+  <div id="scan-filter-tray" style="display:none;margin-top:12px;">
+    <p style="font-size:12px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Enhance scan</p>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">
+      <button class="chip active" id="filter-original" onclick="applyFilter('original',this)">Original</button>
+      <button class="chip" id="filter-noshadow" onclick="applyFilter('noshadow',this)">No Shadow</button>
+      <button class="chip" id="filter-lighten" onclick="applyFilter('lighten',this)">Lighten</button>
+      <button class="chip" id="filter-bw" onclick="applyFilter('bw',this)">Black &amp; White</button>
+      <button class="chip" id="filter-magic" onclick="applyFilter('magic',this)">Magic Color</button>
+    </div>
+    <button class="btn btn-amber mt-12" id="scan-proceed-btn" onclick="proceedWithFilteredScan()">Read this form</button>
+  </div>
 </div>
 
 <!-- SCREEN: confirm-type -->
@@ -1144,6 +1155,11 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <p style="font-size:12px;font-weight:600;color:var(--color-amber-dark);text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 8px;">Next: Review &amp; Approve</p>
     <button class="btn btn-amber" onclick="showScreen('screen-preview')">Preview &amp; Approve</button>
     <button class="btn btn-outline mt-8" onclick="showScreen('screen-review')">Review answers first</button>
+    <button class="btn btn-outline mt-8" onclick="addFormToBundle()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add another form to this package
+    </button>
+    <div id="bundle-count-label" style="display:none;font-size:12px;color:var(--color-amber-dark);font-weight:600;text-align:center;margin-top:8px;"></div>
   </div>
 </div>
 
@@ -1361,15 +1377,42 @@ textarea.input-field { min-height: 100px; resize: vertical; }
       Download scanned PDF
     </button>
   </div>
+  <!-- Save / Export -->
+  <button class="btn btn-outline mb-12" onclick="openExportModal()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    Save / Export
+  </button>
+  <!-- PDF Lock -->
+  <div id="pdf-lock-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--color-border);margin-bottom:12px;">
+    <div>
+      <div style="font-weight:600;font-size:14px;">Lock PDF with password</div>
+      <div style="font-size:12px;color:var(--color-text-muted);">Recipient needs password to open</div>
+    </div>
+    <button class="toggle" id="pdf-lock-toggle" onclick="togglePdfLock(this)"></button>
+  </div>
+  <div id="pdf-password-row" style="display:none;margin-bottom:12px;">
+    <input id="pdf-password-input" type="password" class="input-field" placeholder="Set a password for this PDF" autocomplete="new-password">
+    <p class="input-helper">Share this password separately with the recipient.</p>
+  </div>
+  <!-- Google Drive -->
+  <button class="btn btn-outline mb-12" onclick="shareToGoogleDrive()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 19h20L12 2z"/><path d="M12 2L6 19M12 2l6 17"/></svg>
+    Save to Google Drive
+  </button>
+  <!-- WhatsApp -->
+  <button class="btn btn-outline mb-12" onclick="shareViaWhatsApp()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+    Share via WhatsApp
+  </button>
+  <!-- Native share -->
+  <button class="btn btn-outline mb-12" id="native-share-btn" style="display:none;" onclick="nativeShare()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Share
+  </button>
   <!-- Print -->
-  <button class="btn btn-outline mb-12" onclick="window.print()">
+  <button class="btn btn-outline mb-24" onclick="window.print()">
     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
     Print
-  </button>
-  <!-- Save -->
-  <button class="btn btn-outline mb-24" onclick="saveDocument()">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-    Save document
   </button>
   <div style="text-align:center;">
     <button class="btn-ghost" onclick="fileAnotherForm()">File another form</button>
@@ -1754,6 +1797,18 @@ textarea.input-field { min-height: 100px; resize: vertical; }
   </div>
 </div>
 
+<div class="modal-overlay" id="export-format-modal">
+  <div class="modal-panel">
+    <div class="flex-between mb-16">
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">Export document</h3>
+      <button onclick="closeModal('export-format-modal')" style="background:none;border:none;cursor:pointer;padding:4px;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="export-format-list"></div>
+  </div>
+</div>
+
 <script>
 // Error handler in its own block so it survives syntax errors in the main script
 window.onerror = function(msg, src, line, col, err) {
@@ -1871,6 +1926,10 @@ window.addEventListener('load', () => {
     setupOrgCodeInputs();
     setupPWAInstall();
     setupNetworkListener();
+    if (navigator.share) {
+      const btn = document.getElementById('native-share-btn');
+      if (btn) btn.style.display = 'flex';
+    }
   } catch(e) {
     // Fallback: make sure auth screen is visible if anything fails
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -2041,12 +2100,17 @@ function handleWelcomeUpload(e) {
   } else {
     reader.onload = async (ev) => {
       const base64 = ev.target.result.split(',')[1];
+      document.getElementById('scan-preview').style.display = 'block';
+      document.getElementById('scan-preview-img').src = ev.target.result;
+      document.getElementById('scan-preview-img').style.display = 'block';
+      document.getElementById('scan-loading').style.display = 'none';
       try {
         const { enhancedBase64, pdfDataUri } = await photoToScannedPDF(base64, file.type);
         session.scannedPdfUri = pdfDataUri;
-        processScannedImage(enhancedBase64, 'image/jpeg');
+        document.getElementById('scan-preview-img').src = 'data:image/jpeg;base64,' + enhancedBase64;
+        showFilterTray(enhancedBase64, 'image/jpeg');
       } catch {
-        processScannedImage(base64, file.type);
+        showFilterTray(base64, file.type);
       }
     };
     reader.readAsDataURL(file);
@@ -2117,6 +2181,67 @@ function doneQuickPhoto() {
   showScreen('screen-welcome');
 }
 
+// ===== SCAN FILTERS =====
+let rawScanBase64 = null;
+let filteredScanBase64 = null;
+let rawScanMime = 'image/jpeg';
+
+function showFilterTray(base64, mime) {
+  rawScanBase64 = base64;
+  filteredScanBase64 = base64;
+  rawScanMime = mime || 'image/jpeg';
+  document.querySelectorAll('#scan-filter-tray .chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('filter-original').classList.add('active');
+  document.getElementById('scan-filter-tray').style.display = 'block';
+  document.getElementById('scan-loading').style.display = 'none';
+}
+
+function applyFilter(filter, btn) {
+  document.querySelectorAll('#scan-filter-tray .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      let r = d[i], g = d[i+1], b = d[i+2];
+      if (filter === 'noshadow') {
+        const gray = 0.299*r + 0.587*g + 0.114*b;
+        const v = Math.min(255, (gray - 128) * 1.5 + 160);
+        d[i] = d[i+1] = d[i+2] = v;
+      } else if (filter === 'lighten') {
+        d[i] = Math.min(255, r + 40);
+        d[i+1] = Math.min(255, g + 40);
+        d[i+2] = Math.min(255, b + 40);
+      } else if (filter === 'bw') {
+        const gray = 0.299*r + 0.587*g + 0.114*b;
+        const v = gray > 128 ? 255 : 0;
+        d[i] = d[i+1] = d[i+2] = v;
+      } else if (filter === 'magic') {
+        const avg = (r + g + b) / 3;
+        d[i] = Math.min(255, Math.max(0, avg + (r - avg) * 1.6));
+        d[i+1] = Math.min(255, Math.max(0, avg + (g - avg) * 1.6));
+        d[i+2] = Math.min(255, Math.max(0, avg + (b - avg) * 1.6));
+      }
+      // 'original' — no change
+    }
+    ctx.putImageData(imageData, 0, 0);
+    filteredScanBase64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+    document.getElementById('scan-preview-img').src = canvas.toDataURL('image/jpeg', 0.92);
+  };
+  img.src = `data:${rawScanMime};base64,` + rawScanBase64;
+}
+
+function proceedWithFilteredScan() {
+  document.getElementById('scan-filter-tray').style.display = 'none';
+  document.getElementById('scan-loading').style.display = 'block';
+  processScannedImage(filteredScanBase64, 'image/jpeg');
+}
+
 // ===== SCAN =====
 function showDocPlaceholder(filename) {
   document.getElementById('scan-preview').style.display = 'block';
@@ -2161,14 +2286,14 @@ function handleScanFile(e) {
       document.getElementById('scan-preview').style.display = 'block';
       document.getElementById('scan-preview-img').src = ev.target.result;
       document.getElementById('scan-preview-img').style.display = 'block';
-      document.getElementById('scan-loading').style.display = 'block';
+      document.getElementById('scan-loading').style.display = 'none';
       try {
         const { enhancedBase64, pdfDataUri } = await photoToScannedPDF(base64, file.type);
         session.scannedPdfUri = pdfDataUri;
         document.getElementById('scan-preview-img').src = 'data:image/jpeg;base64,' + enhancedBase64;
-        processScannedImage(enhancedBase64, 'image/jpeg');
+        showFilterTray(enhancedBase64, 'image/jpeg');
       } catch {
-        processScannedImage(base64, file.type);
+        showFilterTray(base64, file.type);
       }
     };
     reader.readAsDataURL(file);
@@ -2996,10 +3121,30 @@ function renderApprove() {
   document.getElementById('approve-fields').textContent = `${session.answers ? session.answers.filter(a => a && a.value).length : 0} of ${session.fields ? session.fields.length : 0}`;
   document.getElementById('approve-name').textContent = user.name || user.email || '—';
   document.getElementById('approve-timestamp').textContent = new Date().toLocaleString();
-  document.getElementById('approve-checkbox').checked = false;
-  updateApproveButton();
 }
 
+
+let sessionBundle = [];
+
+function addFormToBundle() {
+  if (session.formType && session.fields && session.fields.length > 0) {
+    sessionBundle.push({
+      formType: session.formType,
+      fields: [...session.fields],
+      answers: [...(session.answers || [])],
+      refNumber: session.refNumber
+    });
+    const label = document.getElementById('bundle-count-label');
+    label.style.display = 'block';
+    label.textContent = sessionBundle.length + ' form' + (sessionBundle.length !== 1 ? 's' : '') + ' in this package';
+  }
+  session.fields = [];
+  session.answers = [];
+  session.formType = '';
+  session.currentFieldIndex = 0;
+  session.refNumber = generateRef();
+  showScreen('screen-scan');
+}
 
 function submitApproval() {
   const user = getUser();
@@ -3014,6 +3159,10 @@ function submitApproval() {
     confidential: session.confidential,
     status: 'sent'
   };
+  if (sessionBundle.length > 0) {
+    record.bundledForms = sessionBundle.map(b => ({ formType: b.formType, refNumber: b.refNumber }));
+    sessionBundle = [];
+  }
   const history = getHistory();
   history.unshift(record);
   setLS('tio_history', history);
@@ -3080,33 +3229,140 @@ function sendEmail() {
   document.getElementById('output-email-confirm').style.display = 'flex';
 }
 
-function saveDocument() {
-  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${session.formType} — ${session.refNumber}</title>
+function openExportModal() {
+  const formats = [
+    { label: 'PDF', ext: 'pdf', icon: '📄', desc: 'Best for printing and filing' },
+    { label: 'Word (.docx)', ext: 'docx', icon: '📝', desc: 'Edit in Microsoft Word or Google Docs' },
+    { label: 'Plain Text', ext: 'txt', icon: '🗒️', desc: 'Simple text file' },
+    { label: 'HTML', ext: 'html', icon: '🌐', desc: 'Open in any browser' }
+  ];
+  document.getElementById('export-format-list').innerHTML = formats.map(f => `
+    <button onclick="exportAs('${f.ext}')" style="width:100%;text-align:left;background:var(--color-bg-secondary);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color 200ms ease;" onmouseover="this.style.borderColor='var(--color-amber)'" onmouseout="this.style.borderColor='var(--color-border)'">
+      <span style="font-size:24px;">${f.icon}</span>
+      <div>
+        <div style="font-weight:700;font-size:15px;">${f.label}</div>
+        <div style="font-size:12px;color:var(--color-text-muted);">${f.desc}</div>
+      </div>
+    </button>
+  `).join('');
+  document.getElementById('export-format-modal').classList.add('active');
+}
+
+async function exportAs(format) {
+  closeModal('export-format-modal');
+  const filename = (session.refNumber || 'form') + '-' + (session.formType || 'document').replace(/\s+/g, '-');
+
+  if (format === 'txt') {
+    let text = `${session.formType}\nRef: ${session.refNumber}\n${new Date().toLocaleString()}\n\n`;
+    if (session.fields) session.fields.forEach((f, i) => {
+      const ans = session.answers && session.answers[i];
+      text += `${f.name}: ${ans ? ans.value : '—'}\n`;
+    });
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = filename + '.txt'; a.click(); URL.revokeObjectURL(a.href);
+    return;
+  }
+
+  if (format === 'html') {
+    let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${session.formType} — ${session.refNumber}</title>
 <style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;}
 h1{font-size:22px;}table{width:100%;border-collapse:collapse;margin:20px 0;}
 td{padding:10px;border-bottom:1px solid #eee;}td:first-child{font-weight:600;color:#666;width:35%;}
 .footer{margin-top:30px;font-size:12px;color:#999;border-top:1px solid #eee;padding-top:12px;}
 </style></head><body>
 <h1>${session.formType}</h1>
-<p style="color:#666;">Ref: ${session.refNumber} &nbsp;|&nbsp; ${new Date().toLocaleString()}</p>
-<table>`;
-  if (session.fields) {
-    session.fields.forEach((f, i) => {
+<p style="color:#666;">Ref: ${session.refNumber} | ${new Date().toLocaleString()}</p><table>`;
+    if (session.fields) session.fields.forEach((f, i) => {
       const ans = session.answers && session.answers[i];
       html += `<tr><td>${f.name}</td><td>${ans ? ans.value : '—'}</td></tr>`;
     });
+    html += `</table>${session.signature ? `<p>Signature:</p><img src="${session.signature}" style="max-width:200px;">` : ''}
+<div class="footer">Talk It Out | ${session.refNumber} | ${new Date().toLocaleString()}</div></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = filename + '.html'; a.click(); URL.revokeObjectURL(a.href);
+    return;
   }
-  html += `</table>`;
-  if (session.signature) html += `<p>Signature:</p><img src="${session.signature}" style="max-width:200px;border:1px solid #eee;">`;
-  html += `<div class="footer">Talk It Out &nbsp;|&nbsp; ${session.refNumber} &nbsp;|&nbsp; ${new Date().toLocaleString()}</div>
-</body></html>`;
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `TIO-${session.refNumber}-${(session.formType || 'form').replace(/\s+/g, '-')}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+
+  if (format === 'pdf') {
+    await loadJsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+    const margin = 60; let y = margin;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
+    doc.text(session.formType || 'Workplace Form', margin, y); y += 28;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.setTextColor(120); doc.text(`Ref: ${session.refNumber}   |   ${new Date().toLocaleString()}`, margin, y); y += 24;
+    doc.setTextColor(0);
+    if (session.fields) {
+      session.fields.forEach((f, i) => {
+        if (y > 720) { doc.addPage(); y = margin; }
+        const ans = session.answers && session.answers[i];
+        const val = ans ? ans.value : '—';
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100);
+        doc.text(f.name.toUpperCase(), margin, y); y += 14;
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
+        const lines = doc.splitTextToSize(val, 480);
+        lines.forEach(line => { if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15; });
+        y += 8;
+      });
+    }
+    if (session.signature) {
+      if (y > 640) { doc.addPage(); y = margin; }
+      try { doc.addImage(session.signature, 'PNG', margin, y, 150, 50); y += 60; } catch(e) {}
+    }
+    const pw = document.getElementById('pdf-password-input') && document.getElementById('pdf-lock-toggle').classList.contains('on')
+      ? document.getElementById('pdf-password-input').value : null;
+    if (pw) {
+      doc.setFontSize(8); doc.setTextColor(180);
+      doc.text(`[Password protected — share password separately]`, margin, y + 34);
+    }
+    doc.setFontSize(8); doc.setTextColor(150);
+    doc.text(`Talk It Out   |   ${session.refNumber}   |   ${new Date().toLocaleString()}`, margin, y + 20);
+    doc.save(filename + '.pdf');
+    return;
+  }
+
+  if (format === 'docx') {
+    let rtf = `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Helvetica;}}{\\colortbl ;\\red15\\green26\\blue36;\\red107\\green114\\blue128;}
+\\f0\\fs28\\b ${session.formType || 'Workplace Form'}\\b0\\fs20\\par
+\\cf2\\fs18 Ref: ${session.refNumber} | ${new Date().toLocaleString()}\\cf1\\par\\par`;
+    if (session.fields) session.fields.forEach((f, i) => {
+      const ans = session.answers && session.answers[i];
+      const val = (ans ? ans.value : '—').replace(/[\\{}]/g, '\\$&');
+      rtf += `\\b\\fs18 ${f.name.toUpperCase()}\\b0\\par\\fs20 ${val}\\par\\par`;
+    });
+    rtf += '}';
+    const blob = new Blob([rtf], { type: 'application/msword' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = filename + '.doc'; a.click(); URL.revokeObjectURL(a.href);
+    return;
+  }
+}
+
+function togglePdfLock(btn) {
+  btn.classList.toggle('on');
+  document.getElementById('pdf-password-row').style.display = btn.classList.contains('on') ? 'block' : 'none';
+}
+
+function shareToGoogleDrive() {
+  alert('To save to Google Drive: export the file first using Save / Export, then upload it to drive.google.com');
+}
+
+function shareViaWhatsApp() {
+  const text = `Workplace Documentation\nForm: ${session.formType}\nRef: ${session.refNumber}\nDate: ${new Date().toLocaleString()}\n\nFiled via Talk It Out.`;
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+async function nativeShare() {
+  if (!navigator.share) return;
+  try {
+    await navigator.share({
+      title: `${session.formType} — ${session.refNumber}`,
+      text: `Workplace Documentation\nRef: ${session.refNumber}\nDate: ${new Date().toLocaleString()}`
+    });
+  } catch(e) { console.log('Share cancelled'); }
 }
 
 function fileAnotherForm() {
