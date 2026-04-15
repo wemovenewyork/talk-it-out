@@ -2422,13 +2422,21 @@ let scannerStream = null;
 
 function captureVideoFrame(videoElement) {
   const canvas = document.createElement('canvas');
-  canvas.width = videoElement.videoWidth || videoElement.offsetWidth;
-  canvas.height = videoElement.videoHeight || videoElement.offsetHeight;
+  // Always use native video resolution — never offsetWidth/offsetHeight (display size)
+  canvas.width  = videoElement.videoWidth;
+  canvas.height = videoElement.videoHeight;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
   const dataURL = canvas.toDataURL('image/jpeg', 0.92);
   const base64 = dataURL.split(',')[1];
-  return { canvas, base64, mimeType: 'image/jpeg' };
+
+  // Diagnostic: confirm what we captured vs what the element displays
+  console.log('[Scanner] Video element display size:', videoElement.offsetWidth, 'x', videoElement.offsetHeight);
+  console.log('[Scanner] Video native resolution:',    videoElement.videoWidth,  'x', videoElement.videoHeight);
+  console.log('[Scanner] Canvas capture size:',         canvas.width, 'x', canvas.height);
+  console.log('[Scanner] Base64 image size sent to Claude: approximately', Math.round(base64.length * 0.75 / 1024), 'KB');
+
+  return { canvas, base64, mimeType: 'image/jpeg', captureWidth: canvas.width, captureHeight: canvas.height };
 }
 
 async function detectDocumentEdges(base64, mimeType) {
@@ -2441,6 +2449,39 @@ async function detectDocumentEdges(base64, mimeType) {
   const result = await resp.json();
   console.log('Document detection result:', result);
   return result;
+}
+
+function drawDetectedCorners(corners, scaleX, scaleY) {
+  // scaleX = videoWidth / overlayCanvas.width  (native px per display px)
+  // scaleY = videoHeight / overlayCanvas.height
+  const overlay = document.getElementById('scannerOverlay');
+  const ctx = overlay.getContext('2d');
+
+  // Convert from native-frame coords → display coords
+  const pts = {
+    tl: { x: corners.topLeft.x     / scaleX, y: corners.topLeft.y     / scaleY },
+    tr: { x: corners.topRight.x    / scaleX, y: corners.topRight.y    / scaleY },
+    bl: { x: corners.bottomLeft.x  / scaleX, y: corners.bottomLeft.y  / scaleY },
+    br: { x: corners.bottomRight.x / scaleX, y: corners.bottomRight.y / scaleY }
+  };
+
+  ctx.strokeStyle = '#F59E0B';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(pts.tl.x, pts.tl.y);
+  ctx.lineTo(pts.tr.x, pts.tr.y);
+  ctx.lineTo(pts.br.x, pts.br.y);
+  ctx.lineTo(pts.bl.x, pts.bl.y);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Corner dots
+  Object.values(pts).forEach(function(pt) {
+    ctx.fillStyle = '#F59E0B';
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+  });
 }
 
 function computeHomography(srcPts, dstPts) {
@@ -2753,6 +2794,7 @@ function closeScannerModal() {
 
 async function handleScanButton() {
   const video = document.getElementById('scannerVideo');
+  const overlay = document.getElementById('scannerOverlay');
   const scanBtn = document.getElementById('scanBtn');
   const scanStatus = document.getElementById('scanStatus');
   const processing = document.getElementById('scanProcessing');
@@ -2764,8 +2806,10 @@ async function handleScanButton() {
   processingStep.textContent = 'Detecting document\u2026';
 
   try {
-    const { canvas, base64, mimeType } = captureVideoFrame(video);
+    const { canvas, base64, mimeType, captureWidth, captureHeight } = captureVideoFrame(video);
     const result = await detectDocumentEdges(base64, mimeType);
+
+    console.log('[Scanner] Corners returned by Claude:', JSON.stringify(result.corners || null));
 
     if (!result.found) {
       processing.style.display = 'none';
@@ -2774,10 +2818,47 @@ async function handleScanButton() {
       return;
     }
 
+    // --- Scale Claude corners to match the capture canvas ---
+    // Claude's vision backend may resize images internally before processing.
+    // We decode the base64 to read the exact dimensions Claude actually received,
+    // then scale the returned corners back to the canvas's native coordinate space.
+    const imageSize = await new Promise(function(resolve) {
+      const img = new Image();
+      img.onload = function() { resolve({ w: img.naturalWidth, h: img.naturalHeight }); };
+      img.onerror = function() { resolve({ w: captureWidth, h: captureHeight }); };
+      img.src = 'data:image/jpeg;base64,' + base64;
+    });
+
+    const scaleX = captureWidth  / imageSize.w;
+    const scaleY = captureHeight / imageSize.h;
+
+    console.log('[Scanner] Capture canvas:', captureWidth, 'x', captureHeight);
+    console.log('[Scanner] Decoded image (what Claude sees):', imageSize.w, 'x', imageSize.h);
+    console.log('[Scanner] Scale factors — scaleX:', scaleX.toFixed(4), 'scaleY:', scaleY.toFixed(4));
+
+    const scaledCorners = {
+      topLeft:     { x: result.corners.topLeft.x     * scaleX, y: result.corners.topLeft.y     * scaleY },
+      topRight:    { x: result.corners.topRight.x    * scaleX, y: result.corners.topRight.y    * scaleY },
+      bottomLeft:  { x: result.corners.bottomLeft.x  * scaleX, y: result.corners.bottomLeft.y  * scaleY },
+      bottomRight: { x: result.corners.bottomRight.x * scaleX, y: result.corners.bottomRight.y * scaleY }
+    };
+
+    console.log('[Scanner] Scaled corners (canvas px):', JSON.stringify(scaledCorners));
+
+    // --- Debug overlay: draw detected quad on the live overlay canvas ---
+    // overlayScaleX = how many native video px per overlay display px
+    const overlayScaleX = captureWidth  / overlay.width;
+    const overlayScaleY = captureHeight / overlay.height;
+    processing.style.display = 'none'; // hide briefly so user sees the overlay
+    drawDetectedCorners(scaledCorners, overlayScaleX, overlayScaleY);
+
+    // Show the quad for 1500ms so the worker can see what Claude detected
+    await new Promise(function(r) { setTimeout(r, 1500); });
+    processing.style.display = 'flex';
     processingStep.textContent = 'Correcting perspective\u2026';
-    // yield to let the DOM update
+
     await new Promise(function(r) { setTimeout(r, 30); });
-    const corrected = perspectiveCorrect(canvas, result.corners);
+    const corrected = perspectiveCorrect(canvas, scaledCorners);
 
     processingStep.textContent = 'Enhancing image\u2026';
     await new Promise(function(r) { setTimeout(r, 30); });
@@ -2789,7 +2870,7 @@ async function handleScanButton() {
     await new Promise(function(r) { setTimeout(r, 400); });
     processing.style.display = 'none';
     video.style.display = 'none';
-    document.getElementById('scannerOverlay').style.display = 'none';
+    overlay.style.display = 'none';
 
     const preview = document.getElementById('scanPreview');
     preview.src = corrected.toDataURL('image/jpeg', 0.92);

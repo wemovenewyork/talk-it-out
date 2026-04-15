@@ -41,19 +41,29 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 512,
-        system: `You are a document edge detector. When given an image, find the four corners of the primary document (paper, form, or card) visible in the image. Return ONLY a valid JSON object with no markdown, no explanation, no preamble. The JSON must follow this exact shape:
+        system: `You are a document edge detector. When given an image, find the four outermost corners of the primary flat document (paper form, letter, or card) visible in the image. The document will typically be a white or light-colored rectangle against a darker surface.
+
+Return ONLY a valid JSON object with no markdown, no explanation, no preamble:
 {
   "found": true,
   "corners": {
-    "topLeft": { "x": 0, "y": 0 },
-    "topRight": { "x": 0, "y": 0 },
-    "bottomLeft": { "x": 0, "y": 0 },
+    "topLeft":     { "x": 0, "y": 0 },
+    "topRight":    { "x": 0, "y": 0 },
+    "bottomLeft":  { "x": 0, "y": 0 },
     "bottomRight": { "x": 0, "y": 0 }
   },
   "confidence": "high"
 }
-If no document is clearly visible return: { "found": false }
-Coordinates are pixel values relative to the full image dimensions.`,
+
+Rules:
+- Coordinates are pixel values measured from the top-left corner of the image (0,0)
+- topLeft is the corner closest to the top-left of the image
+- topRight is the corner closest to the top-right of the image
+- bottomLeft is the corner closest to the bottom-left of the image
+- bottomRight is the corner closest to the bottom-right of the image
+- Include the full document including its edges and borders — do not crop inside the document
+- If the document is slightly rotated, return the actual rotated corner positions
+- If no document is clearly visible return: { "found": false }`,
         messages: [{
           role: "user",
           content: [
