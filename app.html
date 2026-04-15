@@ -2454,6 +2454,25 @@ function resizeForClaude(sourceCanvas, maxDim) {
   return { canvas: out, base64: dataURL.split(',')[1], width: tw, height: th };
 }
 
+// Push each corner outward from the quad's centroid by expandPx pixels.
+// Used to compensate for Claude detecting the content area instead of the paper edge.
+function expandCorners(corners, expandPx) {
+  const cx = (corners.topLeft.x + corners.topRight.x + corners.bottomLeft.x + corners.bottomRight.x) / 4;
+  const cy = (corners.topLeft.y + corners.topRight.y + corners.bottomLeft.y + corners.bottomRight.y) / 4;
+  function push(pt) {
+    const dx = pt.x - cx, dy = pt.y - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 1) return pt;
+    return { x: pt.x + (dx / dist) * expandPx, y: pt.y + (dy / dist) * expandPx };
+  }
+  return {
+    topLeft:     push(corners.topLeft),
+    topRight:    push(corners.topRight),
+    bottomLeft:  push(corners.bottomLeft),
+    bottomRight: push(corners.bottomRight)
+  };
+}
+
 async function detectDocumentEdges(base64, mimeType, imageWidth, imageHeight) {
   const resp = await fetch('/api/scanDocument', {
     method: 'POST',
@@ -2847,16 +2866,22 @@ async function handleScanButton() {
       return;
     }
 
-    // 4. Scale corners from send-image space → native canvas space
+    // 4. Expand corners outward — Claude tends to find text/content boundary,
+    //    not the physical paper edge. Push each corner away from the centroid.
+    //    12px in 1024px send-image space ≈ ~1% of image width.
+    const expanded = expandCorners(result.corners, 12);
+    console.log('[Scanner] Expanded corners (send px):', JSON.stringify(expanded));
+
+    // 5. Scale corners from send-image space → native canvas space
     const scaleX = captureWidth  / send.width;
     const scaleY = captureHeight / send.height;
     console.log('[Scanner] Scale factors — scaleX:', scaleX.toFixed(4), 'scaleY:', scaleY.toFixed(4));
 
     const scaledCorners = {
-      topLeft:     { x: result.corners.topLeft.x     * scaleX, y: result.corners.topLeft.y     * scaleY },
-      topRight:    { x: result.corners.topRight.x    * scaleX, y: result.corners.topRight.y    * scaleY },
-      bottomLeft:  { x: result.corners.bottomLeft.x  * scaleX, y: result.corners.bottomLeft.y  * scaleY },
-      bottomRight: { x: result.corners.bottomRight.x * scaleX, y: result.corners.bottomRight.y * scaleY }
+      topLeft:     { x: expanded.topLeft.x     * scaleX, y: expanded.topLeft.y     * scaleY },
+      topRight:    { x: expanded.topRight.x    * scaleX, y: expanded.topRight.y    * scaleY },
+      bottomLeft:  { x: expanded.bottomLeft.x  * scaleX, y: expanded.bottomLeft.y  * scaleY },
+      bottomRight: { x: expanded.bottomRight.x * scaleX, y: expanded.bottomRight.y * scaleY }
     };
     console.log('[Scanner] Scaled corners (native px):', JSON.stringify(scaledCorners));
 

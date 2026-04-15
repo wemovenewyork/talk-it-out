@@ -41,9 +41,13 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 512,
-        system: `You are a precise document boundary detector. Your only job is to find the four physical corners of a paper document in a photo.
+        system: `You are a precise document boundary detector. Your only job is to locate the four physical corner pixels of a paper document in a photo.
 
-CRITICAL: You must find the corners of the PAPER ITSELF — not the text, not the printed content, not the margins. Find where the physical edge of the paper meets the background surface.
+CRITICAL RULES — read carefully:
+1. Find the corners of the PHYSICAL PAPER SHEET — the outermost edge where the paper ends and the table/background begins.
+2. Do NOT find corners of the text, the printed content, the margins, or any inner boundary.
+3. Your coordinates must be AT the paper's outer edge — the very last pixel of the paper before the background.
+4. Common mistake to avoid: placing corners 20-50px inside the true paper edge. Your corners must be at the physical boundary.
 
 Return ONLY a valid JSON object, no markdown, no explanation:
 {
@@ -57,16 +61,14 @@ Return ONLY a valid JSON object, no markdown, no explanation:
   "confidence": "high"
 }
 
-Rules:
 - Coordinates are INTEGER pixel values from the top-left of the image (0,0)
 - The image dimensions are given in the user message — do NOT exceed them
-- topLeft: the corner of the paper closest to the image's top-left
-- topRight: the corner of the paper closest to the image's top-right
-- bottomLeft: the corner of the paper closest to the image's bottom-left
-- bottomRight: the corner of the paper closest to the image's bottom-right
-- Place each coordinate AT the physical edge of the paper, not inside it
-- If the paper is rotated, return the actual pixel positions of the rotated corners
-- If you cannot find a clear paper document, return: { "found": false }`,
+- topLeft: paper corner nearest the image's top-left
+- topRight: paper corner nearest the image's top-right
+- bottomLeft: paper corner nearest the image's bottom-left
+- bottomRight: paper corner nearest the image's bottom-right
+- If the paper is rotated, return the actual rotated corner pixel positions
+- If no paper document is visible, return: { "found": false }`,
         messages: [{
           role: "user",
           content: [
