@@ -614,6 +614,180 @@ textarea.input-field { min-height: 100px; resize: vertical; }
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
 .gap-8 { gap: 8px; }
 .w-full { width: 100%; }
+
+/* ===== DOCUMENT SCANNER MODAL ===== */
+#documentScannerModal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0D0D0D;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+}
+#scannerTopBar {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  flex-shrink: 0;
+  background: #0D0D0D;
+  gap: 0;
+}
+.scanner-back-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+#scannerWorkerName {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+#scannerTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  flex: 1;
+  text-align: center;
+  margin-right: 110px; /* balance the left side */
+}
+#scannerVideoWrap {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #000;
+}
+#scannerVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+#scannerOverlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+#scannerBottomBar {
+  padding: 14px 16px 20px;
+  background: #0D0D0D;
+  flex-shrink: 0;
+}
+#scanStatus {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 10px;
+  min-height: 20px;
+}
+#scanBtn {
+  width: 100%;
+  min-height: 64px;
+  background: #F59E0B;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+#scanBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#scanProcessing {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(13,13,13,0.92);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+}
+#scanProcessingStep {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  padding: 0 24px;
+}
+.scanner-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(245,158,11,0.3);
+  border-top-color: #F59E0B;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+#scanResult {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0D0D0D;
+  display: none;
+  flex-direction: column;
+}
+#scanResultImageWrap {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+#scanPreview {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+}
+#scanResultActions {
+  padding: 12px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#useScanBtn {
+  width: 100%;
+  min-height: 56px;
+  background: #F59E0B;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#retakeScanBtn {
+  width: 100%;
+  min-height: 48px;
+  background: none;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -936,7 +1110,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
   <div id="photo-grid" class="photo-grid"></div>
   <input id="qp-camera-input" type="file" accept="image/*" capture="environment" style="display:none;" multiple onchange="handleQuickPhotos(event)">
   <input id="qp-file-input" type="file" accept="image/*" style="display:none;" multiple onchange="handleQuickPhotos(event)">
-  <button class="btn btn-red mt-8" onclick="document.getElementById('qp-camera-input').click()">
+  <button class="btn btn-red mt-8" onclick="openScannerModal('quickPhoto')">
     <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
     Take photos now
   </button>
@@ -954,7 +1128,7 @@ textarea.input-field { min-height: 100px; resize: vertical; }
     <span class="top-bar-title">Step 1 — Upload your form</span>
   </div>
   <p class="text-muted mb-16" style="font-size:14px;">Take a photo of your form, or upload a PDF or image file. We'll read every field automatically.</p>
-  <button class="btn btn-amber" onclick="document.getElementById('scan-camera').click()">
+  <button class="btn btn-amber" onclick="openScannerModal('scan')">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
     Take a photo
   </button>
@@ -2237,6 +2411,427 @@ function doneQuickPhoto() {
   session.photos = quickPhotos;
   quickPhotos = [];
   showScreen('screen-welcome');
+}
+
+// ===== DOCUMENT SCANNER STATE =====
+let currentScanTarget = 'scan'; // 'scan' | 'quickPhoto'
+let lastScannedCanvas = null;
+let scannerStream = null;
+
+// ===== DOCUMENT SCANNER — IMAGE UTILITIES =====
+
+function captureVideoFrame(videoElement) {
+  const canvas = document.createElement('canvas');
+  canvas.width = videoElement.videoWidth || videoElement.offsetWidth;
+  canvas.height = videoElement.videoHeight || videoElement.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+  const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+  const base64 = dataURL.split(',')[1];
+  return { canvas, base64, mimeType: 'image/jpeg' };
+}
+
+async function detectDocumentEdges(base64, mimeType) {
+  const resp = await fetch('/api/scanDocument', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageData: base64, mimeType: mimeType || 'image/jpeg' })
+  });
+  if (!resp.ok) return { found: false };
+  const result = await resp.json();
+  console.log('Document detection result:', result);
+  return result;
+}
+
+function computeHomography(srcPts, dstPts) {
+  // Builds 8x8 linear system and solves via Gaussian elimination
+  // Maps each srcPts[i] -> dstPts[i]
+  const A = [];
+  const b = [];
+  for (let i = 0; i < 4; i++) {
+    const sx = srcPts[i].x, sy = srcPts[i].y;
+    const dx = dstPts[i].x, dy = dstPts[i].y;
+    A.push([sx, sy, 1, 0, 0, 0, -sx * dx, -sy * dx]);
+    b.push(dx);
+    A.push([0, 0, 0, sx, sy, 1, -sx * dy, -sy * dy]);
+    b.push(dy);
+  }
+  const n = 8;
+  const aug = A.map((row, i) => [...row, b[i]]);
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    for (let row = col + 1; row < n; row++) {
+      if (Math.abs(aug[row][col]) > Math.abs(aug[maxRow][col])) maxRow = row;
+    }
+    [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+    if (Math.abs(aug[col][col]) < 1e-10) continue;
+    for (let row = col + 1; row < n; row++) {
+      const factor = aug[row][col] / aug[col][col];
+      for (let j = col; j <= n; j++) aug[row][j] -= factor * aug[col][j];
+    }
+  }
+  const h = new Array(n);
+  for (let i = n - 1; i >= 0; i--) {
+    h[i] = aug[i][n];
+    for (let j = i + 1; j < n; j++) h[i] -= aug[i][j] * h[j];
+    h[i] /= aug[i][i];
+  }
+  // Returns 3x3 matrix, h22 = 1
+  return [
+    [h[0], h[1], h[2]],
+    [h[3], h[4], h[5]],
+    [h[6], h[7], 1]
+  ];
+}
+
+function perspectiveCorrect(sourceCanvas, corners, outputWidth, outputHeight) {
+  outputWidth = outputWidth || 800;
+  outputHeight = outputHeight || 1100;
+
+  const dstPts = [
+    { x: 0,           y: 0            },
+    { x: outputWidth, y: 0            },
+    { x: 0,           y: outputHeight },
+    { x: outputWidth, y: outputHeight }
+  ];
+  const srcPts = [
+    corners.topLeft,
+    corners.topRight,
+    corners.bottomLeft,
+    corners.bottomRight
+  ];
+
+  // Backward mapping: for each output pixel, find the source pixel via H(dst->src)
+  const H = computeHomography(dstPts, srcPts);
+
+  const outCanvas = document.createElement('canvas');
+  outCanvas.width = outputWidth;
+  outCanvas.height = outputHeight;
+  const outCtx = outCanvas.getContext('2d');
+
+  const srcCtx = sourceCanvas.getContext('2d');
+  const srcData = srcCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+  const outData = outCtx.createImageData(outputWidth, outputHeight);
+
+  const sw = sourceCanvas.width;
+  const sh = sourceCanvas.height;
+
+  for (let y = 0; y < outputHeight; y++) {
+    for (let x = 0; x < outputWidth; x++) {
+      const w = H[2][0] * x + H[2][1] * y + H[2][2];
+      const u = (H[0][0] * x + H[0][1] * y + H[0][2]) / w;
+      const v = (H[1][0] * x + H[1][1] * y + H[1][2]) / w;
+
+      const u0 = Math.floor(u), v0 = Math.floor(v);
+      const u1 = u0 + 1,       v1 = v0 + 1;
+      const fu = u - u0,       fv = v - v0;
+      const outIdx = (y * outputWidth + x) * 4;
+
+      if (u0 < 0 || v0 < 0 || u1 >= sw || v1 >= sh) {
+        outData.data[outIdx]     = 255;
+        outData.data[outIdx + 1] = 255;
+        outData.data[outIdx + 2] = 255;
+        outData.data[outIdx + 3] = 255;
+        continue;
+      }
+      for (let c = 0; c < 3; c++) {
+        const p00 = srcData.data[(v0 * sw + u0) * 4 + c];
+        const p10 = srcData.data[(v0 * sw + u1) * 4 + c];
+        const p01 = srcData.data[(v1 * sw + u0) * 4 + c];
+        const p11 = srcData.data[(v1 * sw + u1) * 4 + c];
+        outData.data[outIdx + c] = Math.round(
+          p00 * (1 - fu) * (1 - fv) +
+          p10 * fu       * (1 - fv) +
+          p01 * (1 - fu) * fv       +
+          p11 * fu       * fv
+        );
+      }
+      outData.data[outIdx + 3] = 255;
+    }
+  }
+  outCtx.putImageData(outData, 0, 0);
+  return outCanvas;
+}
+
+function enhanceDocument(canvas, options) {
+  options = options || { contrast: 1.4, grayscale: false, sharpen: true };
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = imageData.data;
+  const contrast = options.contrast !== undefined ? options.contrast : 1.4;
+
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i], g = d[i + 1], b = d[i + 2];
+
+    if (options.grayscale) {
+      const gray = r * 0.299 + g * 0.587 + b * 0.114;
+      r = g = b = gray;
+    }
+
+    r = Math.max(0, Math.min(255, (r - 128) * contrast + 128));
+    g = Math.max(0, Math.min(255, (g - 128) * contrast + 128));
+    b = Math.max(0, Math.min(255, (b - 128) * contrast + 128));
+
+    d[i] = r; d[i + 1] = g; d[i + 2] = b;
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  if (options.sharpen) {
+    // 3x3 sharpen kernel: [0,-1,0, -1,5,-1, 0,-1,0]
+    const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+    const src = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const dst = ctx.createImageData(canvas.width, canvas.height);
+    const w = canvas.width, h = canvas.height;
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = (y * w + x) * 4;
+        for (let c = 0; c < 3; c++) {
+          let val = 0;
+          for (let ky = -1; ky <= 1; ky++) {
+            for (let kx = -1; kx <= 1; kx++) {
+              const si = ((y + ky) * w + (x + kx)) * 4 + c;
+              val += src.data[si] * kernel[(ky + 1) * 3 + (kx + 1)];
+            }
+          }
+          dst.data[idx + c] = Math.max(0, Math.min(255, val));
+        }
+        dst.data[idx + 3] = 255;
+      }
+    }
+    // Copy border pixels as-is
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (y === 0 || y === h - 1 || x === 0 || x === w - 1) {
+          const idx = (y * w + x) * 4;
+          dst.data[idx]     = src.data[idx];
+          dst.data[idx + 1] = src.data[idx + 1];
+          dst.data[idx + 2] = src.data[idx + 2];
+          dst.data[idx + 3] = 255;
+        }
+      }
+    }
+    ctx.putImageData(dst, 0, 0);
+  }
+
+  return canvas;
+}
+
+async function canvasToPdfBlob(canvas) {
+  await loadJsPDF();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 24;
+  const ratio = Math.min((pageW - margin * 2) / canvas.width, (pageH - margin * 2) / canvas.height);
+  const imgW = canvas.width * ratio;
+  const imgH = canvas.height * ratio;
+  const imgX = margin + ((pageW - margin * 2) - imgW) / 2;
+  const imgY = margin + ((pageH - margin * 2) - imgH) / 2;
+  const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+  doc.addImage(dataURL, 'JPEG', imgX, imgY, imgW, imgH);
+  return doc.output('blob');
+}
+
+// ===== DOCUMENT SCANNER — GUIDE OVERLAY =====
+
+function drawGuideOverlay() {
+  const canvas = document.getElementById('scannerOverlay');
+  const video = document.getElementById('scannerVideo');
+  if (!canvas || !video) return;
+  canvas.width = video.offsetWidth;
+  canvas.height = video.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Dark overlay behind guide
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const margin = 24;
+  const guideX = margin;
+  const guideY = canvas.height * 0.12;
+  const guideW = canvas.width - margin * 2;
+  const guideH = canvas.height * 0.76;
+
+  // Cut out the guide rectangle using compositing
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  ctx.roundRect(guideX, guideY, guideW, guideH, 12);
+  ctx.fill();
+  ctx.restore();
+
+  // Amber border
+  ctx.strokeStyle = 'rgba(249,159,11,0.85)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.roundRect(guideX, guideY, guideW, guideH, 12);
+  ctx.stroke();
+
+  // Corner accent marks
+  const cornerSize = 24;
+  ctx.strokeStyle = '#F59E0B';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+
+  // Top-left
+  ctx.beginPath(); ctx.moveTo(guideX, guideY + cornerSize); ctx.lineTo(guideX, guideY); ctx.lineTo(guideX + cornerSize, guideY); ctx.stroke();
+  // Top-right
+  ctx.beginPath(); ctx.moveTo(guideX + guideW - cornerSize, guideY); ctx.lineTo(guideX + guideW, guideY); ctx.lineTo(guideX + guideW, guideY + cornerSize); ctx.stroke();
+  // Bottom-left
+  ctx.beginPath(); ctx.moveTo(guideX, guideY + guideH - cornerSize); ctx.lineTo(guideX, guideY + guideH); ctx.lineTo(guideX + cornerSize, guideY + guideH); ctx.stroke();
+  // Bottom-right
+  ctx.beginPath(); ctx.moveTo(guideX + guideW - cornerSize, guideY + guideH); ctx.lineTo(guideX + guideW, guideY + guideH); ctx.lineTo(guideX + guideW, guideY + guideH - cornerSize); ctx.stroke();
+}
+
+// ===== DOCUMENT SCANNER — CONTROLLER =====
+
+function openScannerModal(targetHandler) {
+  // Fallback: if getUserMedia is not available, trigger the original hidden input
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const inputId = targetHandler === 'scan' ? 'scan-camera' : 'qp-camera-input';
+    document.getElementById(inputId).click();
+    return;
+  }
+
+  currentScanTarget = targetHandler;
+  lastScannedCanvas = null;
+
+  const modal = document.getElementById('documentScannerModal');
+  const video = document.getElementById('scannerVideo');
+  const nameEl = document.getElementById('scannerWorkerName');
+  nameEl.textContent = getUser().name || '';
+
+  // Reset state
+  document.getElementById('scanStatus').textContent = '';
+  document.getElementById('scanBtn').disabled = false;
+  document.getElementById('scanProcessing').style.display = 'none';
+  document.getElementById('scanResult').style.display = 'none';
+  video.style.display = 'block';
+  document.getElementById('scannerOverlay').style.display = 'block';
+
+  modal.style.display = 'flex';
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+    audio: false
+  }).then(function(stream) {
+    scannerStream = stream;
+    video.srcObject = stream;
+    video.play();
+    video.addEventListener('loadedmetadata', drawGuideOverlay, { once: false });
+    window.addEventListener('resize', drawGuideOverlay);
+    video.addEventListener('loadedmetadata', drawGuideOverlay);
+  }).catch(function(err) {
+    console.warn('Camera permission denied:', err);
+    modal.style.display = 'none';
+    alert('Camera access is required to scan documents. Please allow camera access in your browser settings.');
+    // Fall back to original input
+    const inputId = targetHandler === 'scan' ? 'scan-camera' : 'qp-camera-input';
+    document.getElementById(inputId).click();
+  });
+}
+
+function closeScannerModal() {
+  const video = document.getElementById('scannerVideo');
+  if (video && video.srcObject) {
+    video.srcObject.getTracks().forEach(function(t) { t.stop(); });
+    video.srcObject = null;
+  }
+  scannerStream = null;
+  window.removeEventListener('resize', drawGuideOverlay);
+  const modal = document.getElementById('documentScannerModal');
+  modal.style.display = 'none';
+  // Reset UI
+  document.getElementById('scanStatus').textContent = '';
+  document.getElementById('scanBtn').disabled = false;
+  document.getElementById('scanProcessing').style.display = 'none';
+  document.getElementById('scanResult').style.display = 'none';
+  video.style.display = 'block';
+}
+
+async function handleScanButton() {
+  const video = document.getElementById('scannerVideo');
+  const scanBtn = document.getElementById('scanBtn');
+  const scanStatus = document.getElementById('scanStatus');
+  const processing = document.getElementById('scanProcessing');
+  const processingStep = document.getElementById('scanProcessingStep');
+
+  scanBtn.disabled = true;
+  scanStatus.textContent = 'Detecting document\u2026';
+  processing.style.display = 'flex';
+  processingStep.textContent = 'Detecting document\u2026';
+
+  try {
+    const { canvas, base64, mimeType } = captureVideoFrame(video);
+    const result = await detectDocumentEdges(base64, mimeType);
+
+    if (!result.found) {
+      processing.style.display = 'none';
+      scanBtn.disabled = false;
+      scanStatus.textContent = 'No document found \u2014 adjust position and try again';
+      return;
+    }
+
+    processingStep.textContent = 'Correcting perspective\u2026';
+    // yield to let the DOM update
+    await new Promise(function(r) { setTimeout(r, 30); });
+    const corrected = perspectiveCorrect(canvas, result.corners);
+
+    processingStep.textContent = 'Enhancing image\u2026';
+    await new Promise(function(r) { setTimeout(r, 30); });
+    enhanceDocument(corrected, { contrast: 1.4, grayscale: false, sharpen: true });
+
+    processingStep.textContent = 'Done';
+    lastScannedCanvas = corrected;
+
+    await new Promise(function(r) { setTimeout(r, 400); });
+    processing.style.display = 'none';
+    video.style.display = 'none';
+    document.getElementById('scannerOverlay').style.display = 'none';
+
+    const preview = document.getElementById('scanPreview');
+    preview.src = corrected.toDataURL('image/jpeg', 0.92);
+    document.getElementById('scanResult').style.display = 'flex';
+  } catch (err) {
+    console.error('Scan error:', err);
+    processing.style.display = 'none';
+    scanBtn.disabled = false;
+    scanStatus.textContent = 'Something went wrong \u2014 please try again';
+  }
+}
+
+function handleUseScan() {
+  if (!lastScannedCanvas) { closeScannerModal(); return; }
+  const dataURL = lastScannedCanvas.toDataURL('image/jpeg', 0.92);
+  const base64 = dataURL.split(',')[1];
+
+  if (currentScanTarget === 'scan') {
+    closeScannerModal();
+    showScreen('screen-scan');
+    document.getElementById('scan-preview').style.display = 'block';
+    document.getElementById('scan-preview-img').src = dataURL;
+    document.getElementById('scan-preview-img').style.display = 'block';
+    document.getElementById('scan-loading').style.display = 'none';
+    session.scannedPdfUri = null;
+    showFilterTray(base64, 'image/jpeg');
+  } else if (currentScanTarget === 'quickPhoto') {
+    quickPhotos.push({ src: dataURL, note: '' });
+    renderPhotoGrid();
+    closeScannerModal();
+  }
+}
+
+function handleRetake() {
+  const video = document.getElementById('scannerVideo');
+  document.getElementById('scanResult').style.display = 'none';
+  video.style.display = 'block';
+  document.getElementById('scannerOverlay').style.display = 'block';
+  document.getElementById('scanBtn').disabled = false;
+  document.getElementById('scanStatus').textContent = '';
+  lastScannedCanvas = null;
+  drawGuideOverlay();
 }
 
 // ===== SCAN FILTERS =====
@@ -4260,5 +4855,42 @@ self.addEventListener('fetch', e => {
   navigator.serviceWorker.register(swUrl).catch(err => console.log('SW reg failed', err));
 }
 </script>
+
+<!-- ===== DOCUMENT SCANNER MODAL ===== -->
+<div id="documentScannerModal">
+  <div id="scannerTopBar">
+    <button class="scanner-back-btn" onclick="closeScannerModal()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span id="scannerWorkerName"></span>
+    <span id="scannerTitle">Scan document</span>
+  </div>
+  <div id="scannerVideoWrap">
+    <video id="scannerVideo" autoplay playsinline muted></video>
+    <canvas id="scannerOverlay"></canvas>
+    <div id="scanProcessing">
+      <div class="scanner-spinner"></div>
+      <div id="scanProcessingStep">Detecting document&#8230;</div>
+    </div>
+    <div id="scanResult">
+      <div id="scanResultImageWrap">
+        <img id="scanPreview" alt="Scanned document">
+      </div>
+      <div id="scanResultActions">
+        <button id="useScanBtn" onclick="handleUseScan()">Use this scan</button>
+        <button id="retakeScanBtn" onclick="handleRetake()">Retake</button>
+      </div>
+    </div>
+  </div>
+  <div id="scannerBottomBar">
+    <div id="scanStatus"></div>
+    <button id="scanBtn" onclick="handleScanButton()">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Scan document
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
