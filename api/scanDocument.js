@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "API key not configured" });
   }
 
-  const { imageData, mimeType } = req.body;
+  const { imageData, mimeType, imageWidth, imageHeight } = req.body;
   if (!imageData || !mimeType) {
     return res.status(400).json({ error: "imageData and mimeType are required" });
   }
@@ -41,9 +41,11 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 512,
-        system: `You are a document edge detector. When given an image, find the four outermost corners of the primary flat document (paper form, letter, or card) visible in the image. The document will typically be a white or light-colored rectangle against a darker surface.
+        system: `You are a precise document boundary detector. Your only job is to find the four physical corners of a paper document in a photo.
 
-Return ONLY a valid JSON object with no markdown, no explanation, no preamble:
+CRITICAL: You must find the corners of the PAPER ITSELF — not the text, not the printed content, not the margins. Find where the physical edge of the paper meets the background surface.
+
+Return ONLY a valid JSON object, no markdown, no explanation:
 {
   "found": true,
   "corners": {
@@ -56,14 +58,15 @@ Return ONLY a valid JSON object with no markdown, no explanation, no preamble:
 }
 
 Rules:
-- Coordinates are pixel values measured from the top-left corner of the image (0,0)
-- topLeft is the corner closest to the top-left of the image
-- topRight is the corner closest to the top-right of the image
-- bottomLeft is the corner closest to the bottom-left of the image
-- bottomRight is the corner closest to the bottom-right of the image
-- Include the full document including its edges and borders — do not crop inside the document
-- If the document is slightly rotated, return the actual rotated corner positions
-- If no document is clearly visible return: { "found": false }`,
+- Coordinates are INTEGER pixel values from the top-left of the image (0,0)
+- The image dimensions are given in the user message — do NOT exceed them
+- topLeft: the corner of the paper closest to the image's top-left
+- topRight: the corner of the paper closest to the image's top-right
+- bottomLeft: the corner of the paper closest to the image's bottom-left
+- bottomRight: the corner of the paper closest to the image's bottom-right
+- Place each coordinate AT the physical edge of the paper, not inside it
+- If the paper is rotated, return the actual pixel positions of the rotated corners
+- If you cannot find a clear paper document, return: { "found": false }`,
         messages: [{
           role: "user",
           content: [
@@ -77,7 +80,7 @@ Rules:
             },
             {
               type: "text",
-              text: "Detect the document corners in this image."
+              text: `This image is ${imageWidth || '?'} x ${imageHeight || '?'} pixels. Find the four corners of the physical paper document. Return the pixel coordinates of the outermost edges of the paper itself, not the content printed on it.`
             }
           ]
         }]

@@ -2439,15 +2439,35 @@ function captureVideoFrame(videoElement) {
   return { canvas, base64, mimeType: 'image/jpeg', captureWidth: canvas.width, captureHeight: canvas.height };
 }
 
-async function detectDocumentEdges(base64, mimeType) {
+// Resize canvas to a fixed max dimension before sending to Claude.
+// This gives us a known, unambiguous coordinate space — no guessing about
+// what Claude's backend may have resized to internally.
+function resizeForClaude(sourceCanvas, maxDim) {
+  maxDim = maxDim || 1024;
+  const sw = sourceCanvas.width, sh = sourceCanvas.height;
+  const scale = Math.min(1, maxDim / Math.max(sw, sh));
+  const tw = Math.round(sw * scale), th = Math.round(sh * scale);
+  const out = document.createElement('canvas');
+  out.width = tw; out.height = th;
+  out.getContext('2d').drawImage(sourceCanvas, 0, 0, tw, th);
+  const dataURL = out.toDataURL('image/jpeg', 0.88);
+  return { canvas: out, base64: dataURL.split(',')[1], width: tw, height: th };
+}
+
+async function detectDocumentEdges(base64, mimeType, imageWidth, imageHeight) {
   const resp = await fetch('/api/scanDocument', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageData: base64, mimeType: mimeType || 'image/jpeg' })
+    body: JSON.stringify({
+      imageData: base64,
+      mimeType: mimeType || 'image/jpeg',
+      imageWidth: imageWidth,
+      imageHeight: imageHeight
+    })
   });
   if (!resp.ok) return { found: false };
   const result = await resp.json();
-  console.log('Document detection result:', result);
+  console.log('[Scanner] Detection result from API:', result);
   return result;
 }
 
@@ -2806,8 +2826,17 @@ async function handleScanButton() {
   processingStep.textContent = 'Detecting document\u2026';
 
   try {
-    const { canvas, base64, mimeType, captureWidth, captureHeight } = captureVideoFrame(video);
-    const result = await detectDocumentEdges(base64, mimeType);
+    // 1. Capture full native frame
+    const { canvas, captureWidth, captureHeight } = captureVideoFrame(video);
+
+    // 2. Downsample to a known 1024px-max size before sending to Claude.
+    //    This eliminates any ambiguity about internal backend resizing.
+    const send = resizeForClaude(canvas, 1024);
+    console.log('[Scanner] Sending to Claude at:', send.width, 'x', send.height,
+      '~' + Math.round(send.base64.length * 0.75 / 1024) + ' KB');
+
+    // 3. Detect edges — pass exact send dimensions so the prompt can include them
+    const result = await detectDocumentEdges(send.base64, 'image/jpeg', send.width, send.height);
 
     console.log('[Scanner] Corners returned by Claude:', JSON.stringify(result.corners || null));
 
@@ -2818,22 +2847,9 @@ async function handleScanButton() {
       return;
     }
 
-    // --- Scale Claude corners to match the capture canvas ---
-    // Claude's vision backend may resize images internally before processing.
-    // We decode the base64 to read the exact dimensions Claude actually received,
-    // then scale the returned corners back to the canvas's native coordinate space.
-    const imageSize = await new Promise(function(resolve) {
-      const img = new Image();
-      img.onload = function() { resolve({ w: img.naturalWidth, h: img.naturalHeight }); };
-      img.onerror = function() { resolve({ w: captureWidth, h: captureHeight }); };
-      img.src = 'data:image/jpeg;base64,' + base64;
-    });
-
-    const scaleX = captureWidth  / imageSize.w;
-    const scaleY = captureHeight / imageSize.h;
-
-    console.log('[Scanner] Capture canvas:', captureWidth, 'x', captureHeight);
-    console.log('[Scanner] Decoded image (what Claude sees):', imageSize.w, 'x', imageSize.h);
+    // 4. Scale corners from send-image space → native canvas space
+    const scaleX = captureWidth  / send.width;
+    const scaleY = captureHeight / send.height;
     console.log('[Scanner] Scale factors — scaleX:', scaleX.toFixed(4), 'scaleY:', scaleY.toFixed(4));
 
     const scaledCorners = {
@@ -2842,18 +2858,15 @@ async function handleScanButton() {
       bottomLeft:  { x: result.corners.bottomLeft.x  * scaleX, y: result.corners.bottomLeft.y  * scaleY },
       bottomRight: { x: result.corners.bottomRight.x * scaleX, y: result.corners.bottomRight.y * scaleY }
     };
+    console.log('[Scanner] Scaled corners (native px):', JSON.stringify(scaledCorners));
 
-    console.log('[Scanner] Scaled corners (canvas px):', JSON.stringify(scaledCorners));
-
-    // --- Debug overlay: draw detected quad on the live overlay canvas ---
-    // overlayScaleX = how many native video px per overlay display px
+    // 5. Debug overlay — show Claude's detected quad on the live frame for 1500ms
     const overlayScaleX = captureWidth  / overlay.width;
     const overlayScaleY = captureHeight / overlay.height;
-    processing.style.display = 'none'; // hide briefly so user sees the overlay
+    processing.style.display = 'none';
     drawDetectedCorners(scaledCorners, overlayScaleX, overlayScaleY);
-
-    // Show the quad for 1500ms so the worker can see what Claude detected
     await new Promise(function(r) { setTimeout(r, 1500); });
+
     processing.style.display = 'flex';
     processingStep.textContent = 'Correcting perspective\u2026';
 
