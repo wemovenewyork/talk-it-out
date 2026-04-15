@@ -615,6 +615,131 @@ textarea.input-field { min-height: 100px; resize: vertical; }
 .gap-8 { gap: 8px; }
 .w-full { width: 100%; }
 
+/* ===== VOICE-ALL SCREEN ===== */
+.voice-field-chip {
+  display: inline-block;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 3px 3px 3px 0;
+  transition: background 200ms, border-color 200ms, color 200ms;
+}
+.voice-field-chip.filled {
+  background: #FEF3C7;
+  border-color: var(--color-amber);
+  color: var(--color-amber-dark);
+}
+#voice-all-mic-btn {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto;
+  transition: transform 100ms, box-shadow 200ms;
+  box-shadow: 0 4px 16px rgba(245,158,11,0.35);
+}
+#voice-all-mic-btn.recording {
+  background: #DC2626;
+  box-shadow: 0 0 0 8px rgba(220,38,38,0.2), 0 4px 16px rgba(220,38,38,0.4);
+  animation: pulse 1.2s ease-out infinite;
+}
+#voice-all-mic-btn:active { transform: scale(0.94); }
+#voice-all-mapping-overlay {
+  position: absolute; inset: 0;
+  background: rgba(var(--color-bg-rgb, 255,255,255), 0.92);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  z-index: 5;
+}
+/* ===== FORM REVIEW SCREEN ===== */
+.review-summary-card {
+  background: #FFFBEB;
+  border: 1.5px solid var(--color-amber);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+.form-image-wrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+.form-image-wrap img { display: block; width: 100%; }
+#form-review-overlay {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+.review-field-row {
+  background: var(--color-bg-secondary);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.review-field-row.review-field-empty {
+  border-color: #FCA5A5;
+  background: #FFF5F5;
+}
+.dark .review-field-row.review-field-empty { background: rgba(220,38,38,0.08); border-color: rgba(220,38,38,0.4); }
+.review-field-row.review-field-low { border-color: var(--color-amber); }
+.review-field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: 4px; }
+.review-field-value { font-size: 15px; font-weight: 500; color: var(--color-text); word-break: break-word; }
+.review-field-low-note { font-size: 11px; color: var(--color-amber-dark); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.review-field-unfilled { font-size: 13px; color: #DC2626; display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+.review-field-edit-btn, .review-field-fill-btn {
+  margin-top: 8px; padding: 6px 14px;
+  border-radius: 8px; border: 1.5px solid var(--color-amber);
+  background: none; color: var(--color-amber-dark);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.review-field-fill-btn { border-color: #DC2626; color: #DC2626; }
+/* ===== MINI RECORDER MODAL ===== */
+#miniRecorderModal {
+  position: fixed; inset: 0; z-index: 10000;
+  display: none; align-items: flex-end; justify-content: center;
+  background: rgba(0,0,0,0.5);
+}
+#miniRecorderSheet {
+  background: var(--color-bg);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 36px;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
+}
+#mini-recorder-label {
+  font-size: 16px; font-weight: 700;
+  color: var(--color-text); margin-bottom: 16px;
+  text-align: center;
+}
+#mini-mic-btn {
+  width: 60px; height: 60px;
+  border-radius: 50%; background: var(--color-amber);
+  border: none; cursor: pointer; margin: 0 auto 12px; display: flex;
+  align-items: center; justify-content: center;
+}
+#mini-mic-btn.recording {
+  background: #DC2626;
+  box-shadow: 0 0 0 6px rgba(220,38,38,0.2);
+  animation: pulse 1.2s ease-out infinite;
+}
+#mini-recorder-transcript {
+  min-height: 44px; font-size: 15px;
+  color: var(--color-text); text-align: center;
+  padding: 10px; margin-bottom: 16px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+}
 /* ===== DOCUMENT SCANNER MODAL ===== */
 #documentScannerModal {
   position: fixed;
@@ -2418,6 +2543,19 @@ let currentScanTarget = 'scan'; // 'scan' | 'quickPhoto'
 let lastScannedCanvas = null;
 let scannerStream = null;
 
+// ===== FORM FILL STATE =====
+let currentFormFields = [];   // fields from api/extractFields (id, label, type, x, y, width, height, value)
+let currentFormCanvas = null; // perspective-corrected scan canvas for PDF overlay
+let currentFieldMappings = [];
+let currentFormSummary = '';
+let miniRecordFieldId = null;
+let isAllMicRecording = false;
+let allMicRecognition = null;
+let allMicTranscript = '';
+let isMiniRecording = false;
+let miniRecognition = null;
+let miniTranscript = '';
+
 // ===== DOCUMENT SCANNER — IMAGE UTILITIES =====
 
 function captureVideoFrame(videoElement) {
@@ -2923,6 +3061,8 @@ async function handleScanButton() {
 
 function handleUseScan() {
   if (!lastScannedCanvas) { closeScannerModal(); return; }
+  // Capture the corrected canvas before modal close resets state
+  currentFormCanvas = lastScannedCanvas;
   const dataURL = lastScannedCanvas.toDataURL('image/jpeg', 0.92);
   const base64 = dataURL.split(',')[1];
 
@@ -3397,10 +3537,446 @@ function skipConfidential() {
   startVoiceCapture();
 }
 
-function startVoiceCapture() {
+async function startVoiceCapture() {
   session.currentFieldIndex = 0;
   session.startTime = Date.now();
+  // If a form image was scanned, use the new single-voice flow
+  if (session.formImage) {
+    await extractFieldsForCurrentForm();
+  } else {
+    showScreen('screen-voice');
+  }
+}
+
+function skipToFieldByField() {
+  currentFormFields = [];
   showScreen('screen-voice');
+}
+
+// ===== EXTRACT FIELDS FROM SCANNED FORM =====
+async function extractFieldsForCurrentForm() {
+  // Show loading state on scan screen
+  showScreen('screen-scan');
+  const loadEl = document.getElementById('scan-loading');
+  if (loadEl) {
+    loadEl.style.display = 'block';
+    loadEl.innerHTML = '<div class="spinner"></div><p class="text-muted mt-12">Reading form fields&#8230;</p>';
+  }
+  currentFormFields = [];
+  try {
+    const resp = await fetch('/api/extractFields', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageData: session.formImage, mimeType: 'image/jpeg' })
+    });
+    if (!resp.ok) throw new Error('extractFields HTTP ' + resp.status);
+    const data = await resp.json();
+    if (data.fields && data.fields.length > 0) {
+      currentFormFields = data.fields;
+      if (data.formType && data.formType !== 'unknown') session.formType = data.formType;
+      renderVoiceAllScreen();
+      showScreen('screen-voice-all');
+    } else {
+      // No fields detected — fall back to field-by-field
+      showScreen('screen-voice');
+    }
+  } catch (err) {
+    console.warn('[FormFill] extractFields failed, falling back to field-by-field:', err);
+    showScreen('screen-voice');
+  }
+}
+
+// ===== VOICE-ALL SCREEN =====
+function renderVoiceAllScreen() {
+  document.getElementById('voice-all-form-type').textContent = session.formType || 'Form';
+  document.getElementById('voice-all-field-count').textContent =
+    currentFormFields.length + ' field' + (currentFormFields.length !== 1 ? 's' : '') + ' to fill';
+  document.getElementById('voice-all-field-chips').innerHTML =
+    currentFormFields.map(f => `<span class="voice-field-chip" id="chip-${f.id}">${f.label}</span>`).join('');
+  document.getElementById('voice-all-transcript-display').innerHTML =
+    '<span style="color:var(--color-text-muted);font-size:13px;font-style:italic;">Your words will appear here\u2026</span>';
+  document.getElementById('voice-all-mic-status').textContent = 'Tap to start recording';
+  document.getElementById('voice-all-submit-btn').disabled = true;
+  document.getElementById('voice-all-mapping-overlay').style.display = 'none';
+  allMicTranscript = '';
+  isAllMicRecording = false;
+}
+
+function toggleAllMic() {
+  if (isAllMicRecording) stopAllMic(); else startAllMic();
+}
+
+function startAllMic() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('voice-all-transcript-display').textContent = '';
+    document.getElementById('voice-all-submit-btn').disabled = false;
+    document.getElementById('voice-all-mic-status').textContent = 'Voice not supported — type your answers above';
+    return;
+  }
+  allMicRecognition = new SpeechRecognition();
+  const settings = getSettings();
+  allMicRecognition.lang = settings.language === 'es' ? 'es-US' : settings.language === 'ht' ? 'fr-HT' : settings.language === 'zh' ? 'zh-CN' : settings.language === 'ar' ? 'ar' : 'en-US';
+  allMicRecognition.continuous = true;
+  allMicRecognition.interimResults = true;
+  let finalTranscript = '';
+
+  allMicRecognition.onstart = function() {
+    isAllMicRecording = true;
+    document.getElementById('voice-all-mic-btn').classList.add('recording');
+    document.getElementById('voice-all-mic-status').textContent = 'Listening \u2014 speak naturally\u2026';
+  };
+  allMicRecognition.onresult = function(e) {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    allMicTranscript = finalTranscript.trim();
+    const display = document.getElementById('voice-all-transcript-display');
+    if (interim) {
+      display.innerHTML = finalTranscript + '<span style="color:var(--color-text-muted);font-style:italic;">' + interim + '</span>';
+    } else {
+      display.textContent = finalTranscript;
+    }
+    if (allMicTranscript) document.getElementById('voice-all-submit-btn').disabled = false;
+  };
+  allMicRecognition.onerror = function(e) {
+    stopAllMic();
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') showScreen('screen-err-voice');
+  };
+  allMicRecognition.onend = function() { if (isAllMicRecording) stopAllMic(); };
+  try { allMicRecognition.start(); } catch { showScreen('screen-err-voice'); }
+}
+
+function stopAllMic() {
+  isAllMicRecording = false;
+  if (allMicRecognition) { try { allMicRecognition.stop(); } catch {} }
+  const btn = document.getElementById('voice-all-mic-btn');
+  if (btn) btn.classList.remove('recording');
+  const status = document.getElementById('voice-all-mic-status');
+  if (status) status.textContent = allMicTranscript ? 'Recording done \u2014 tap again to add more' : 'Tap to start recording';
+}
+
+async function submitAllTranscript() {
+  const transcript = allMicTranscript.trim() ||
+    document.getElementById('voice-all-transcript-display').textContent.trim();
+  if (!transcript) { alert('Please record your answers first.'); return; }
+  stopAllMic();
+  document.getElementById('voice-all-mapping-overlay').style.display = 'flex';
+  document.getElementById('voice-all-submit-btn').disabled = true;
+  try {
+    const resp = await fetch('/api/mapVoiceToFields', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript, fields: currentFormFields })
+    });
+    if (!resp.ok) throw new Error('mapVoiceToFields HTTP ' + resp.status);
+    const data = await resp.json();
+    currentFieldMappings = data.mappings || [];
+    currentFormSummary = data.summary || '';
+    // Merge mapped values into currentFormFields
+    currentFieldMappings.forEach(function(m) {
+      const field = currentFormFields.find(function(f) { return f.id === m.id; });
+      if (field) field.value = m.value || '';
+    });
+    // Also store in session.answers for compatibility with existing export flow
+    session.answers = currentFormFields.map(function(f) {
+      return { value: f.value || '\u2014', aiRewritten: false };
+    });
+    document.getElementById('voice-all-mapping-overlay').style.display = 'none';
+    renderFormReview();
+    showScreen('screen-form-review');
+  } catch (err) {
+    console.error('[FormFill] mapVoiceToFields error:', err);
+    document.getElementById('voice-all-mapping-overlay').style.display = 'none';
+    document.getElementById('voice-all-submit-btn').disabled = false;
+    alert('Mapping failed. Please try again.');
+  }
+}
+
+// ===== FORM REVIEW SCREEN =====
+function renderFormReview() {
+  document.getElementById('form-review-type').textContent = session.formType || 'Form';
+  const user = getUser();
+  document.getElementById('form-review-meta').textContent =
+    (user.name || user.email || '') + ' \u00b7 ' + new Date().toLocaleString();
+
+  const summaryWrap = document.getElementById('form-review-summary-wrap');
+  const summaryEl = document.getElementById('form-review-summary');
+  if (currentFormSummary) {
+    summaryEl.textContent = currentFormSummary;
+    summaryWrap.style.display = 'block';
+  } else {
+    summaryWrap.style.display = 'none';
+  }
+
+  // Set form image and draw overlay once loaded
+  const img = document.getElementById('form-review-image');
+  img.onload = function() { renderFormOverlay(); };
+  if (session.formImage) {
+    img.src = 'data:image/jpeg;base64,' + session.formImage;
+  } else {
+    img.style.display = 'none';
+  }
+
+  // Render field list
+  document.getElementById('form-review-fields-list').innerHTML = currentFormFields.map(function(f) {
+    const mapping = currentFieldMappings.find(function(m) { return m.id === f.id; });
+    const isLow = mapping && mapping.confidence === 'low';
+    const hasValue = f.value && f.value !== '';
+    if (hasValue) {
+      return '<div class="review-field-row' + (isLow ? ' review-field-low' : '') + '">' +
+        '<div class="review-field-label">' + escHtml(f.label) + '</div>' +
+        '<div class="review-field-value">' + escHtml(f.value) + '</div>' +
+        (isLow ? '<div class="review-field-low-note">\u26a0 Review this answer</div>' : '') +
+        '<button class="review-field-edit-btn" onclick="openMiniRecorder(\'' + f.id + '\')">Re-record</button>' +
+        '</div>';
+    } else {
+      return '<div class="review-field-row review-field-empty">' +
+        '<div class="review-field-label">' + escHtml(f.label) + '</div>' +
+        '<div class="review-field-unfilled">' +
+          '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>' +
+          'Not filled' +
+        '</div>' +
+        '<button class="review-field-fill-btn" onclick="openMiniRecorder(\'' + f.id + '\')">Tap to fill</button>' +
+        '</div>';
+    }
+  }).join('');
+}
+
+function renderFormOverlay() {
+  const img = document.getElementById('form-review-image');
+  const overlay = document.getElementById('form-review-overlay');
+  if (!img || !overlay) return;
+  overlay.width = img.offsetWidth;
+  overlay.height = img.offsetHeight;
+  const ctx = overlay.getContext('2d');
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+  currentFormFields.forEach(function(f) {
+    const x = f.x * overlay.width;
+    const y = f.y * overlay.height;
+    const w = f.width * overlay.width;
+    const h = f.height * overlay.height;
+    const hasValue = f.value && f.value !== '';
+
+    ctx.fillStyle = hasValue ? 'rgba(245,158,11,0.18)' : 'rgba(220,38,38,0.14)';
+    ctx.strokeStyle = hasValue ? 'rgba(245,158,11,0.8)' : 'rgba(220,38,38,0.65)';
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeRect(x, y, w, h);
+
+    if (hasValue) {
+      const fontSize = Math.max(11, Math.min(14, h * 0.65));
+      ctx.font = 'bold ' + fontSize + 'px sans-serif';
+      ctx.fillStyle = '#1a1a1a';
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x + 2, y + 2, w - 4, h - 4);
+      ctx.clip();
+      ctx.fillText(f.value, x + 4, y + h * 0.72);
+      ctx.restore();
+    }
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Redraw overlay when review image resizes
+window.addEventListener('resize', function() {
+  const screen = document.getElementById('screen-form-review');
+  if (screen && screen.classList.contains('active')) renderFormOverlay();
+});
+
+// ===== MINI RECORDER =====
+function openMiniRecorder(fieldId) {
+  const field = currentFormFields.find(function(f) { return f.id === fieldId; });
+  if (!field) return;
+  miniRecordFieldId = fieldId;
+  miniTranscript = '';
+  document.getElementById('mini-recorder-label').textContent = 'Recording: ' + field.label;
+  document.getElementById('mini-recorder-transcript').textContent = '';
+  document.getElementById('mini-recorder-use-btn').disabled = true;
+  document.getElementById('miniRecorderModal').style.display = 'flex';
+  isMiniRecording = false;
+}
+
+function closeMiniRecorder() {
+  stopMiniMic();
+  document.getElementById('miniRecorderModal').style.display = 'none';
+  miniRecordFieldId = null;
+}
+
+function toggleMiniMic() {
+  if (isMiniRecording) stopMiniMic(); else startMiniMic();
+}
+
+function startMiniMic() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return;
+  miniRecognition = new SpeechRecognition();
+  miniRecognition.continuous = false;
+  miniRecognition.interimResults = true;
+  miniTranscript = '';
+
+  miniRecognition.onstart = function() {
+    isMiniRecording = true;
+    document.getElementById('mini-mic-btn').classList.add('recording');
+  };
+  miniRecognition.onresult = function(e) {
+    let final = '', interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    if (final) {
+      miniTranscript = final;
+      document.getElementById('mini-recorder-transcript').textContent = final;
+      document.getElementById('mini-recorder-use-btn').disabled = false;
+      stopMiniMic();
+    } else if (interim) {
+      document.getElementById('mini-recorder-transcript').innerHTML =
+        '<span style="color:var(--color-text-muted);font-style:italic;">' + interim + '</span>';
+    }
+  };
+  miniRecognition.onerror = function() { stopMiniMic(); };
+  miniRecognition.onend = function() { if (isMiniRecording) stopMiniMic(); };
+  try { miniRecognition.start(); } catch {}
+}
+
+function stopMiniMic() {
+  isMiniRecording = false;
+  if (miniRecognition) { try { miniRecognition.stop(); } catch {} }
+  const btn = document.getElementById('mini-mic-btn');
+  if (btn) btn.classList.remove('recording');
+}
+
+async function useMiniTranscript() {
+  const transcript = miniTranscript.trim() ||
+    document.getElementById('mini-recorder-transcript').textContent.trim();
+  if (!transcript || !miniRecordFieldId) return;
+  const field = currentFormFields.find(function(f) { return f.id === miniRecordFieldId; });
+  if (!field) { closeMiniRecorder(); return; }
+  // Map the single-field transcript via API
+  try {
+    const resp = await fetch('/api/mapVoiceToFields', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript, fields: [field] })
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      field.value = (data.mappings && data.mappings[0] && data.mappings[0].value) || transcript;
+    } else {
+      field.value = transcript;
+    }
+  } catch {
+    field.value = transcript;
+  }
+  // Update session.answers for export compatibility
+  const idx = currentFormFields.indexOf(field);
+  if (idx >= 0 && session.answers) session.answers[idx] = { value: field.value, aiRewritten: false };
+  // Update chip
+  const chip = document.getElementById('chip-' + field.id);
+  if (chip) chip.classList.add('filled');
+  closeMiniRecorder();
+  renderFormReview();
+  renderFormOverlay();
+}
+
+// ===== GENERATE FILLED PDF =====
+function wrapTextLines(ctx, text, maxWidth) {
+  const words = String(text).split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(function(w) {
+    const test = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && cur) { lines.push(cur); cur = w; }
+    else { cur = test; }
+  });
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+async function confirmFilledForm() {
+  if (!currentFormCanvas) {
+    // No canvas — generate a text-only PDF via the existing path
+    session.answers = currentFormFields.map(function(f) {
+      return { value: f.value || '\u2014', aiRewritten: false };
+    });
+    session.fields = currentFormFields.map(function(f) {
+      return { name: f.label, type: f.type, required: false };
+    });
+    submitApproval();
+    return;
+  }
+
+  // Draw field values onto a copy of the canvas
+  const out = document.createElement('canvas');
+  out.width = currentFormCanvas.width;
+  out.height = currentFormCanvas.height;
+  const ctx = out.getContext('2d');
+  ctx.drawImage(currentFormCanvas, 0, 0);
+
+  currentFormFields.forEach(function(f) {
+    if (!f.value) return;
+    const x = f.x * out.width;
+    const y = f.y * out.height;
+    const w = f.width * out.width;
+    const h = f.height * out.height;
+    const fontSize = Math.max(14, Math.min(20, h * 0.55));
+    ctx.font = 'bold ' + fontSize + 'px sans-serif';
+    ctx.fillStyle = '#1a1a1a';
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x + 2, y + 2, w - 4, h - 4);
+    ctx.clip();
+    const lines = wrapTextLines(ctx, f.value, w - 8);
+    const lineH = fontSize * 1.2;
+    lines.forEach(function(line, i) {
+      if (y + fontSize + i * lineH < y + h) {
+        ctx.fillText(line, x + 4, y + fontSize + i * lineH);
+      }
+    });
+    ctx.restore();
+  });
+
+  await loadJsPDF();
+  const { jsPDF } = window.jspdf;
+  const isLandscape = out.width > out.height;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter', orientation: isLandscape ? 'landscape' : 'portrait' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const ratio = Math.min(pageW / out.width, pageH / out.height);
+  const imgW = out.width * ratio;
+  const imgH = out.height * ratio;
+  doc.addImage(out.toDataURL('image/jpeg', 0.92), 'JPEG', (pageW - imgW) / 2, 0, imgW, imgH);
+  doc.setFontSize(7); doc.setTextColor(150);
+  doc.text('Talk It Out   |   ' + session.refNumber + '   |   ' + new Date().toLocaleString(), 20, pageH - 10);
+
+  // Store for the output screen download button
+  session.scannedPdfUri = doc.output('datauristring');
+
+  // Save to history
+  const record = {
+    refNumber: session.refNumber,
+    formType: session.formType,
+    fields: currentFormFields.map(function(f) { return { name: f.label, type: f.type, required: false }; }),
+    answers: currentFormFields.map(function(f) { return { value: f.value || '\u2014', aiRewritten: false }; }),
+    summary: currentFormSummary,
+    timestamp: new Date().toISOString(),
+    confidential: session.confidential,
+    status: 'sent'
+  };
+  const history = getHistory();
+  history.unshift(record);
+  setLS('tio_history', history);
+  sendLocalNotification('Form saved', session.formType + ' \u2014 ' + session.refNumber);
+
+  showScreen('screen-output');
 }
 
 // ===== VOICE SCREEN =====
@@ -4974,6 +5550,80 @@ self.addEventListener('fetch', e => {
   navigator.serviceWorker.register(swUrl).catch(err => console.log('SW reg failed', err));
 }
 </script>
+
+<!-- ===== SCREEN: VOICE ALL FIELDS ===== -->
+<div id="screen-voice-all" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-confirm-type')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <span class="top-bar-title">Tell your story</span>
+  </div>
+  <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 10px;">Speak naturally — cover everything below in one go. Don't worry about order.</p>
+  <div style="margin-bottom:16px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:8px;" id="voice-all-form-type">Form</div>
+    <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:8px;" id="voice-all-field-count"></div>
+    <div id="voice-all-field-chips" style="line-height:1.8;"></div>
+  </div>
+  <div class="transcript-box" id="voice-all-transcript-display" style="min-height:80px;margin-bottom:16px;">
+    <span style="color:var(--color-text-muted);font-size:13px;font-style:italic;">Your words will appear here…</span>
+  </div>
+  <div style="text-align:center;margin-bottom:12px;">
+    <div style="font-size:13px;color:var(--color-text-muted);margin-bottom:10px;" id="voice-all-mic-status">Tap to start recording</div>
+    <button id="voice-all-mic-btn" onclick="toggleAllMic()" aria-label="Record">
+      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+    </button>
+  </div>
+  <button id="voice-all-submit-btn" class="btn btn-amber mt-8" onclick="submitAllTranscript()" disabled>Map answers to form</button>
+  <button class="btn btn-outline mt-8" onclick="skipToFieldByField()">Fill field by field instead</button>
+  <div id="voice-all-mapping-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:5;border-radius:inherit;">
+    <div class="spinner"></div>
+    <p style="font-size:15px;font-weight:500;color:var(--color-text);">Mapping your words to the form…</p>
+  </div>
+</div>
+
+<!-- ===== SCREEN: FORM REVIEW ===== -->
+<div id="screen-form-review" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screen-voice-all')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Re-record
+    </button>
+    <span class="top-bar-title">Review your form</span>
+  </div>
+  <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:2px;" id="form-review-type"></div>
+  <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px;" id="form-review-meta"></div>
+  <div id="form-review-summary-wrap" style="display:none;">
+    <div class="review-summary-card" id="form-review-summary"></div>
+  </div>
+  <div class="form-image-wrap" id="form-image-container">
+    <img id="form-review-image" alt="Scanned form" style="display:block;width:100%;">
+    <canvas id="form-review-overlay"></canvas>
+  </div>
+  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:10px;">Fields</div>
+  <div id="form-review-fields-list"></div>
+  <div style="height:120px;"></div><!-- spacer for fixed bottom bar -->
+  <div style="position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--color-bg);border-top:1px solid var(--color-border);padding:14px 16px 24px;z-index:100;">
+    <button class="btn btn-amber" onclick="confirmFilledForm()">Confirm and save</button>
+    <button class="btn btn-outline mt-8" onclick="showScreen('screen-voice-all')">Re-record</button>
+  </div>
+</div>
+
+<!-- ===== MINI RECORDER MODAL ===== -->
+<div id="miniRecorderModal">
+  <div id="miniRecorderSheet">
+    <div id="mini-recorder-label">Recording field</div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <button id="mini-mic-btn" onclick="toggleMiniMic()" aria-label="Record">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+      </button>
+    </div>
+    <div id="mini-recorder-transcript"></div>
+    <button id="mini-recorder-use-btn" class="btn btn-amber" onclick="useMiniTranscript()" disabled>Use this answer</button>
+    <button class="btn btn-outline mt-8" onclick="closeMiniRecorder()">Cancel</button>
+  </div>
+</div>
 
 <!-- ===== DOCUMENT SCANNER MODAL ===== -->
 <div id="documentScannerModal">
