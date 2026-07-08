@@ -9,7 +9,6 @@ Scan any paper form, speak your answers, and get a completed official PDF back. 
 | `app.html` | The entire app — single-file, ~5,700 lines. Keep it single-file. |
 | `index.html` | Marketing / landing page. |
 | `privacy.html`, `terms.html` | Legal pages. |
-| `api/chat.js` | Generic Anthropic proxy (being hardened / retired — see work order Phase 1). |
 | `api/scanDocument.js` | Claude document-corner detection (fallback-only as of Phase 2). |
 | `api/extractFields.js` | Claude form-field extraction from a scanned image. |
 | `api/mapVoiceToFields.js` | Maps a voice transcript onto extracted form fields. |
@@ -37,6 +36,21 @@ Set via the Vercel dashboard or REST API. Grows each phase of the production-har
 | `EXTRACT_FIELDS_MODEL` | Phase 0 | Optional model override for `extractFields` (default `claude-sonnet-4-6`). |
 | `MAP_VOICE_MODEL` | Phase 0 | Optional model override for `mapVoiceToFields` (default `claude-sonnet-4-6`). |
 | `SCAN_DOCUMENT_MODEL` | Phase 0 | Optional model override for `scanDocument` (default `claude-sonnet-4-20250514`). |
+| `APP_SHARED_SECRET` | Phase 1 | Optional interim app gate. When set, all AI endpoints require an `x-tio-app` header matching this value, and the same value must be placed in `app.html`'s `APP_SHARED_SECRET` const. **Obfuscation, not security** — real gate is the Phase 5 session cookie. Leave unset to disable. |
+| `EXTRACT_FORM_FIELDS_MODEL` | Phase 1 | Optional model override for `extractFormFields` (default `claude-sonnet-4-6`). |
+| `REWRITE_MODEL` | Phase 1 | Optional model override for `rewrite` (default `claude-sonnet-4-6`). |
+
+### API endpoints
+
+| Endpoint | Input | Purpose |
+|----------|-------|---------|
+| `POST /api/extractFormFields` | `{ images: [base64…], mimeType }` or `{ text }` | Extract form fields from scanned image(s) or document text. Model/prompt/limits hardcoded server-side. Returns `{ fields: [...] }` or `{ fields: [], error }`. |
+| `POST /api/rewrite` | `{ transcript, tone }` (`tone` ∈ professional\|concise\|detailed\|plain) | Rewrite a spoken account into professional documentation. Returns `{ text }`. |
+| `POST /api/scanDocument` | `{ imageData, mimeType, imageWidth, imageHeight }` | Claude document-corner detection (Phase 2: fallback-only). |
+| `POST /api/extractFields` | `{ imageData, mimeType }` | Alt field extraction (id/label + 0–1 fraction coords). |
+| `POST /api/mapVoiceToFields` | `{ transcript, fields }` | Map a transcript onto extracted fields. |
+
+> The generic `/api/chat` proxy was **removed in Phase 1** — all AI features now go through the purpose-built endpoints above, each of which hardcodes its model, system prompt, and token limits server-side. There is no generic Anthropic pass-through in the deployment.
 
 ## CORS
 

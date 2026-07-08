@@ -2168,6 +2168,18 @@ window.addEventListener('unhandledrejection', function(e) {
 </script>
 
 <script>
+// ===== AI ENDPOINT CONFIG =====
+// TODO(phase5): interim app gate. A secret embedded in client HTML is
+// obfuscation, not security — the real gate is the Phase 5 session cookie.
+// Leave empty to disable; if set, must match APP_SHARED_SECRET in Vercel.
+const APP_SHARED_SECRET = '';
+// Standard JSON headers for AI endpoint calls, plus the interim app gate header.
+function aiHeaders(extra) {
+  const h = { 'Content-Type': 'application/json' };
+  if (APP_SHARED_SECRET) h['x-tio-app'] = APP_SHARED_SECRET;
+  return Object.assign(h, extra || {});
+}
+
 // ===== SESSION STATE =====
 let session = {
   refNumber: "",
@@ -3251,34 +3263,19 @@ async function processScannedImage(base64Data, mimeType) {
     showScreen('screen-err-network'); return;
   }
   try {
-    const resp = await fetch("/api/chat", {
+    const resp = await fetch("/api/extractFormFields", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 2000,
-        messages: [{
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: mediaType, data: base64Data } },
-            { type: "text", text: 'Extract all form fields from this workplace form image. Return ONLY a JSON array, no other text. Each item: { "name": string, "type": "short_text"|"long_text"|"date"|"checkbox"|"signature", "required": boolean, "x": number, "y": number, "w": number, "h": number } where x/y are the top-left corner of the field as a percentage of image width/height (0-100), and w/h are the field\'s width/height as percentages. If you cannot read the form return { "error": "cannot_read" }.' }
-          ]
-        }]
-      })
+      headers: aiHeaders(),
+      body: JSON.stringify({ images: [base64Data], mimeType: mediaType })
     });
     if (!resp.ok) {
       const errBody = await resp.json().catch(() => ({}));
-      const msg = errBody?.error?.message || errBody?.error?.type || JSON.stringify(errBody).slice(0, 200);
-      showScanError('image API ' + resp.status + ': ' + msg); return;
+      showScanError('image API ' + resp.status + ': ' + (errBody?.error || resp.status)); return;
     }
     const data = await resp.json();
-    const raw = data.content?.[0]?.text?.trim();
-    if (!raw) { showScanError('empty API response'); return; }
-    const parsed = parseClaudeJson(raw);
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) {
-      showScanError('parse failed: ' + raw.slice(0, 120)); return;
+    const parsed = data.fields;
+    if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
+      showScanError('could not read form: ' + (data.error || 'no fields')); return;
     }
     session.fields = parsed;
     session.formImage = base64Data;
@@ -3409,29 +3406,20 @@ async function processScannedDocument(base64Data) {
     const previewImg = document.getElementById('scan-preview-img');
     previewImg.src = 'data:image/jpeg;base64,' + pageImages[0];
     previewImg.style.display = 'block';
-    // Build content array: one image block per page + prompt
-    const content = pageImages.map(b64 => ({
-      type: 'image',
-      source: { type: 'base64', media_type: 'image/jpeg', data: b64 }
-    }));
-    content.push({ type: 'text', text: 'Extract all form fields from this workplace form (all pages shown). Return ONLY a JSON array, no other text. Each item: { "name": string, "type": "short_text"|"long_text"|"date"|"checkbox"|"signature", "required": boolean, "x": number, "y": number, "w": number, "h": number } where x/y are the top-left corner of the field as a percentage of the FIRST page\'s width/height (0-100), and w/h are the field\'s width/height as percentages. If you cannot read the form return { "error": "cannot_read" }.' });
     if (!navigator.onLine) { showScreen('screen-err-network'); return; }
-    const resp = await fetch('/api/chat', {
+    const resp = await fetch('/api/extractFormFields', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, messages: [{ role: 'user', content }] })
+      headers: aiHeaders(),
+      body: JSON.stringify({ images: pageImages, mimeType: 'image/jpeg' })
     });
     if (!resp.ok) {
       const errBody = await resp.json().catch(() => ({}));
-      const msg = errBody?.error?.message || errBody?.error?.type || JSON.stringify(errBody).slice(0, 200);
-      showScanError('pdf API ' + resp.status + ': ' + msg); return;
+      showScanError('pdf API ' + resp.status + ': ' + (errBody?.error || resp.status)); return;
     }
     const data = await resp.json();
-    const raw = data.content?.[0]?.text?.trim();
-    if (!raw) { showScanError('empty pdf API response'); return; }
-    const parsed = parseClaudeJson(raw);
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) {
-      showScanError('pdf parse failed: ' + raw.slice(0, 120)); return;
+    const parsed = data.fields;
+    if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
+      showScanError('could not read pdf form: ' + (data.error || 'no fields')); return;
     }
     session.fields = parsed;
     session.formImage = pageImages[0];
@@ -3447,25 +3435,16 @@ async function processScannedText(text) {
   if (!navigator.onLine) { showScreen('screen-err-network'); return; }
   if (!text || text.trim().length < 10) { showScanError('word doc: extracted text too short (' + (text ? text.trim().length : 0) + ' chars)'); return; }
   try {
-    const resp = await fetch("/api/chat", {
+    const resp = await fetch("/api/extractFormFields", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
-        messages: [{
-          role: "user",
-          content: `Extract all form fields from this workplace form document text. Return ONLY a JSON array, no other text. Each item: { name: string, type: 'short_text'|'long_text'|'date'|'checkbox'|'signature', required: boolean }. If you cannot identify form fields return { error: 'cannot_read' }.\n\nDocument text:\n${text.slice(0, 8000)}`
-        }]
-      })
+      headers: aiHeaders(),
+      body: JSON.stringify({ text: text.slice(0, 8000) })
     });
     if (!resp.ok) { showScanError('text API ' + resp.status); return; }
     const data = await resp.json();
-    const raw = data.content?.[0]?.text?.trim();
-    if (!raw) { showScanError('empty text API response'); return; }
-    const parsed = parseClaudeJson(raw);
-    if (!parsed || parsed.error === 'cannot_read' || !Array.isArray(parsed) || parsed.length === 0) {
-      showScanError('text parse failed: ' + raw.slice(0, 120)); return;
+    const parsed = data.fields;
+    if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
+      showScanError('could not read text form: ' + (data.error || 'no fields')); return;
     }
     session.fields = parsed;
     session.refNumber = generateRef();
@@ -4220,29 +4199,16 @@ async function callRewriteAPI(transcript, tone) {
     document.getElementById('rewrite-result').textContent = transcript;
     return;
   }
-  let toneInstr = '';
-  if (tone === 'concise') toneInstr = ' Be concise and brief.';
-  else if (tone === 'detailed') toneInstr = ' Include thorough detail.';
-  else if (tone === 'plain') toneInstr = ' Use simple, plain language.';
-  else toneInstr = ' Use formal, professional workplace documentation language.';
+  const toneKey = (tone === 'concise' || tone === 'detailed' || tone === 'plain') ? tone : 'professional';
   try {
-    const resp = await fetch("/api/chat", {
+    const resp = await fetch("/api/rewrite", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 500,
-        messages: [{
-          role: "user",
-          content: `Rewrite the following spoken account into formal, professional workplace documentation language. Preserve all facts exactly.${toneInstr} Return only the rewritten text, no preamble:\n\n${transcript}`
-        }]
-      })
+      headers: aiHeaders(),
+      body: JSON.stringify({ transcript, tone: toneKey })
     });
     if (!resp.ok) throw new Error('API error');
     const data = await resp.json();
-    document.getElementById('rewrite-result').textContent = data.content?.[0]?.text?.trim() || transcript;
+    document.getElementById('rewrite-result').textContent = data.text?.trim() || transcript;
   } catch {
     document.getElementById('rewrite-result').textContent = transcript;
   } finally {
