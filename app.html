@@ -3745,67 +3745,191 @@ function renderVoiceAllScreen() {
   isAllMicRecording = false;
 }
 
+// ===== AUDIO CAPTURE + WHISPER TRANSCRIPTION (Phase 4) =====
+// Primary path: MediaRecorder -> /api/transcribe (Groq Whisper). Web Speech,
+// when present, runs in parallel for live on-screen interim ONLY; the server
+// transcript is the source of truth submitted for mapping. No-capture devices
+// keep the existing type-instead fallback.
+let allMicRecorder = null;
+let miniRecorder = null;
+let fieldRecorder = null;
+const REC_MAX_MS = 90000;
+const REC_MAX_BYTES = 5 * 1024 * 1024;
+
+function pickAudioMime() {
+  const cands = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/mp4;codecs=mp4a.40.2', 'audio/aac', 'audio/ogg;codecs=opus'];
+  if (window.MediaRecorder && MediaRecorder.isTypeSupported) {
+    for (let i = 0; i < cands.length; i++) { if (MediaRecorder.isTypeSupported(cands[i])) return cands[i]; }
+  }
+  return '';
+}
+function audioCaptureSupported() {
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+}
+function nowMs() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
+
+// Recorder controller. onTick(ms,maxMs) each 200ms; onCap() at the 90s/5MB cap.
+function createAudioRecorder() {
+  let mr = null, stream = null, chunks = [], startTs = 0, mime = '', timer = null;
+  return {
+    async start(onTick, onCap) {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mime = pickAudioMime();
+      chunks = [];
+      mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      mr.ondataavailable = function(e) { if (e.data && e.data.size) chunks.push(e.data); };
+      startTs = nowMs();
+      mr.start(250);
+      timer = setInterval(function() {
+        const ms = nowMs() - startTs;
+        if (onTick) onTick(ms, REC_MAX_MS);
+        let total = 0; for (let i = 0; i < chunks.length; i++) total += chunks[i].size;
+        if (ms >= REC_MAX_MS || total >= REC_MAX_BYTES) { if (onCap) onCap(); }
+      }, 200);
+    },
+    async stop() {
+      if (timer) { clearInterval(timer); timer = null; }
+      if (!mr) return null;
+      const done = new Promise(function(res) { mr.onstop = function() { res(); }; });
+      try { mr.stop(); } catch (e) {}
+      await done;
+      if (stream) stream.getTracks().forEach(function(t) { t.stop(); });
+      const type = mime || (chunks[0] && chunks[0].type) || 'audio/webm';
+      return new Blob(chunks, { type: type });
+    }
+  };
+}
+
+function speechLang() {
+  const s = getSettings();
+  return s.language === 'es' ? 'es-US' : s.language === 'ht' ? 'fr-HT' : s.language === 'zh' ? 'zh-CN' : s.language === 'ar' ? 'ar' : 'en-US';
+}
+function whisperLang() {
+  const s = getSettings();
+  return ({ es: 'es', ht: 'ht', zh: 'zh', ar: 'ar', en: 'en' })[s.language] || 'en';
+}
+function fmtRecTimer(ms, maxMs) {
+  const left = Math.max(0, Math.ceil((maxMs - ms) / 1000));
+  return 'Recording ' + Math.floor(ms / 1000) + 's · ' + left + 's left';
+}
+
+// Upload an audio blob to the Whisper endpoint; returns the transcript text.
+async function transcribeBlob(blob) {
+  if (!blob || !blob.size) return '';
+  if (blob.size > REC_MAX_BYTES) throw new Error('audio too large');
+  const b64 = await new Promise(function(res, rej) {
+    const r = new FileReader();
+    r.onload = function() { res(String(r.result).split(',')[1]); };
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+  const resp = await fetch('/api/transcribe', {
+    method: 'POST', headers: aiHeaders(),
+    body: JSON.stringify({ audio: b64, mimeType: blob.type, language: whisperLang() })
+  });
+  if (!resp.ok) throw new Error('transcribe HTTP ' + resp.status);
+  const data = await resp.json();
+  return (data && data.transcript) || '';
+}
+
+// Web Speech recogniser for LIVE INTERIM DISPLAY ONLY (best-effort). Returns the
+// recogniser (to stop later) or null if unsupported.
+function startInterim(onInterim) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const rec = new SR();
+  rec.lang = speechLang();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.onresult = function(e) {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) interim += e.results[i][0].transcript + ' ';
+    if (onInterim) onInterim(interim.trim());
+  };
+  try { rec.start(); } catch (e) { return null; }
+  return rec;
+}
+function stopInterim(rec) { if (rec) { try { rec.stop(); } catch (e) {} } }
+
 function toggleAllMic() {
   if (isAllMicRecording) stopAllMic(); else startAllMic();
 }
 
-function startAllMic() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    document.getElementById('voice-all-transcript-display').textContent = '';
+async function startAllMic() {
+  const statusEl = document.getElementById('voice-all-mic-status');
+  const display = document.getElementById('voice-all-transcript-display');
+  const btn = document.getElementById('voice-all-mic-btn');
+
+  // No audio capture at all -> keep the type-instead fallback.
+  if (!audioCaptureSupported()) {
+    display.textContent = '';
     document.getElementById('voice-all-submit-btn').disabled = false;
-    document.getElementById('voice-all-mic-status').textContent = 'Voice not supported — type your answers above';
+    statusEl.textContent = 'Voice not supported \u2014 type your answers above';
     return;
   }
-  allMicRecognition = new SpeechRecognition();
-  const settings = getSettings();
-  allMicRecognition.lang = settings.language === 'es' ? 'es-US' : settings.language === 'ht' ? 'fr-HT' : settings.language === 'zh' ? 'zh-CN' : settings.language === 'ar' ? 'ar' : 'en-US';
-  allMicRecognition.continuous = true;
-  allMicRecognition.interimResults = true;
-  let finalTranscript = '';
 
-  allMicRecognition.onstart = function() {
-    isAllMicRecording = true;
-    document.getElementById('voice-all-mic-btn').classList.add('recording');
-    document.getElementById('voice-all-mic-status').textContent = 'Listening \u2014 speak naturally\u2026';
-  };
-  allMicRecognition.onresult = function(e) {
-    let interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
-      else interim += e.results[i][0].transcript;
-    }
-    allMicTranscript = finalTranscript.trim();
-    const display = document.getElementById('voice-all-transcript-display');
-    if (interim) {
-      display.innerHTML = finalTranscript + '<span style="color:var(--color-text-muted);font-style:italic;">' + interim + '</span>';
-    } else {
-      display.textContent = finalTranscript;
-    }
-    if (allMicTranscript) document.getElementById('voice-all-submit-btn').disabled = false;
-  };
-  allMicRecognition.onerror = function(e) {
-    stopAllMic();
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') showScreen('screen-err-voice');
-  };
-  allMicRecognition.onend = function() { if (isAllMicRecording) stopAllMic(); };
-  try { allMicRecognition.start(); } catch { showScreen('screen-err-voice'); }
+  allMicRecorder = createAudioRecorder();
+  // Live interim (display only). The server transcript is the source of truth.
+  allMicRecognition = startInterim(function(interim) {
+    display.innerHTML = escHtml(allMicTranscript) + (allMicTranscript ? ' ' : '') +
+      '<span style="color:var(--color-text-muted);font-style:italic;">' + escHtml(interim) + '</span>';
+  });
+
+  try {
+    await allMicRecorder.start(
+      function(ms, max) { statusEl.textContent = fmtRecTimer(ms, max); },
+      function() { stopAllMic(); }
+    );
+  } catch (e) {
+    stopInterim(allMicRecognition); allMicRecognition = null;
+    allMicRecorder = null;
+    showScreen('screen-err-voice');
+    return;
+  }
+  isAllMicRecording = true;
+  btn.classList.add('recording');
+  statusEl.textContent = 'Listening \u2014 speak naturally\u2026';
 }
 
-function stopAllMic() {
+async function stopAllMic() {
+  if (!isAllMicRecording) return;
   isAllMicRecording = false;
-  if (allMicRecognition) { try { allMicRecognition.stop(); } catch {} }
   const btn = document.getElementById('voice-all-mic-btn');
   if (btn) btn.classList.remove('recording');
-  const status = document.getElementById('voice-all-mic-status');
-  if (status) status.textContent = allMicTranscript ? 'Recording done \u2014 tap again to add more' : 'Tap to start recording';
+  const statusEl = document.getElementById('voice-all-mic-status');
+  stopInterim(allMicRecognition); allMicRecognition = null;
+
+  const recorder = allMicRecorder; allMicRecorder = null;
+  if (!recorder) return;
+  let blob = null;
+  try { blob = await recorder.stop(); } catch (e) {}
+  if (!blob || !blob.size) {
+    if (statusEl) statusEl.textContent = allMicTranscript ? 'Recording done \u2014 tap again to add more' : 'Tap to start recording';
+    return;
+  }
+
+  if (statusEl) statusEl.textContent = 'Transcribing\u2026';
+  try {
+    const text = await transcribeBlob(blob);
+    if (text) allMicTranscript = (allMicTranscript ? allMicTranscript + ' ' : '') + text;
+  } catch (e) {
+    console.warn('[Voice] transcription failed:', e && e.message);
+    if (statusEl) statusEl.textContent = 'Could not transcribe \u2014 tap to try again, or type above';
+    if (allMicTranscript) document.getElementById('voice-all-submit-btn').disabled = false;
+    return;
+  }
+  const display = document.getElementById('voice-all-transcript-display');
+  if (display) display.textContent = allMicTranscript;
+  if (allMicTranscript) document.getElementById('voice-all-submit-btn').disabled = false;
+  if (statusEl) statusEl.textContent = 'Recording done \u2014 tap again to add more';
 }
 
 async function submitAllTranscript() {
+  // If still recording, finish + transcribe first so we submit the real text.
+  if (isAllMicRecording) await stopAllMic();
   const transcript = allMicTranscript.trim() ||
     document.getElementById('voice-all-transcript-display').textContent.trim();
   if (!transcript) { alert('Please record your answers first.'); return; }
-  stopAllMic();
   document.getElementById('voice-all-mapping-overlay').style.display = 'flex';
   document.getElementById('voice-all-submit-btn').disabled = true;
   try {
@@ -4200,44 +4324,71 @@ function toggleMiniMic() {
   if (isMiniRecording) stopMiniMic(); else startMiniMic();
 }
 
-function startMiniMic() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) return;
-  miniRecognition = new SpeechRecognition();
-  miniRecognition.continuous = false;
-  miniRecognition.interimResults = true;
-  miniTranscript = '';
+async function startMiniMic() {
+  const tEl = document.getElementById('mini-recorder-transcript');
+  // No MediaRecorder: fall back to Web Speech-only (previous behaviour) if any.
+  if (!audioCaptureSupported()) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { if (tEl) tEl.textContent = 'Voice not supported on this device.'; return; }
+    miniRecognition = new SR();
+    miniRecognition.continuous = false; miniRecognition.interimResults = true; miniRecognition.lang = speechLang();
+    miniTranscript = '';
+    miniRecognition.onstart = function() { isMiniRecording = true; document.getElementById('mini-mic-btn').classList.add('recording'); };
+    miniRecognition.onresult = function(e) {
+      let final = '', interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript; else interim += e.results[i][0].transcript;
+      }
+      if (final) { miniTranscript = final; tEl.textContent = final; document.getElementById('mini-recorder-use-btn').disabled = false; stopMiniMic(); }
+      else if (interim) { tEl.innerHTML = '<span style="color:var(--color-text-muted);font-style:italic;">' + escHtml(interim) + '</span>'; }
+    };
+    miniRecognition.onerror = function() { stopMiniMic(); };
+    miniRecognition.onend = function() { if (isMiniRecording) stopMiniMic(); };
+    try { miniRecognition.start(); } catch (e) {}
+    return;
+  }
 
-  miniRecognition.onstart = function() {
-    isMiniRecording = true;
-    document.getElementById('mini-mic-btn').classList.add('recording');
-  };
-  miniRecognition.onresult = function(e) {
-    let final = '', interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
-    }
-    if (final) {
-      miniTranscript = final;
-      document.getElementById('mini-recorder-transcript').textContent = final;
-      document.getElementById('mini-recorder-use-btn').disabled = false;
-      stopMiniMic();
-    } else if (interim) {
-      document.getElementById('mini-recorder-transcript').innerHTML =
-        '<span style="color:var(--color-text-muted);font-style:italic;">' + interim + '</span>';
-    }
-  };
-  miniRecognition.onerror = function() { stopMiniMic(); };
-  miniRecognition.onend = function() { if (isMiniRecording) stopMiniMic(); };
-  try { miniRecognition.start(); } catch {}
+  miniRecorder = createAudioRecorder();
+  let sawInterim = false;
+  miniRecognition = startInterim(function(interim) {
+    sawInterim = true;
+    if (tEl) tEl.innerHTML = '<span style="color:var(--color-text-muted);font-style:italic;">' + escHtml(interim) + '</span>';
+  });
+  try {
+    await miniRecorder.start(
+      function(ms, max) { if (!sawInterim && tEl) tEl.textContent = fmtRecTimer(ms, max); },
+      function() { stopMiniMic(); }
+    );
+  } catch (e) {
+    stopInterim(miniRecognition); miniRecognition = null; miniRecorder = null;
+    if (tEl) tEl.textContent = 'Microphone unavailable.';
+    return;
+  }
+  isMiniRecording = true;
+  document.getElementById('mini-mic-btn').classList.add('recording');
 }
 
-function stopMiniMic() {
-  isMiniRecording = false;
-  if (miniRecognition) { try { miniRecognition.stop(); } catch {} }
+async function stopMiniMic() {
   const btn = document.getElementById('mini-mic-btn');
   if (btn) btn.classList.remove('recording');
+  const tEl = document.getElementById('mini-recorder-transcript');
+  const wasRecording = isMiniRecording;
+  isMiniRecording = false;
+  stopInterim(miniRecognition); miniRecognition = null;
+
+  const recorder = miniRecorder; miniRecorder = null;
+  if (!recorder) return; // Web Speech-only path already set miniTranscript.
+  let blob = null;
+  try { blob = await recorder.stop(); } catch (e) {}
+  if (!wasRecording || !blob || !blob.size) return;
+  if (tEl) tEl.textContent = 'Transcribing\u2026';
+  try {
+    const text = await transcribeBlob(blob);
+    if (text) { miniTranscript = text; if (tEl) tEl.textContent = text; document.getElementById('mini-recorder-use-btn').disabled = false; }
+    else if (tEl) { tEl.textContent = 'Nothing heard \u2014 tap to try again.'; }
+  } catch (e) {
+    if (tEl) tEl.textContent = 'Could not transcribe \u2014 tap to try again.';
+  }
 }
 
 async function useMiniTranscript() {
@@ -4416,64 +4567,79 @@ function toggleMic() {
   }
 }
 
-function startMic() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    showScreen('screen-err-voice'); return;
+async function startMic() {
+  const statusEl = document.getElementById('mic-status');
+  const display = document.getElementById('transcript-display');
+
+  // No MediaRecorder: fall back to Web Speech-only (previous behaviour), else error.
+  if (!audioCaptureSupported()) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { showScreen('screen-err-voice'); return; }
+    recognition = new SR();
+    recognition.lang = speechLang(); recognition.continuous = false; recognition.interimResults = true;
+    recognition.onstart = function() {
+      isRecording = true;
+      document.getElementById('mic-btn').classList.add('recording');
+      statusEl.textContent = 'Listening\u2026';
+      document.getElementById('mic-pulse-ring').style.animation = 'pulse 1.2s ease-out infinite';
+    };
+    recognition.onresult = function(e) {
+      let interim = '', final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript; else interim += e.results[i][0].transcript;
+      }
+      if (final) { currentTranscript = final; display.textContent = final; stopMic(); handleTranscriptComplete(final); }
+      else if (interim) { display.innerHTML = '<span style="color:var(--color-text-muted);font-style:italic;">' + escHtml(interim) + '</span>'; }
+    };
+    recognition.onerror = function(e) { stopMic(); if (e.error === 'not-allowed' || e.error === 'service-not-allowed') showScreen('screen-err-voice'); };
+    recognition.onend = function() { if (isRecording) stopMic(); };
+    try { recognition.start(); } catch (e) { showScreen('screen-err-voice'); }
+    return;
   }
-  recognition = new SpeechRecognition();
-  const settings = getSettings();
-  recognition.lang = settings.language === 'es' ? 'es-US' : settings.language === 'ht' ? 'fr-HT' : settings.language === 'zh' ? 'zh-CN' : settings.language === 'ar' ? 'ar' : 'en-US';
-  recognition.continuous = false;
-  recognition.interimResults = true;
 
-  recognition.onstart = () => {
-    isRecording = true;
-    document.getElementById('mic-btn').classList.add('recording');
-    document.getElementById('mic-status').textContent = 'Listening…';
-    document.getElementById('mic-pulse-ring').style.animation = 'pulse 1.2s ease-out infinite';
-  };
-
-  recognition.onresult = (e) => {
-    let interim = '', final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
-    }
-    if (final) {
-      currentTranscript = final;
-      document.getElementById('transcript-display').textContent = final;
-      stopMic();
-      handleTranscriptComplete(final);
-    } else if (interim) {
-      document.getElementById('transcript-display').innerHTML = `<span style="color:var(--color-text-muted);font-style:italic;">${interim}</span>`;
-    }
-  };
-
-  recognition.onerror = (e) => {
-    stopMic();
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      showScreen('screen-err-voice');
-    }
-  };
-
-  recognition.onend = () => {
-    stopMic();
-    if (currentTranscript) handleTranscriptComplete(currentTranscript);
-  };
-
-  try { recognition.start(); } catch { showScreen('screen-err-voice'); }
+  fieldRecorder = createAudioRecorder();
+  recognition = startInterim(function(interim) {
+    display.innerHTML = '<span style="color:var(--color-text-muted);font-style:italic;">' + escHtml(interim) + '</span>';
+  });
+  try {
+    await fieldRecorder.start(
+      function(ms, max) { statusEl.textContent = fmtRecTimer(ms, max); },
+      function() { stopMic(); }
+    );
+  } catch (e) {
+    stopInterim(recognition); recognition = null; fieldRecorder = null;
+    showScreen('screen-err-voice');
+    return;
+  }
+  isRecording = true;
+  document.getElementById('mic-btn').classList.add('recording');
+  statusEl.textContent = 'Listening\u2026';
+  const pr = document.getElementById('mic-pulse-ring'); if (pr) pr.style.animation = 'pulse 1.2s ease-out infinite';
 }
 
-function stopMic() {
-  isRecording = false;
-  if (recognition) { try { recognition.stop(); } catch {} }
-  const btn = document.getElementById('mic-btn');
-  if (btn) btn.classList.remove('recording');
+async function stopMic() {
+  const btn = document.getElementById('mic-btn'); if (btn) btn.classList.remove('recording');
   const status = document.getElementById('mic-status');
+  const pulse = document.getElementById('mic-pulse-ring'); if (pulse) pulse.style.animation = '';
+  const wasRecording = isRecording;
+  isRecording = false;
+  stopInterim(recognition); recognition = null;
+
+  const recorder = fieldRecorder; fieldRecorder = null;
+  if (!recorder) { if (status) status.textContent = 'Tap to start recording'; return; }
+  let blob = null;
+  try { blob = await recorder.stop(); } catch (e) {}
+  if (!wasRecording || !blob || !blob.size) { if (status) status.textContent = 'Tap to start recording'; return; }
+  if (status) status.textContent = 'Transcribing\u2026';
+  let text = '';
+  try { text = await transcribeBlob(blob); }
+  catch (e) { if (status) status.textContent = 'Could not transcribe \u2014 tap to try again'; return; }
   if (status) status.textContent = 'Tap to start recording';
-  const pulse = document.getElementById('mic-pulse-ring');
-  if (pulse) pulse.style.animation = '';
+  if (text) {
+    currentTranscript = text;
+    const display = document.getElementById('transcript-display'); if (display) display.textContent = text;
+    handleTranscriptComplete(text);
+  }
 }
 
 function handleTranscriptComplete(transcript) {
