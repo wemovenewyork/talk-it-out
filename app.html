@@ -2277,7 +2277,8 @@ function handleSignIn() {
   const password = document.getElementById('signin-password').value;
   if (!email || !password) { alert('Please enter your email and password.'); return; }
   const user = getUser();
-  const storedPass = getLS('tio_password');
+  // Local auth remains demo-only until Phase 5 (real server auth). We no longer
+  // store plaintext credentials; sign-in just proceeds if the email matches.
   if (user.email && user.email !== email) { alert('Account not found.'); return; }
   // Accept any password for demo; real app would validate
   if (!user.email) {
@@ -2293,7 +2294,8 @@ function handleCreateAccount() {
   const orgCode = document.getElementById('create-orgcode').value.trim().toUpperCase();
   if (!name || !email || !password) { alert('Please fill all required fields.'); return; }
   setUser({ name, email, personalEmail: '', orgCode });
-  setLS('tio_password', password);
+  // Plaintext password intentionally NOT stored (was setLS('tio_password', ...)).
+  // Real credential handling arrives in Phase 5.
   afterAuth();
 }
 

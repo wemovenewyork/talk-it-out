@@ -7,10 +7,26 @@ export const config = {
   },
 };
 
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "https://talk-it-out-two.vercel.app");
+// NOTE(phase2): this endpoint becomes a FALLBACK only — client-side jscanify/
+// OpenCV.js is the primary document-boundary detector. Model kept as-is.
+const MODEL = process.env.SCAN_DOCUMENT_MODEL || "claude-sonnet-4-20250514";
+
+// Env-driven CORS allowlist. Reflect the request Origin only if it is on the
+// comma-separated ALLOWED_ORIGINS list; allow same-origin (no Origin header).
+function applyCors(req, res) {
+  const allowed = (process.env.ALLOWED_ORIGINS || "")
+    .split(",").map(o => o.trim()).filter(Boolean);
+  const origin = req.headers.origin;
+  if (origin && allowed.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-tio-app");
+}
+
+export default async function handler(req, res) {
+  applyCors(req, res);
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -39,7 +55,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: MODEL,
         max_tokens: 512,
         system: `You are a precise document boundary detector. Your only job is to locate the four physical corner pixels of a paper document in a photo.
 
