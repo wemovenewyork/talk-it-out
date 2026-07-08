@@ -51,5 +51,19 @@ Run on **iOS Safari** and **Android Chrome** (the target field devices).
       values/PII in Sentry payloads or server logs.
 - [ ] PDF password-lock (encrypt) path produces an openable, password-protected PDF.
 
+## Output convergence — every path yields the filled scan (WO2)
+- [ ] **A. Field-by-field parity:** camera-scan a printed form → answer via the
+      one-at-a-time voice flow → review shows answers drawn **on the form image**
+      (stats strip above it) → Confirm → the output/downloaded/emailed/history PDF
+      **page 1 is the scanned form with answers on the lines**; typed summary
+      appended after.
+- [ ] **B. Voice-all parity:** same filled-scan result via the speak-it-all path.
+- [ ] **C. Draft resume:** scan → answer half → save draft → close app → resume →
+      finish → same filled-scan artifact (canvas rehydrated from the draft).
+- [ ] **D. No-canvas fallback:** manual entry (no scan) → typed "Summary PDF",
+      correctly labeled; `submitApproval` reached without a console routing warning.
+- [ ] **E. Second device:** history on another device serves the filled-scan PDF
+      for A–C.
+
 ## Landing page
 - [ ] `index.html` claims match reality (offline, the 5 named languages, security).

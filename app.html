@@ -2546,6 +2546,9 @@ function resumeDraft() {
   const d = drafts[0];
   session = Object.assign(session, d);
   session.draft = true;
+  // Canvas isn't serialisable; clear it so review rehydrates from the draft's
+  // stored session.formImage (WO2 canvas-lifetime audit).
+  currentFormCanvas = null; currentFormFields = [];
   showScreen('screen-voice');
 }
 
@@ -4115,6 +4118,8 @@ function renderFormReview() {
   const _adjFont = document.getElementById('adjust-font-controls'); if (_adjFont) _adjFont.style.display = 'none';
   const _adjHint = document.getElementById('adjust-hint'); if (_adjHint) _adjHint.style.display = 'none';
   const _ov = document.getElementById('form-review-overlay'); if (_ov) _ov.style.pointerEvents = 'none';
+  // Stats strip is hidden by default; the field-by-field reroute (WO2) shows it.
+  const _st = document.getElementById('form-review-stats'); if (_st) _st.style.display = 'none';
 
   document.getElementById('form-review-type').textContent = session.formType || 'Form';
   const user = getUser();
@@ -4582,6 +4587,84 @@ function wrapTextLines(ctx, text, maxWidth) {
   return lines;
 }
 
+// ===== WO2: OUTPUT CONVERGENCE (field-by-field -> overlay) =====
+// Bridge the field-by-field data model (session.fields + session.answers) onto
+// the coordinate-bearing currentFormFields the overlay/composition step expects.
+// session.fields (from extractFormFields) carries x/y/w/h as 0-100 percentages;
+// the overlay uses 0-1 fractions + label + value.
+function bridgeSessionToFormFields() {
+  const fields = session.fields || [];
+  const answers = session.answers || [];
+  currentFormFields = fields.map(function(f, i) {
+    const ans = answers[i];
+    const has100 = isFinite(f.x) && isFinite(f.y) && isFinite(f.w) && isFinite(f.h);
+    return {
+      id: 'f' + i,
+      label: f.name || f.label || ('Field ' + (i + 1)),
+      type: f.type || 'text',
+      x:      has100 ? f.x / 100 : (isFinite(f.x) ? f.x : 0),
+      y:      has100 ? f.y / 100 : (isFinite(f.y) ? f.y : 0),
+      width:  has100 ? f.w / 100 : (isFinite(f.width) ? f.width : 0.3),
+      height: has100 ? f.h / 100 : (isFinite(f.height) ? f.height : 0.04),
+      value: (ans && ans.value) || ''
+    };
+  });
+  return currentFormFields;
+}
+
+// Rehydrate currentFormCanvas from session.formImage when it was never set or was
+// lost (draft resume, PDF-scan path, reload) so composition always has pixels.
+function ensureFormCanvas() {
+  return new Promise(function(resolve) {
+    if (currentFormCanvas) return resolve(currentFormCanvas);
+    if (!session.formImage) return resolve(null);
+    const img = new Image();
+    img.onload = function() {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      c.getContext('2d').drawImage(img, 0, 0);
+      currentFormCanvas = c;
+      resolve(c);
+    };
+    img.onerror = function() { resolve(null); };
+    img.src = 'data:image/jpeg;base64,' + session.formImage;
+  });
+}
+
+// Append the typed summary (form type, ref, field/answer table, transcript,
+// signature) as page(s) AFTER the filled-form image. Companion, not replacement.
+function appendSummaryPages(doc, fields) {
+  doc.addPage();
+  const margin = 60; let y = margin;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
+  doc.text((session.formType || 'Workplace Form') + ' — Summary', margin, y); y += 24;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(120);
+  doc.text('Ref: ' + session.refNumber + '   |   ' + new Date().toLocaleString(), margin, y); y += 22;
+  doc.setTextColor(0);
+  (fields || []).forEach(function(f) {
+    if (y > 720) { doc.addPage(); y = margin; }
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100);
+    doc.text(String(f.label || f.name || 'Field').toUpperCase(), margin, y); y += 14;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
+    doc.splitTextToSize(String(f.value || '—'), 480).forEach(function(line) {
+      if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15;
+    });
+    y += 8;
+  });
+  if (currentFormSummary) {
+    if (y > 680) { doc.addPage(); y = margin; }
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100); doc.text('SUMMARY', margin, y); y += 14;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
+    doc.splitTextToSize(currentFormSummary, 480).forEach(function(line) { if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15; });
+    y += 8;
+  }
+  if (session.signature) {
+    if (y > 640) { doc.addPage(); y = margin; }
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100); doc.text('SIGNATURE', margin, y); y += 16;
+    try { doc.addImage(session.signature, 'PNG', margin, y, 150, 50); } catch (e) {}
+  }
+}
+
 async function confirmFilledForm() {
   if (!currentFormCanvas) {
     // No canvas — generate a text-only PDF via the existing path
@@ -4637,6 +4720,9 @@ async function confirmFilledForm() {
   doc.addImage(out.toDataURL('image/jpeg', 0.92), 'JPEG', (pageW - imgW) / 2, 0, imgW, imgH);
   doc.setFontSize(7); doc.setTextColor(150);
   doc.text('Talk It Out   |   ' + session.refNumber + '   |   ' + new Date().toLocaleString(), 20, pageH - 10);
+
+  // WO2 Part 2: append the typed summary as companion page(s) after the form.
+  appendSummaryPages(doc, currentFormFields);
 
   // Store for the output screen download button
   session.scannedPdfUri = doc.output('datauristring');
@@ -4834,14 +4920,36 @@ function advanceField() {
   }
 }
 
-function goToFieldsDone() {
-  updateProgress(session.fields.length, session.fields.length);
+async function goToFieldsDone() {
+  const total = session.fields.length;
+  const answered = session.answers.filter(a => a && a.value).length;
+  updateProgress(total, total);
   const elapsed = Math.floor((Date.now() - (session.startTime || Date.now())) / 1000);
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
-  document.getElementById('done-fields-count').textContent = `${session.answers.filter(a => a && a.value).length} of ${session.fields.length}`;
+  const statsText = `${answered} of ${total} answered · ${session.rewriteCount || 0} rewrites · ${mins}:${String(secs).padStart(2, '0')}`;
+
+  // WO2: converge on the overlay composition whenever a form image exists — the
+  // field-by-field user sees their answers ON the scanned form and Confirm
+  // composes the filled-scan PDF (same step as voice-all). Typed summary only
+  // survives as the no-image fallback + the appended companion page.
+  if (session.formImage) {
+    await ensureFormCanvas();
+    bridgeSessionToFormFields();
+    currentFieldMappings = [];
+    currentFormSummary = '';
+    renderFormReview();
+    const st = document.getElementById('form-review-stats');
+    if (st) { st.textContent = statsText; st.style.display = 'block'; } // stats moment survives (WO2 1.3)
+    showScreen('screen-form-review');
+    syncBundleLabel();
+    return;
+  }
+
+  // No form image → typed-summary fallback (unchanged).
+  document.getElementById('done-fields-count').textContent = `${answered} of ${total}`;
   document.getElementById('done-rewrites-count').textContent = session.rewriteCount || 0;
-  document.getElementById('done-time').textContent = `${mins}:${String(secs).padStart(2,'0')}`;
+  document.getElementById('done-time').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
   showScreen('screen-fields-done');
   syncBundleLabel();
 }
@@ -5221,6 +5329,12 @@ function syncBundleLabel() {
 }
 
 function submitApproval() {
+  // WO2: fallback-only exit (no form image / no canvas). If a canvas exists we
+  // should have composed the filled overlay via confirmFilledForm — reaching
+  // here with a live canvas is a routing bug.
+  if (currentFormCanvas) {
+    console.warn('[WO2] submitApproval reached with a live currentFormCanvas — routing bug; the filled overlay should be composed via confirmFilledForm.');
+  }
   const user = getUser();
   const ts = new Date().toISOString();
   const record = {
@@ -5644,6 +5758,7 @@ async function nativeShare() {
 
 function fileAnotherForm() {
   session = { refNumber: '', formType: '', fields: [], answers: [], currentFieldIndex: 0, photos: [], confidential: false, signature: null, draft: false, startTime: null, rewriteCount: 0 };
+  currentFormCanvas = null; currentFormFields = []; // don't inherit a stale scan (WO2)
   updateProgress(0, 1);
   showScreen('screen-welcome');
 }
@@ -6389,6 +6504,7 @@ self.addEventListener('fetch', e => {
   <div id="form-review-summary-wrap" style="display:none;">
     <div class="review-summary-card" id="form-review-summary"></div>
   </div>
+  <div id="form-review-stats" style="display:none;font-size:12px;font-weight:600;color:var(--color-text-muted);background:var(--color-bg-secondary);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:12px;text-align:center;"></div>
   <div class="form-image-wrap" id="form-image-container">
     <img id="form-review-image" alt="Scanned form" style="display:block;width:100%;">
     <canvas id="form-review-overlay"></canvas>
