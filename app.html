@@ -2188,6 +2188,31 @@ function aiHeaders(extra) {
   return Object.assign({ 'Content-Type': 'application/json' }, extra || {});
 }
 
+// ===== ERROR MONITORING (Phase 7, Sentry — best-effort, online-only) =====
+// DSN comes from /api/config (env-driven; the DSN is public by design). Sentry
+// auto-captures window errors + unhandled rejections. Telemetry never blocks
+// the app, and we scrub request bodies so field values/transcripts aren't sent.
+async function initSentry() {
+  try {
+    const cfg = await fetch('/api/config').then(function(r) { return r.json(); }).catch(function() { return null; });
+    if (!cfg || !cfg.sentryDsn) return;
+    await new Promise(function(resolve, reject) {
+      const s = document.createElement('script');
+      s.src = 'https://browser.sentry-cdn.com/8.47.0/bundle.min.js';
+      s.crossOrigin = 'anonymous';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+    if (window.Sentry && Sentry.init) {
+      Sentry.init({
+        dsn: cfg.sentryDsn, release: cfg.release, environment: cfg.environment,
+        tracesSampleRate: 0,
+        beforeSend: function(event) { if (event.request) delete event.request.data; return event; }
+      });
+    }
+  } catch (e) { /* telemetry must never break the app */ }
+}
+
 // ===== SESSION STATE =====
 let session = {
   refNumber: "",
@@ -2341,6 +2366,7 @@ window.addEventListener('load', () => {
     // sign-in so AI features don't silently 401. Offline keeps the local session.
     if (user.email) validateServerSession();
 
+    initSentry();
     setupOrgCodeInputs();
     setupPWAInstall();
     setupNetworkListener();

@@ -3,6 +3,7 @@
 // Uploads the final artifacts to Vercel Blob and marks the submission completed.
 import { sql, getSessionUser, applyCors, logEvent } from "../_db.js";
 import { uploadBase64 } from "../_blob.js";
+import { captureServerError } from "../_sentry.js";
 
 export const config = { api: { bodyParser: { sizeLimit: "20mb" } } };
 
@@ -44,6 +45,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ id, pdfUrl, scanUrl, signatureUrl: sigUrl });
   } catch (err) {
     console.error("submissions/complete error:", err && err.message);
+    captureServerError(err, "submissions/complete");
     return res.status(500).json({ error: "complete failed" });
   }
 }
