@@ -97,3 +97,23 @@ export async function logEvent(userId, type, meta, submissionId) {
     INSERT INTO events (user_id, type, meta, submission_id)
     VALUES (${userId}, ${type}, ${JSON.stringify(meta || {})}::jsonb, ${submissionId || null})`;
 }
+
+// Gate an AI endpoint (Phase 5): require a valid session cookie and enforce a
+// per-user daily call cap via the events table. Returns the session payload, or
+// null after having already sent the 401/429 response — callers just `return`.
+export async function requireAiSession(req, res, endpoint, dailyLimit = 100) {
+  const session = await getSessionUser(req);
+  if (!session) { res.status(401).json({ error: "not authenticated" }); return null; }
+  try {
+    if (!(await underDailyLimit(session.sub, "ai_call", dailyLimit))) {
+      res.status(429).json({ error: "Daily AI limit reached — please try again tomorrow." });
+      return null;
+    }
+    await logEvent(session.sub, "ai_call", { endpoint });
+  } catch (e) {
+    // Fail open on the rate-limit bookkeeping if the events table is unreachable;
+    // the request is still authenticated.
+    console.error("rate-limit check failed:", e && e.message);
+  }
+  return session;
+}

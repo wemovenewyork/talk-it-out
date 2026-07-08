@@ -11,19 +11,7 @@ export const config = {
 // OpenCV.js is the primary document-boundary detector. Model kept as-is.
 const MODEL = process.env.SCAN_DOCUMENT_MODEL || "claude-sonnet-4-20250514";
 
-// Env-driven CORS allowlist. Reflect the request Origin only if it is on the
-// comma-separated ALLOWED_ORIGINS list; allow same-origin (no Origin header).
-function applyCors(req, res) {
-  const allowed = (process.env.ALLOWED_ORIGINS || "")
-    .split(",").map(o => o.trim()).filter(Boolean);
-  const origin = req.headers.origin;
-  if (origin && allowed.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-  }
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-tio-app");
-}
+import { applyCors, requireAiSession } from "./_db.js";
 
 export default async function handler(req, res) {
   applyCors(req, res);
@@ -35,6 +23,9 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const session = await requireAiSession(req, res, "scanDocument");
+  if (!session) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
