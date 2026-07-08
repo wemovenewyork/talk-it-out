@@ -1,6 +1,7 @@
 // POST /api/auth/signin  { email, password }
 import bcrypt from "bcryptjs";
 import { sql, signSession, setSessionCookie, applyCors } from "../_db.js";
+import { captureServerError } from "../_sentry.js";
 
 export const config = { api: { bodyParser: { sizeLimit: "1mb" } } };
 
@@ -24,6 +25,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ user: { id: u.id, email: u.email, name: u.name, orgId: u.org_id } });
   } catch (err) {
     console.error("signin error:", err && err.message);
+    captureServerError(err, "auth/signin");
     return res.status(500).json({ error: "signin failed" });
   }
 }
