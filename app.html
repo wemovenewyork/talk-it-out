@@ -2556,6 +2556,11 @@ function doneQuickPhoto() {
 let currentScanTarget = 'scan'; // 'scan' | 'quickPhoto'
 let lastScannedCanvas = null;
 let scannerStream = null;
+// Draw the detected quad on the live frame only when ?debug=1 is in the URL.
+const SCAN_DEBUG = new URLSearchParams(location.search).has('debug');
+// Lazy-load singletons for the vendored OpenCV.js + jscanify (Phase 2).
+let _opencvPromise = null;
+let _jscanifyPromise = null;
 
 // ===== FORM FILL STATE =====
 let currentFormFields = [];   // fields from api/extractFields (id, label, type, x, y, width, height, value)
@@ -2604,6 +2609,114 @@ function resizeForClaude(sourceCanvas, maxDim) {
   out.getContext('2d').drawImage(sourceCanvas, 0, 0, tw, th);
   const dataURL = out.toDataURL('image/jpeg', 0.88);
   return { canvas: out, base64: dataURL.split(',')[1], width: tw, height: th };
+}
+
+// ===== DETERMINISTIC EDGE DETECTION (OpenCV.js + jscanify, vendored) =====
+// Phase 2: client-side document-boundary detection is the PRIMARY path. It is
+// deterministic, instant, free, and works offline. Claude scanDocument is a
+// fallback only. Libraries are vendored under /vendor and lazy-loaded on first
+// scanner use (OpenCV.js is ~9MB with inlined wasm).
+
+function loadVendorScript(src) {
+  return new Promise(function(resolve, reject) {
+    const s = document.createElement('script');
+    s.src = src; s.async = true;
+    s.onload = function() { resolve(); };
+    s.onerror = function() { reject(new Error('Failed to load ' + src)); };
+    document.head.appendChild(s);
+  });
+}
+
+// Resolves once window.cv is fully initialised (wasm ready). Handles both the
+// promise-style and onRuntimeInitialized-style OpenCV.js builds by polling for
+// cv.Mat, so we don't depend on which mechanism this build uses.
+function loadOpenCV() {
+  if (_opencvPromise) return _opencvPromise;
+  _opencvPromise = loadVendorScript('/vendor/opencv.js').then(function() {
+    return new Promise(function(resolve, reject) {
+      const start = Date.now();
+      (function poll() {
+        if (window.cv && window.cv.Mat) return resolve();
+        if (window.cv && typeof window.cv.then === 'function') {
+          window.cv.then(function(c) { window.cv = c; resolve(); });
+          return;
+        }
+        if (Date.now() - start > 30000) return reject(new Error('OpenCV init timeout'));
+        setTimeout(poll, 50);
+      })();
+    });
+  });
+  return _opencvPromise;
+}
+
+function loadJscanify() {
+  if (_jscanifyPromise) return _jscanifyPromise;
+  _jscanifyPromise = loadOpenCV().then(function() {
+    if (window.jscanify) return;
+    return loadVendorScript('/vendor/jscanify.min.js');
+  });
+  return _jscanifyPromise;
+}
+
+// Run jscanify/OpenCV on a full-res canvas. Returns corners in canvas pixel
+// space { topLeft, topRight, bottomLeft, bottomRight } or null if none found.
+function detectEdgesJscanify(canvas) {
+  if (!window.cv || !window.cv.Mat || !window.jscanify) return null;
+  let src = null;
+  try {
+    src = cv.imread(canvas);
+    const scanner = new jscanify();
+    const contour = scanner.findPaperContour(src);
+    if (!contour) return null;
+    const c = scanner.getCornerPoints(contour, src);
+    if (!c || !c.topLeftCorner || !c.topRightCorner || !c.bottomLeftCorner || !c.bottomRightCorner) {
+      return null;
+    }
+    return {
+      topLeft:     { x: c.topLeftCorner.x,     y: c.topLeftCorner.y },
+      topRight:    { x: c.topRightCorner.x,    y: c.topRightCorner.y },
+      bottomLeft:  { x: c.bottomLeftCorner.x,  y: c.bottomLeftCorner.y },
+      bottomRight: { x: c.bottomRightCorner.x, y: c.bottomRightCorner.y }
+    };
+  } catch (e) {
+    console.warn('[Scanner] jscanify detection failed:', e && e.message);
+    return null;
+  } finally {
+    if (src) { try { src.delete(); } catch (e) {} }
+  }
+}
+
+// Validate a detected quad before trusting it: area > 20% of the frame, convex,
+// and a sane aspect ratio (0.5-2.0). Rejects noise / white-on-white failures.
+function isPlausibleQuad(c, frameW, frameH) {
+  if (!c) return false;
+  const pts = [c.topLeft, c.topRight, c.bottomRight, c.bottomLeft];
+  for (let i = 0; i < 4; i++) {
+    if (!pts[i] || !isFinite(pts[i].x) || !isFinite(pts[i].y)) return false;
+  }
+  // Shoelace area
+  let area = 0;
+  for (let i = 0; i < 4; i++) {
+    const a = pts[i], b = pts[(i + 1) % 4];
+    area += a.x * b.y - b.x * a.y;
+  }
+  area = Math.abs(area) / 2;
+  if (area < 0.20 * frameW * frameH) return false;
+  // Convexity: all cross products share a sign
+  let sign = 0;
+  for (let i = 0; i < 4; i++) {
+    const a = pts[i], b = pts[(i + 1) % 4], d = pts[(i + 2) % 4];
+    const cross = (b.x - a.x) * (d.y - b.y) - (b.y - a.y) * (d.x - b.x);
+    const s = Math.sign(cross);
+    if (s !== 0) { if (sign === 0) sign = s; else if (s !== sign) return false; }
+  }
+  // Aspect ratio from averaged side lengths
+  const dist = function(p, q) { return Math.hypot(p.x - q.x, p.y - q.y); };
+  const w = (dist(c.topLeft, c.topRight) + dist(c.bottomLeft, c.bottomRight)) / 2;
+  const h = (dist(c.topLeft, c.bottomLeft) + dist(c.topRight, c.bottomRight)) / 2;
+  if (h === 0) return false;
+  const ar = w / h;
+  return ar >= 0.5 && ar <= 2.0;
 }
 
 // Push each corner outward from the quad's centroid by expandPx pixels.
@@ -2930,6 +3043,10 @@ function openScannerModal(targetHandler) {
   currentScanTarget = targetHandler;
   lastScannedCanvas = null;
 
+  // Warm the deterministic scanner libs while the camera initialises so the
+  // first capture is instant. Failure here is non-fatal (Claude fallback).
+  loadJscanify().catch(function(e) { console.warn('[Scanner] lib prefetch failed:', e && e.message); });
+
   const modal = document.getElementById('documentScannerModal');
   const video = document.getElementById('scannerVideo');
   const nameEl = document.getElementById('scannerWorkerName');
@@ -3000,55 +3117,79 @@ async function handleScanButton() {
     // 1. Capture full native frame
     const { canvas, captureWidth, captureHeight } = captureVideoFrame(video);
 
-    // 2. Downsample to a known 1024px-max size before sending to Claude.
-    //    This eliminates any ambiguity about internal backend resizing.
-    const send = resizeForClaude(canvas, 1024);
-    console.log('[Scanner] Sending to Claude at:', send.width, 'x', send.height,
-      '~' + Math.round(send.base64.length * 0.75 / 1024) + ' KB');
+    // 2. Detection with a deterministic-first fallback chain. Corners are in
+    //    native canvas pixel space regardless of which detector succeeds.
+    let scaledCorners = null;
+    let method = null;
 
-    // 3. Detect edges — pass exact send dimensions so the prompt can include them
-    const result = await detectDocumentEdges(send.base64, 'image/jpeg', send.width, send.height);
-
-    console.log('[Scanner] Corners returned by Claude:', JSON.stringify(result.corners || null));
-
-    if (!result.found) {
-      processing.style.display = 'none';
-      scanBtn.disabled = false;
-      scanStatus.textContent = 'No document found \u2014 adjust position and try again';
-      return;
+    // PRIMARY: client-side jscanify/OpenCV on the full-res frame. Deterministic,
+    //          instant, offline-capable. No expandCorners fudge needed - the
+    //          input corners are the real paper edge, not Claude's inset guess.
+    try {
+      await loadJscanify();
+      const jc = detectEdgesJscanify(canvas);
+      if (jc && isPlausibleQuad(jc, captureWidth, captureHeight)) {
+        scaledCorners = jc;
+        method = 'opencv';
+      } else {
+        console.log('[Scanner] OpenCV found no plausible quad - falling back.');
+      }
+    } catch (e) {
+      console.warn('[Scanner] OpenCV path unavailable:', e && e.message);
     }
 
-    // 4. Expand corners outward — Claude tends to find text/content boundary,
-    //    not the physical paper edge. Push each corner away from the centroid.
-    //    12px in 1024px send-image space ≈ ~1% of image width.
-    const expanded = expandCorners(result.corners, 12);
-    console.log('[Scanner] Expanded corners (send px):', JSON.stringify(expanded));
+    // FALLBACK 1: Claude scanDocument on a downsampled frame. Claude finds the
+    //             content boundary, so it keeps the expandCorners fudge.
+    if (!scaledCorners && navigator.onLine) {
+      processingStep.textContent = 'Detecting document\u2026';
+      const send = resizeForClaude(canvas, 1024);
+      const result = await detectDocumentEdges(send.base64, 'image/jpeg', send.width, send.height);
+      if (result && result.found && result.corners) {
+        const expanded = expandCorners(result.corners, 12);
+        const scaleX = captureWidth / send.width;
+        const scaleY = captureHeight / send.height;
+        const claudeCorners = {
+          topLeft:     { x: expanded.topLeft.x     * scaleX, y: expanded.topLeft.y     * scaleY },
+          topRight:    { x: expanded.topRight.x    * scaleX, y: expanded.topRight.y    * scaleY },
+          bottomLeft:  { x: expanded.bottomLeft.x  * scaleX, y: expanded.bottomLeft.y  * scaleY },
+          bottomRight: { x: expanded.bottomRight.x * scaleX, y: expanded.bottomRight.y * scaleY }
+        };
+        if (isPlausibleQuad(claudeCorners, captureWidth, captureHeight)) {
+          scaledCorners = claudeCorners;
+          method = 'claude';
+        }
+      }
+    }
 
-    // 5. Scale corners from send-image space → native canvas space
-    const scaleX = captureWidth  / send.width;
-    const scaleY = captureHeight / send.height;
-    console.log('[Scanner] Scale factors — scaleX:', scaleX.toFixed(4), 'scaleY:', scaleY.toFixed(4));
+    // FALLBACK 2: full frame, no perspective transform. The user keeps the raw
+    //             capture and can crop/adjust later (Phase 3 manual adjust).
+    let fullFrame = false;
+    if (!scaledCorners) {
+      scaledCorners = {
+        topLeft:     { x: 0,            y: 0             },
+        topRight:    { x: captureWidth, y: 0             },
+        bottomLeft:  { x: 0,            y: captureHeight },
+        bottomRight: { x: captureWidth, y: captureHeight }
+      };
+      method = 'fullframe';
+      fullFrame = true;
+    }
+    console.log('[Scanner] Detection method:', method);
 
-    const scaledCorners = {
-      topLeft:     { x: expanded.topLeft.x     * scaleX, y: expanded.topLeft.y     * scaleY },
-      topRight:    { x: expanded.topRight.x    * scaleX, y: expanded.topRight.y    * scaleY },
-      bottomLeft:  { x: expanded.bottomLeft.x  * scaleX, y: expanded.bottomLeft.y  * scaleY },
-      bottomRight: { x: expanded.bottomRight.x * scaleX, y: expanded.bottomRight.y * scaleY }
-    };
-    console.log('[Scanner] Scaled corners (native px):', JSON.stringify(scaledCorners));
+    // Debug overlay - draw the detected quad on the live frame (only ?debug=1).
+    if (SCAN_DEBUG && !fullFrame) {
+      const overlayScaleX = captureWidth  / overlay.width;
+      const overlayScaleY = captureHeight / overlay.height;
+      processing.style.display = 'none';
+      drawDetectedCorners(scaledCorners, overlayScaleX, overlayScaleY);
+      await new Promise(function(r) { setTimeout(r, 1500); });
+      processing.style.display = 'flex';
+    }
 
-    // 5. Debug overlay — show Claude's detected quad on the live frame for 1500ms
-    const overlayScaleX = captureWidth  / overlay.width;
-    const overlayScaleY = captureHeight / overlay.height;
-    processing.style.display = 'none';
-    drawDetectedCorners(scaledCorners, overlayScaleX, overlayScaleY);
-    await new Promise(function(r) { setTimeout(r, 1500); });
-
-    processing.style.display = 'flex';
     processingStep.textContent = 'Correcting perspective\u2026';
-
     await new Promise(function(r) { setTimeout(r, 30); });
-    const corrected = perspectiveCorrect(canvas, scaledCorners);
+    // Full-frame fallback keeps the raw capture (no warp to a fixed portrait).
+    const corrected = fullFrame ? canvas : perspectiveCorrect(canvas, scaledCorners);
 
     processingStep.textContent = 'Enhancing image\u2026';
     await new Promise(function(r) { setTimeout(r, 30); });
