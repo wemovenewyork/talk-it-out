@@ -2647,6 +2647,7 @@ const SCAN_DEBUG = new URLSearchParams(location.search).has('debug');
 // Lazy-load singletons for the vendored OpenCV.js + jscanify (Phase 2).
 let _opencvPromise = null;
 let _jscanifyPromise = null;
+let lastScanDiag = null; // last detection outcome + per-stage failure reasons
 
 // ===== FORM FILL STATE =====
 let currentFormFields = [];   // fields from api/extractFields (id, label, type, x, y, width, height, value)
@@ -2731,10 +2732,15 @@ function loadOpenCV() {
           window.cv.then(function(c) { window.cv = c; resolve(); });
           return;
         }
-        if (Date.now() - start > 30000) return reject(new Error('OpenCV init timeout'));
+        if (Date.now() - start > 30000) return reject(new Error('OpenCV init timeout (30s)'));
         setTimeout(poll, 50);
       })();
     });
+  }).catch(function(e) {
+    // Do NOT cache a rejected load — a single early failure (slow mobile,
+    // memory pressure) must not permanently poison every later scan attempt.
+    _opencvPromise = null;
+    throw e;
   });
   return _opencvPromise;
 }
@@ -2744,6 +2750,9 @@ function loadJscanify() {
   _jscanifyPromise = loadOpenCV().then(function() {
     if (window.jscanify) return;
     return loadVendorScript('/vendor/jscanify.min.js');
+  }).catch(function(e) {
+    _jscanifyPromise = null; // allow retry on the next attempt
+    throw e;
   });
   return _jscanifyPromise;
 }
@@ -3207,46 +3216,57 @@ async function handleScanButton() {
     // 1. Capture full native frame
     const { canvas, captureWidth, captureHeight } = captureVideoFrame(video);
 
-    // 2. Detection with a deterministic-first fallback chain. Corners are in
-    //    native canvas pixel space regardless of which detector succeeds.
+    // 2. Detection with a deterministic-first fallback chain + per-stage
+    //    diagnostics (surfaced on-screen under ?debug=1; no console needed).
     let scaledCorners = null;
     let method = null;
+    const diag = { opencv: '', claude: '', online: navigator.onLine };
 
-    // PRIMARY: client-side jscanify/OpenCV on the full-res frame. Deterministic,
-    //          instant, offline-capable. No expandCorners fudge needed - the
-    //          input corners are the real paper edge, not Claude's inset guess.
+    // PRIMARY: client-side jscanify/OpenCV on the full-res frame.
     try {
       await loadJscanify();
       const jc = detectEdgesJscanify(canvas);
       if (jc && isPlausibleQuad(jc, captureWidth, captureHeight)) {
-        scaledCorners = jc;
-        method = 'opencv';
+        scaledCorners = jc; method = 'opencv'; diag.opencv = 'ok';
       } else {
-        console.log('[Scanner] OpenCV found no plausible quad - falling back.');
+        diag.opencv = jc ? 'quad rejected (implausible: area/convex/aspect)' : 'no quad found';
       }
     } catch (e) {
+      // Load or init failure (e.g. the 9MB wasm failing on mobile). Recorded, not
+      // swallowed \u2014 the loader no longer caches this rejection, so a retry re-loads.
+      diag.opencv = 'load/init failed: ' + ((e && e.message) || e);
       console.warn('[Scanner] OpenCV path unavailable:', e && e.message);
     }
 
-    // FALLBACK 1: Claude scanDocument on a downsampled frame. Claude finds the
-    //             content boundary, so it keeps the expandCorners fudge.
-    if (!scaledCorners && navigator.onLine) {
-      processingStep.textContent = 'Detecting document\u2026';
-      const send = resizeForClaude(canvas, 1024);
-      const result = await detectDocumentEdges(send.base64, 'image/jpeg', send.width, send.height);
-      if (result && result.found && result.corners) {
-        const expanded = expandCorners(result.corners, 12);
-        const scaleX = captureWidth / send.width;
-        const scaleY = captureHeight / send.height;
-        const claudeCorners = {
-          topLeft:     { x: expanded.topLeft.x     * scaleX, y: expanded.topLeft.y     * scaleY },
-          topRight:    { x: expanded.topRight.x    * scaleX, y: expanded.topRight.y    * scaleY },
-          bottomLeft:  { x: expanded.bottomLeft.x  * scaleX, y: expanded.bottomLeft.y  * scaleY },
-          bottomRight: { x: expanded.bottomRight.x * scaleX, y: expanded.bottomRight.y * scaleY }
-        };
-        if (isPlausibleQuad(claudeCorners, captureWidth, captureHeight)) {
-          scaledCorners = claudeCorners;
-          method = 'claude';
+    // FALLBACK 1: Claude scanDocument on a downsampled frame.
+    if (!scaledCorners) {
+      if (!navigator.onLine) {
+        diag.claude = 'skipped (offline)';
+      } else {
+        try {
+          processingStep.textContent = 'Detecting document\u2026';
+          const send = resizeForClaude(canvas, 1024);
+          const result = await detectDocumentEdges(send.base64, 'image/jpeg', send.width, send.height);
+          if (result && result.found && result.corners) {
+            const expanded = expandCorners(result.corners, 12);
+            const scaleX = captureWidth / send.width;
+            const scaleY = captureHeight / send.height;
+            const claudeCorners = {
+              topLeft:     { x: expanded.topLeft.x     * scaleX, y: expanded.topLeft.y     * scaleY },
+              topRight:    { x: expanded.topRight.x    * scaleX, y: expanded.topRight.y    * scaleY },
+              bottomLeft:  { x: expanded.bottomLeft.x  * scaleX, y: expanded.bottomLeft.y  * scaleY },
+              bottomRight: { x: expanded.bottomRight.x * scaleX, y: expanded.bottomRight.y * scaleY }
+            };
+            if (isPlausibleQuad(claudeCorners, captureWidth, captureHeight)) {
+              scaledCorners = claudeCorners; method = 'claude'; diag.claude = 'ok';
+            } else {
+              diag.claude = 'quad rejected (implausible)';
+            }
+          } else {
+            diag.claude = (result && result.error) ? ('no doc: ' + result.error) : 'no document found';
+          }
+        } catch (e) {
+          diag.claude = 'request failed: ' + ((e && e.message) || e);
         }
       }
     }
@@ -3264,15 +3284,21 @@ async function handleScanButton() {
       method = 'fullframe';
       fullFrame = true;
     }
-    console.log('[Scanner] Detection method:', method);
+    lastScanDiag = { method: method, opencv: diag.opencv, claude: diag.claude, online: diag.online };
+    console.log('[Scanner] detection:', JSON.stringify(lastScanDiag));
 
-    // Debug overlay - draw the detected quad on the live frame (only ?debug=1).
-    if (SCAN_DEBUG && !fullFrame) {
-      const overlayScaleX = captureWidth  / overlay.width;
-      const overlayScaleY = captureHeight / overlay.height;
+    // On-screen diagnostics under ?debug=1 \u2014 shows the method + why each stage
+    // fell through, for ALL outcomes (including full-frame), so device testing
+    // needs no console.
+    if (SCAN_DEBUG) {
       processing.style.display = 'none';
-      drawDetectedCorners(scaledCorners, overlayScaleX, overlayScaleY);
-      await new Promise(function(r) { setTimeout(r, 1500); });
+      scanStatus.textContent = 'method=' + method + ' | opencv: ' + (diag.opencv || '-') + ' | claude: ' + (diag.claude || '-');
+      if (!fullFrame) {
+        const overlayScaleX = captureWidth  / overlay.width;
+        const overlayScaleY = captureHeight / overlay.height;
+        drawDetectedCorners(scaledCorners, overlayScaleX, overlayScaleY);
+      }
+      await new Promise(function(r) { setTimeout(r, 2600); });
       processing.style.display = 'flex';
     }
 
@@ -3296,6 +3322,12 @@ async function handleScanButton() {
     const preview = document.getElementById('scanPreview');
     preview.src = corrected.toDataURL('image/jpeg', 0.92);
     document.getElementById('scanResult').style.display = 'flex';
+    // Tell the user when we couldn't detect page edges, instead of silently
+    // handing back the whole photo. (Kept off when ?debug=1 shows the diag line.)
+    if (fullFrame && !SCAN_DEBUG) {
+      scanStatus.style.display = 'block';
+      scanStatus.textContent = "Couldn't find the page edges — kept the full photo. Retake for a tighter crop, or use it as-is.";
+    }
   } catch (err) {
     console.error('Scan error:', err);
     processing.style.display = 'none';
