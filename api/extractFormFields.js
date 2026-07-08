@@ -11,27 +11,7 @@ const MODEL = process.env.EXTRACT_FORM_FIELDS_MODEL || "claude-sonnet-4-6";
 
 // Env-driven CORS allowlist. Reflect the request Origin only if it is on the
 // comma-separated ALLOWED_ORIGINS list; allow same-origin (no Origin header).
-function applyCors(req, res) {
-  const allowed = (process.env.ALLOWED_ORIGINS || "")
-    .split(",").map(o => o.trim()).filter(Boolean);
-  const origin = req.headers.origin;
-  if (origin && allowed.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-  }
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-tio-app");
-}
-
-// TODO(phase5): interim app gate. A secret in client HTML is obfuscation, not
-// security — real gate is the session cookie required on all AI endpoints in
-// Phase 5. Soft check: only enforced when APP_SHARED_SECRET is configured, so
-// the app keeps working if it is unset.
-function appSecretOk(req) {
-  const secret = process.env.APP_SHARED_SECRET;
-  if (!secret) return true;
-  return String(req.headers["x-tio-app"] || "").trim() === secret.trim();
-}
+import { applyCors, requireAiSession } from "./_db.js";
 
 const IMAGE_SYSTEM = `You are a form field extractor. Given one or more images of a workplace form, identify every field that needs to be filled in.
 
@@ -70,7 +50,8 @@ export default async function handler(req, res) {
   applyCors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-  if (!appSecretOk(req)) return res.status(401).json({ error: "unauthorized" });
+  const session = await requireAiSession(req, res, "extractFormFields");
+  if (!session) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "API key not configured" });

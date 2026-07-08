@@ -5,24 +5,14 @@ export const config = {
 
 const MODEL = process.env.EXTRACT_FIELDS_MODEL || "claude-sonnet-4-6";
 
-// Env-driven CORS allowlist. Reflect the request Origin only if it is on the
-// comma-separated ALLOWED_ORIGINS list; allow same-origin (no Origin header).
-function applyCors(req, res) {
-  const allowed = (process.env.ALLOWED_ORIGINS || "")
-    .split(",").map(o => o.trim()).filter(Boolean);
-  const origin = req.headers.origin;
-  if (origin && allowed.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-  }
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-tio-app");
-}
+import { applyCors, requireAiSession } from "./_db.js";
 
 export default async function handler(req, res) {
   applyCors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  const session = await requireAiSession(req, res, "extractFields");
+  if (!session) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "API key not configured" });

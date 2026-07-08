@@ -25,31 +25,14 @@ function extFor(mime) {
   return "webm";
 }
 
-// Env-driven CORS allowlist (same pattern as the other endpoints).
-function applyCors(req, res) {
-  const allowed = (process.env.ALLOWED_ORIGINS || "")
-    .split(",").map(o => o.trim()).filter(Boolean);
-  const origin = req.headers.origin;
-  if (origin && allowed.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-  }
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-tio-app");
-}
-
-// TODO(phase5): interim app gate — see extractFormFields.js. Soft check.
-function appSecretOk(req) {
-  const secret = process.env.APP_SHARED_SECRET;
-  if (!secret) return true;
-  return String(req.headers["x-tio-app"] || "").trim() === secret.trim();
-}
+import { applyCors, requireAiSession } from "./_db.js";
 
 export default async function handler(req, res) {
   applyCors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-  if (!appSecretOk(req)) return res.status(401).json({ error: "unauthorized" });
+  const session = await requireAiSession(req, res, "transcribe");
+  if (!session) return;
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "transcription not configured" });
