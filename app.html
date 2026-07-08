@@ -4092,7 +4092,7 @@ async function submitAllTranscript() {
     // Merge mapped values into currentFormFields
     currentFieldMappings.forEach(function(m) {
       const field = currentFormFields.find(function(f) { return f.id === m.id; });
-      if (field) field.value = m.value || '';
+      if (field) field.value = stripMarkdown(m.value || '');
     });
     // Also store in session.answers for compatibility with existing export flow
     session.answers = currentFormFields.map(function(f) {
@@ -4555,12 +4555,12 @@ async function useMiniTranscript() {
     });
     if (resp.ok) {
       const data = await resp.json();
-      field.value = (data.mappings && data.mappings[0] && data.mappings[0].value) || transcript;
+      field.value = stripMarkdown((data.mappings && data.mappings[0] && data.mappings[0].value) || transcript);
     } else {
-      field.value = transcript;
+      field.value = stripMarkdown(transcript);
     }
   } catch {
-    field.value = transcript;
+    field.value = stripMarkdown(transcript);
   }
   // Update session.answers for export compatibility
   const idx = currentFormFields.indexOf(field);
@@ -4606,7 +4606,7 @@ function bridgeSessionToFormFields() {
       y:      has100 ? f.y / 100 : (isFinite(f.y) ? f.y : 0),
       width:  has100 ? f.w / 100 : (isFinite(f.width) ? f.width : 0.3),
       height: has100 ? f.h / 100 : (isFinite(f.height) ? f.height : 0.04),
-      value: (ans && ans.value) || ''
+      value: stripMarkdown((ans && ans.value) || '')
     };
   });
   return currentFormFields;
@@ -4698,10 +4698,8 @@ async function confirmFilledForm() {
     ctx.beginPath();
     ctx.rect(xPx, yPx, wPx, hPx);
     ctx.clip();
-    // White backdrop so text reads on any form background
-    ctx.fillStyle = 'rgba(255,255,255,0.88)';
-    ctx.fillRect(xPx, yPx, wPx, hPx);
-    // Same fitter as the on-screen preview so the exported PDF matches exactly.
+    // PR13 defect-2 fix: no opaque white backdrop — the answer sits ON the form
+    // (the form's own lines/text stay visible). Dark ink reads on scanned paper.
     drawFieldText(ctx, f.value, { x: xPx, y: yPx, w: wPx, h: hPx }, {
       color: '#111111', minPx: 7, maxPx: 18, scale: f.fontScale || 1
     });
@@ -4905,9 +4903,20 @@ function answerCheckbox(val) {
   advanceField();
 }
 
+// Defensive: strip markdown the model may leak (**, __, *, #, backticks) so raw
+// syntax never renders on the form. Belt-and-suspenders to the prompt fixes.
+function stripMarkdown(s) {
+  return String(s == null ? '' : s)
+    .replace(/\*\*/g, '').replace(/__/g, '')
+    .replace(/`+/g, '')
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/(^|\s)[*_](\S[^*_]*\S|\S)[*_](?=\s|$)/g, '$1$2')
+    .trim();
+}
+
 function saveCurrentAnswer(answer) {
   if (!session.answers) session.answers = new Array(session.fields.length).fill(null);
-  session.answers[session.currentFieldIndex] = { value: answer, aiRewritten: false };
+  session.answers[session.currentFieldIndex] = { value: stripMarkdown(answer), aiRewritten: false };
   autoSaveDraft();
 }
 
@@ -4936,6 +4945,23 @@ async function goToFieldsDone() {
   if (session.formImage) {
     await ensureFormCanvas();
     bridgeSessionToFormFields();
+    // PR13 defect-1 fix: the bridge inherits raw extractFormFields coordinates,
+    // which carry Claude's systematic placement bias (answers rendered a uniform
+    // block too low). Anchor them to real OCR label boxes — the same snap
+    // Pipeline A (voice-all) relies on — so the field-by-field overlay is as
+    // accurate. Client-side (Tesseract), no API call; failure keeps raw coords.
+    try {
+      const words = await Promise.race([
+        runOCRWords('data:image/jpeg;base64,' + session.formImage),
+        new Promise(function(_, rej) { setTimeout(function() { rej(new Error('ocr timeout')); }, 20000); })
+      ]);
+      if (words && words.length) {
+        currentFormFields = snapFieldsToOCR(currentFormFields, words);
+        console.log('[WO2] bridge OCR-snapped',
+          currentFormFields.filter(function(f) { return f.anchor === 'ocr'; }).length,
+          'of', currentFormFields.length);
+      }
+    } catch (e) { console.warn('[WO2] bridge OCR snap skipped:', e && e.message); }
     currentFieldMappings = [];
     currentFormSummary = '';
     renderFormReview();
@@ -5034,7 +5060,7 @@ function approveRewrite() {
   const rewritten = document.getElementById('rewrite-result').textContent;
   if (!rewritten) { alert('Please wait for the AI to finish.'); return; }
   if (!session.answers) session.answers = new Array(session.fields.length).fill(null);
-  session.answers[session.currentFieldIndex] = { value: rewritten, aiRewritten: true };
+  session.answers[session.currentFieldIndex] = { value: stripMarkdown(rewritten), aiRewritten: true };
   session.rewriteCount = (session.rewriteCount || 0) + 1;
   advanceField();
 }

@@ -57,7 +57,10 @@ Rules:
 - For date fields format the value as MM/DD/YYYY
 - For checkbox fields use "Yes" or "No"
 - For number fields return only the numeric value as a string
+- SPOKEN DIGITS: for fields expecting numbers or codes (license plate, permit number, policy number, phone, ID, zip, quantity), convert spoken digit words into numerals with no spaces — e.g. "six six seven zero four five" -> "667045", "permit number one two three" -> "123", "F T three dash six two zero four" -> "FT3-6204". Do not spell the digits out.
 - Never invent information that was not stated in the transcript
+- REJECT NON-RESPONSIVE FRAGMENTS: do not map filler, false starts, or stray words that are not an actual answer (e.g. "forward", "um", "next", "okay so"). If a field has no genuine answer, leave it unmapped rather than inserting a fragment.
+- PLAIN TEXT ONLY: values must be plain text — no markdown, no asterisks (**), no headings (#), no backticks, no bullet characters.
 - Keep values concise — match the field type
 - If the transcript contains no relevant information return: { "mappings": [], "unmapped": [...all field ids], "summary": "No relevant information found" }`,
         messages: [{
