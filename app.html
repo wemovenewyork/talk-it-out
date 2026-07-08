@@ -2216,7 +2216,7 @@ function showScreen(id) {
 function onScreenEnter(id) {
   if (id === 'screen-welcome') initWelcome();
   if (id === 'screen-profile') initProfile();
-  if (id === 'screen-history') renderHistory();
+  if (id === 'screen-history') { renderHistory(); syncHistoryFromServer(); }
   if (id === 'screen-drafts') renderDrafts();
   if (id === 'screen-form-library') renderLibrary();
   if (id === 'screen-review') renderReview();
@@ -2283,11 +2283,20 @@ async function persistCompletedForm(record) {
     const pdfBase64 = session.scannedPdfUri ? String(session.scannedPdfUri).split(',')[1] : null;
     const scanBase64 = session.formImage || null;
     const signatureBase64 = session.signature ? String(session.signature).split(',')[1] : null;
-    await fetch('/api/submissions/complete', {
+    const done = await fetch('/api/submissions/complete', {
       method: 'POST', credentials: 'include', headers: aiHeaders(),
       body: JSON.stringify({ id: created.id, fields: fieldsPayload, pdfBase64: pdfBase64, scanBase64: scanBase64, signatureBase64: signatureBase64 })
     });
     record.serverId = created.id;
+    const doneJson = done.ok ? await done.json().catch(function() { return null; }) : null;
+    // Persist the server Blob URL of the filled PDF back into local history so
+    // re-export uses it (and it survives cleared storage / other devices).
+    if (doneJson && doneJson.pdfUrl) {
+      record.pdfUrl = doneJson.pdfUrl;
+      const hist = getHistory();
+      const idx = hist.findIndex(function(r) { return r.refNumber === record.refNumber; });
+      if (idx >= 0) { hist[idx].pdfUrl = doneJson.pdfUrl; hist[idx].serverId = created.id; setLS('tio_history', hist); }
+    }
   } catch (e) {
     console.warn('[sync] server persist failed (kept locally):', e && e.message);
   }
@@ -4561,6 +4570,7 @@ async function confirmFilledForm() {
     summary: currentFormSummary,
     timestamp: new Date().toISOString(),
     confidential: session.confidential,
+    pdfDataUri: session.scannedPdfUri || null, // the filled scan-overlay PDF
     status: 'sent'
   };
   const history = getHistory();
@@ -5141,6 +5151,7 @@ function submitApproval() {
     timestamp: ts,
     signature: session.signature,
     confidential: session.confidential,
+    pdfDataUri: session.scannedPdfUri || null, // filled scan-overlay PDF, if any
     status: 'sent'
   };
   const bundle = getSessionBundle();
@@ -5235,6 +5246,30 @@ function openExportModal() {
   document.getElementById('export-format-modal').classList.add('active');
 }
 
+// ===== FILLED-PDF HELPERS (Phase 5 amendment) =====
+// The filled scan-overlay PDF (answers drawn on the real form image) is the
+// app's core deliverable. Prefer it everywhere; the text summary is only a
+// fallback for manual entry with no scanned form.
+function getFilledPdfUri() {
+  // session.scannedPdfUri holds the filled overlay PDF after completion; a
+  // history re-export passes record.pdfDataUri in via setActiveExportPdf().
+  return _activeExportPdfUri || session.scannedPdfUri || null;
+}
+let _activeExportPdfUri = null;
+function setActiveExportPdf(uri) { _activeExportPdfUri = uri || null; }
+function dataUriToBytes(uri) {
+  const b64 = String(uri).split(',')[1] || '';
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return arr;
+}
+function downloadPdfBytes(bytes, name) {
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+}
+
 async function exportAs(format) {
   closeModal('export-format-modal');
   const filename = (session.refNumber || 'form') + '-' + (session.formType || 'document').replace(/\s+/g, '-');
@@ -5276,7 +5311,26 @@ td{padding:10px;border-bottom:1px solid #eee;}td:first-child{font-weight:600;col
     const pw = document.getElementById('pdf-lock-toggle') && document.getElementById('pdf-lock-toggle').classList.contains('on')
       ? (document.getElementById('pdf-password-input').value || null) : null;
 
-    // Build PDF with jsPDF first, then optionally encrypt with pdf-lib
+    // PREFERRED: the filled scan-overlay PDF (the real deliverable). Only fall
+    // back to a text "Summary PDF" when there is no scanned form to overlay.
+    const filledUri = getFilledPdfUri();
+    if (filledUri) {
+      let bytes = dataUriToBytes(filledUri);
+      if (pw) {
+        try {
+          await loadPdfLib();
+          const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+          bytes = await pdfDoc.save({
+            userPassword: pw, ownerPassword: pw + '_owner',
+            permissions: { printing: 'lowResolution', copying: false, modifying: false, annotating: false, fillingForms: false, contentAccessibility: true, documentAssembly: false }
+          });
+        } catch (e) { console.warn('pdf-lib encryption failed, saving unencrypted:', e); }
+      }
+      downloadPdfBytes(bytes, filename + '.pdf');
+      return;
+    }
+
+    // Fallback: text "Summary PDF" (manual entry, no scanned form to overlay).
     await loadJsPDF();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
@@ -5327,13 +5381,13 @@ td{padding:10px;border-bottom:1px solid #eee;}td:first-child{font-weight:600;col
         });
         const blob = new Blob([encryptedBytes], { type: 'application/pdf' });
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = filename + '.pdf'; a.click(); URL.revokeObjectURL(a.href);
+        a.download = filename + '-summary.pdf'; a.click(); URL.revokeObjectURL(a.href);
         return;
       } catch(e) {
         console.warn('pdf-lib encryption failed, falling back to unencrypted:', e);
       }
     }
-    doc.save(filename + '.pdf');
+    doc.save(filename + '-summary.pdf');
     return;
   }
 
@@ -5373,30 +5427,40 @@ async function shareToGoogleDrive() {
   }
   try {
     const token = await getGoogleToken();
-    await loadJsPDF();
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-    const margin = 60; let y = margin;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
-    doc.text(session.formType || 'Workplace Form', margin, y); y += 28;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-    doc.setTextColor(120); doc.text(`Ref: ${session.refNumber}   |   ${new Date().toLocaleString()}`, margin, y); y += 24;
-    doc.setTextColor(0);
-    if (session.fields) {
-      session.fields.forEach((f, i) => {
-        if (y > 720) { doc.addPage(); y = margin; }
-        const ans = session.answers && session.answers[i];
-        const val = ans ? ans.value : '—';
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100);
-        doc.text(f.name.toUpperCase(), margin, y); y += 14;
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
-        const lines = doc.splitTextToSize(val, 480);
-        lines.forEach(line => { if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15; });
-        y += 8;
-      });
+    let pdfBlob, filename;
+    const base = `${session.refNumber}-${(session.formType || 'form').replace(/\s+/g, '-')}`;
+    const filledUri = getFilledPdfUri();
+    if (filledUri) {
+      // The real deliverable: the filled scan-overlay PDF.
+      pdfBlob = new Blob([dataUriToBytes(filledUri)], { type: 'application/pdf' });
+      filename = base + '.pdf';
+    } else {
+      // Fallback: text summary (no scanned form to overlay).
+      await loadJsPDF();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+      const margin = 60; let y = margin;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
+      doc.text(session.formType || 'Workplace Form', margin, y); y += 28;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      doc.setTextColor(120); doc.text(`Ref: ${session.refNumber}   |   ${new Date().toLocaleString()}`, margin, y); y += 24;
+      doc.setTextColor(0);
+      if (session.fields) {
+        session.fields.forEach((f, i) => {
+          if (y > 720) { doc.addPage(); y = margin; }
+          const ans = session.answers && session.answers[i];
+          const val = ans ? ans.value : '—';
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(100);
+          doc.text(f.name.toUpperCase(), margin, y); y += 14;
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0);
+          const lines = doc.splitTextToSize(val, 480);
+          lines.forEach(line => { if (y > 720) { doc.addPage(); y = margin; } doc.text(line, margin, y); y += 15; });
+          y += 8;
+        });
+      }
+      pdfBlob = doc.output('blob');
+      filename = base + '-summary.pdf';
     }
-    const pdfBlob = doc.output('blob');
-    const filename = `${session.refNumber}-${(session.formType || 'form').replace(/\s+/g, '-')}.pdf`;
     // Upload to Drive
     const meta = new Blob([JSON.stringify({ name: filename, mimeType: 'application/pdf' })], { type: 'application/json' });
     const form = new FormData();
@@ -5539,6 +5603,45 @@ function renderHistory() {
   `).join('');
 }
 
+// Merge server-stored submissions into local history so completed forms appear
+// on any device the worker signs in on. Server records carry pdfUrl (the filled
+// scan-overlay PDF in Blob), so re-export/view fetches the real form. Best-effort:
+// offline or signed-out simply keeps the local cache.
+async function syncHistoryFromServer() {
+  try {
+    const resp = await fetch('/api/submissions/list', { credentials: 'include' });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const server = (data.submissions || []).filter(function(s) { return s.status === 'completed' || s.status === 'amended'; });
+    const hist = getHistory();
+    let changed = false;
+    server.forEach(function(s) {
+      const ref = s.ref_code || s.id;
+      const existing = hist.find(function(h) { return h.refNumber === ref; });
+      if (existing) {
+        if (!existing.pdfUrl && s.pdf_blob_url) { existing.pdfUrl = s.pdf_blob_url; existing.serverId = s.id; changed = true; }
+        return;
+      }
+      hist.push({
+        refNumber: ref,
+        formType: s.form_type || 'Form',
+        timestamp: s.completed_at || s.created_at,
+        status: 'sent',
+        pdfUrl: s.pdf_blob_url || null,
+        serverId: s.id,
+        fromServer: true
+      });
+      changed = true;
+    });
+    if (changed) {
+      hist.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
+      setLS('tio_history', hist);
+      const screen = document.getElementById('screen-history');
+      if (screen && screen.classList.contains('active')) renderHistory();
+    }
+  } catch (e) { /* offline — keep the local cache */ }
+}
+
 function filterHistory() { renderHistory(); }
 function setHistoryFilter(btn) {
   document.querySelectorAll('#history-filter-chips .chip').forEach(c => c.classList.remove('active'));
@@ -5580,13 +5683,25 @@ async function exportHistoryItem() {
   const h = history[currentHistoryIndex];
   if (!h) return;
   closeModal('history-detail-modal');
-  // Temporarily load history record into session for exportAs
-  const prev = { ...session };
-  session.formType = h.formType;
-  session.refNumber = h.refNumber;
-  session.fields = h.fields;
-  session.answers = h.answers;
-  session.signature = h.signature;
+  const base = `${h.refNumber}-${(h.formType || 'form').replace(/\s+/g, '-')}`;
+
+  // PREFERRED: the stored filled scan-overlay PDF — local data URI, or the
+  // server Blob (works cross-device). Only fall back to a rebuilt text summary
+  // for older records that have no stored filled PDF.
+  try {
+    if (h.pdfDataUri) { downloadPdfBytes(dataUriToBytes(h.pdfDataUri), base + '.pdf'); return; }
+    if (h.pdfUrl) {
+      const r = await fetch(h.pdfUrl);
+      if (r.ok) {
+        const b = await r.blob();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+        a.download = base + '.pdf'; a.click(); URL.revokeObjectURL(a.href);
+        return;
+      }
+    }
+  } catch (e) { console.warn('[history] filled PDF unavailable, using summary:', e && e.message); }
+
+  // Fallback: text "Summary PDF".
   await loadJsPDF();
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
@@ -5612,9 +5727,7 @@ async function exportHistoryItem() {
   if (h.signature) { try { doc.addImage(h.signature, 'PNG', margin, y, 150, 50); y += 60; } catch(e) {} }
   doc.setFontSize(8); doc.setTextColor(150);
   doc.text(`Talk It Out   |   ${h.refNumber}   |   ${new Date(h.timestamp).toLocaleString()}`, margin, y + 20);
-  doc.save(`${h.refNumber}-${(h.formType || 'form').replace(/\s+/g, '-')}.pdf`);
-  // Restore session
-  Object.assign(session, prev);
+  doc.save(base + '-summary.pdf');
 }
 
 function closeModal(id) {
