@@ -13,6 +13,7 @@ Scan any paper form, speak your answers, and get a completed official PDF back. 
 | `api/extractFields.js` | Claude form-field extraction from a scanned image. |
 | `api/mapVoiceToFields.js` | Maps a voice transcript onto extracted form fields. |
 | `vendor/opencv.js`, `vendor/jscanify.min.js` | Vendored, pinned (jscanify 1.4.2) client-side document scanner. Served same-origin, lazy-loaded on first scan. |
+| `vendor/tesseract/` | Vendored, pinned Tesseract.js 5.1.1 + core 5.1.1 (LSTM builds) + fast `eng.traineddata.gz`. Client-side OCR for field label-snapping. |
 | `vercel.json` | Vercel config (headers only). |
 
 ## Document scanning (Phase 2)
@@ -26,6 +27,16 @@ Document-boundary detection runs **client-side** with vendored OpenCV.js + jscan
 The existing `computeHomography` / `perspectiveCorrect` math is reused unchanged — only the input corners changed. The `expandCorners` fudge factor is gone from the primary path (it only compensated for Claude's inset bias) and is applied solely in the Claude fallback. Add `?debug=1` to the URL to draw the detected quad on the live frame.
 
 OpenCV.js (~9MB, inlined wasm) is lazy-loaded when the scanner opens and cached via `vercel.json` (`max-age=86400, stale-while-revalidate` — no `immutable`).
+
+## Field placement (Phase 3)
+
+Claude's `extractFields` stays the semantic brain (what fields exist, their labels, and `orientation: inline|below`); vendored **Tesseract.js** provides pixel truth (where labels actually are). After extraction, `runOCRWords` reads word boxes from the scanned image and `snapFieldsToOCR` fuzzy-matches each field's `labelText` to its OCR label (token-overlap ≥ 0.6), then recomputes the input area — to the **right** of the label for inline fields, **below** it otherwise. Fields keep Claude's coords when there's no confident match, tagged `anchor: "ocr" | "claude"`. OCR is best-effort with a 20s timeout; failure silently leaves Claude's placement.
+
+**Manual adjust** — the review screen has an *Adjust placement* toggle: tap a field to select, drag to move, `A-`/`A+` to resize the font, `Reset` to restore. Adjusted coords/scale persist on the field so the exported PDF matches the preview. A shared `drawFieldText` fitter (shrink-to-fit min 7pt + wrap + vertical centre) is used by **both** the on-screen overlay and the PDF fill, so they always agree.
+
+## Interim app gate (`APP_SHARED_SECRET`)
+
+Active as of Phase 3: `app.html` sends `x-tio-app: <APP_SHARED_SECRET const>` on every AI call, and each endpoint rejects mismatches with 401 **when** the `APP_SHARED_SECRET` env var is set in Vercel. The const in `app.html` and the Vercel env var must hold the **same** value. This is obfuscation, not security (the value ships in the client) — superseded by the Phase 5 session cookie.
 
 ## Local development
 

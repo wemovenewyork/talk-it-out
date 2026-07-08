@@ -49,6 +49,8 @@ Return ONLY valid JSON with no markdown, no preamble:
     {
       "id": "field_1",
       "label": "Employee Name",
+      "labelText": "Employee Name",
+      "orientation": "inline",
       "type": "text",
       "x": 0.12,
       "y": 0.18,
@@ -66,6 +68,8 @@ Rules:
 - x and y mark the TOP LEFT corner of the field INPUT AREA — not the label
 - type is one of: text, date, checkbox, signature, number
 - label is the human-readable field name exactly as it appears on the form
+- labelText is the printed label text EXACTLY as it appears on the form (verbatim, including case), used to locate the label via OCR. Usually equal to label.
+- orientation is "inline" if the input area is to the RIGHT of the label on the same line, or "below" if the input area is UNDERNEATH the label
 - id is a unique snake_case identifier you generate (e.g. employee_name, incident_date)
 - formType is your best guess at what kind of form this is
 - Include every blank line, box, checkbox, or input area visible
@@ -103,6 +107,8 @@ Rules:
     parsed.fields = parsed.fields.map((f, i) => ({
       id: f.id || `field_${i + 1}`,
       label: f.label || `Field ${i + 1}`,
+      labelText: f.labelText || f.label || `Field ${i + 1}`,
+      orientation: f.orientation === "below" ? "below" : "inline",
       type: f.type || "text",
       x: Math.max(0, Math.min(1, Number(f.x) || 0)),
       y: Math.max(0, Math.min(1, Number(f.y) || 0)),

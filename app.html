@@ -2172,7 +2172,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // TODO(phase5): interim app gate. A secret embedded in client HTML is
 // obfuscation, not security — the real gate is the Phase 5 session cookie.
 // Leave empty to disable; if set, must match APP_SHARED_SECRET in Vercel.
-const APP_SHARED_SECRET = '';
+const APP_SHARED_SECRET = 'efc6ca4a3d4dd51086695983ff72ca483ef43008790bf29c';
 // Standard JSON headers for AI endpoint calls, plus the interim app gate header.
 function aiHeaders(extra) {
   const h = { 'Content-Type': 'application/json' };
@@ -2565,6 +2565,10 @@ let _jscanifyPromise = null;
 // ===== FORM FILL STATE =====
 let currentFormFields = [];   // fields from api/extractFields (id, label, type, x, y, width, height, value)
 let currentFormCanvas = null; // perspective-corrected scan canvas for PDF overlay
+// Manual field-placement adjust mode (Phase 3).
+let adjustMode = false;
+let selectedFieldId = null;
+let _dragState = null;
 let currentFieldMappings = [];
 let currentFormSummary = '';
 let miniRecordFieldId = null;
@@ -3696,6 +3700,23 @@ async function extractFieldsForCurrentForm() {
     if (data.fields && data.fields.length > 0) {
       currentFormFields = data.fields;
       if (data.formType && data.formType !== 'unknown') session.formType = data.formType;
+      // Phase 3: snap field positions to OCR label boxes (best-effort, non-fatal).
+      if (session.formImage) {
+        if (loadEl) loadEl.innerHTML = '<div class="spinner"></div><p class="text-muted mt-12">Aligning fields…</p>';
+        try {
+          const dataUri = 'data:image/jpeg;base64,' + session.formImage;
+          const words = await Promise.race([
+            runOCRWords(dataUri),
+            new Promise(function(_, rej) { setTimeout(function() { rej(new Error('ocr timeout')); }, 20000); })
+          ]);
+          if (words && words.length) {
+            currentFormFields = snapFieldsToOCR(currentFormFields, words);
+            console.log('[OCR] snapped',
+              currentFormFields.filter(function(f) { return f.anchor === 'ocr'; }).length,
+              'of', currentFormFields.length, 'fields');
+          }
+        } catch (e) { console.warn('[OCR] field snapping skipped:', e && e.message); }
+      }
       renderVoiceAllScreen();
       showScreen('screen-voice-all');
     } else {
@@ -3819,6 +3840,14 @@ async function submitAllTranscript() {
 
 // ===== FORM REVIEW SCREEN =====
 function renderFormReview() {
+  // Reset manual-adjust state for the freshly rendered form.
+  adjustMode = false; selectedFieldId = null; _dragState = null;
+  const _adjBtn = document.getElementById('adjust-toggle-btn');
+  if (_adjBtn) { _adjBtn.textContent = 'Adjust placement'; _adjBtn.classList.remove('btn-amber'); _adjBtn.classList.add('btn-outline'); }
+  const _adjFont = document.getElementById('adjust-font-controls'); if (_adjFont) _adjFont.style.display = 'none';
+  const _adjHint = document.getElementById('adjust-hint'); if (_adjHint) _adjHint.style.display = 'none';
+  const _ov = document.getElementById('form-review-overlay'); if (_ov) _ov.style.pointerEvents = 'none';
+
   document.getElementById('form-review-type').textContent = session.formType || 'Form';
   const user = getUser();
   document.getElementById('form-review-meta').textContent =
@@ -3867,10 +3896,163 @@ function renderFormReview() {
   }).join('');
 }
 
+// ===== OCR FIELD SNAPPING (Tesseract.js, vendored) — Phase 3 =====
+// Claude's extractFields gives the semantic fields (what they are); OCR gives
+// pixel truth (where the labels actually are). We snap each field's input area
+// to its OCR-located label. Everything is vendored under /vendor/tesseract and
+// lazy-loaded, like the OpenCV scanner.
+let _tesseractWorkerPromise = null;
+function loadTesseract() {
+  if (_tesseractWorkerPromise) return _tesseractWorkerPromise;
+  _tesseractWorkerPromise = (async function() {
+    if (!window.Tesseract) await loadVendorScript('/vendor/tesseract/tesseract.min.js');
+    return await Tesseract.createWorker('eng', 1, {
+      workerPath: '/vendor/tesseract/worker.min.js',
+      corePath: '/vendor/tesseract/',
+      langPath: '/vendor/tesseract/',
+      gzip: true
+    });
+  })();
+  return _tesseractWorkerPromise;
+}
+
+// Recognise word boxes on an image (base64 data URI). Returns
+// [{ text, x, y, w, h }] with coords normalised 0-1 to the image dimensions.
+async function runOCRWords(dataUri) {
+  const img = await new Promise(function(res, rej) {
+    const i = new Image(); i.onload = function() { res(i); }; i.onerror = rej; i.src = dataUri;
+  });
+  const W = img.naturalWidth, H = img.naturalHeight;
+  if (!W || !H) return [];
+  const worker = await loadTesseract();
+  const out = await worker.recognize(img);
+  const words = (out && out.data && out.data.words) || [];
+  return words
+    .filter(function(w) { return w.text && w.text.trim() && w.bbox; })
+    .map(function(w) {
+      return {
+        text: w.text.trim(),
+        x: w.bbox.x0 / W, y: w.bbox.y0 / H,
+        w: (w.bbox.x1 - w.bbox.x0) / W, h: (w.bbox.y1 - w.bbox.y0) / H,
+        conf: w.confidence
+      };
+    });
+}
+
+function normToken(s) { return String(s).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+// Group OCR words into text lines by vertical overlap, sorted left-to-right.
+function groupWordsIntoLines(words) {
+  const sorted = words.slice().sort(function(a, b) { return a.y - b.y; });
+  const lines = [];
+  sorted.forEach(function(w) {
+    const cy = w.y + w.h / 2;
+    let line = null;
+    for (let i = 0; i < lines.length; i++) {
+      const L = lines[i];
+      if (cy >= L.y0 && cy <= L.y1) { line = L; break; }
+    }
+    if (!line) { line = { y0: w.y, y1: w.y + w.h, words: [] }; lines.push(line); }
+    line.y0 = Math.min(line.y0, w.y); line.y1 = Math.max(line.y1, w.y + w.h);
+    line.words.push(w);
+  });
+  lines.forEach(function(L) { L.words.sort(function(a, b) { return a.x - b.x; }); });
+  return lines;
+}
+
+// Snap each Claude field to its OCR label. Fuzzy-match the label tokens against
+// contiguous OCR words on a line; on a confident match recompute the input area
+// from the label box (inline -> right of label, below -> under it). Falls back
+// to Claude's coords when there is no confident match. Tags anchor 'ocr'|'claude'.
+function snapFieldsToOCR(fields, words, imgW, imgH) {
+  const lines = groupWordsIntoLines(words);
+  return fields.map(function(f) {
+    const labelText = f.labelText || f.label || '';
+    const labelToks = labelText.split(/\s+/).map(normToken).filter(Boolean);
+    const base = Object.assign({}, f, { _claude: { x: f.x, y: f.y, width: f.width, height: f.height } });
+    if (!labelToks.length) return Object.assign(base, { anchor: 'claude' });
+
+    let best = null;
+    lines.forEach(function(line) {
+      const lw = line.words;
+      for (let i = 0; i < lw.length; i++) {
+        const matched = new Set();
+        let x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+        const windowEnd = Math.min(lw.length, i + labelToks.length + 2);
+        for (let j = i; j < windowEnd; j++) {
+          const wt = normToken(lw[j].text);
+          if (wt && labelToks.indexOf(wt) !== -1) {
+            matched.add(wt);
+            x0 = Math.min(x0, lw[j].x); y0 = Math.min(y0, lw[j].y);
+            x1 = Math.max(x1, lw[j].x + lw[j].w); y1 = Math.max(y1, lw[j].y + lw[j].h);
+          }
+        }
+        const ratio = matched.size / labelToks.length;
+        if (ratio >= 0.6 && (!best || ratio > best.ratio)) {
+          best = { ratio: ratio, box: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, line: line };
+        }
+      }
+    });
+    if (!best) return Object.assign(base, { anchor: 'claude' });
+
+    const lb = best.box;
+    const orientation = f.orientation || (f.y > lb.y + lb.h * 1.5 ? 'below' : 'inline');
+    let nx, ny, nw, nh;
+    if (orientation === 'below') {
+      nx = lb.x; ny = lb.y + lb.h; nh = lb.h; nw = Math.max(f.width, lb.w);
+    } else {
+      nx = lb.x + lb.w + 0.005; ny = lb.y; nh = lb.h;
+      // Extend to the next OCR word to the right of the label, else the margin.
+      let nextX = null;
+      best.line.words.forEach(function(w) {
+        if (w.x > lb.x + lb.w + 0.005 && (nextX === null || w.x < nextX)) nextX = w.x - 0.005;
+      });
+      nw = (nextX !== null ? nextX : 0.98) - nx;
+    }
+    if (!(nw > 0.02) || !(nh > 0.008)) return Object.assign(base, { anchor: 'claude' });
+    return Object.assign(base, { x: nx, y: ny, width: nw, height: nh, anchor: 'ocr' });
+  });
+}
+
+// Shared text fitter used by BOTH the on-screen overlay and the PDF fill so the
+// exported PDF matches the preview exactly. Shrinks the font (to minPx) and wraps
+// within the box, then vertically centres. scale = manual-adjust multiplier.
+function drawFieldText(ctx, text, box, opts) {
+  opts = opts || {};
+  const scale = opts.scale || 1;
+  const minPx = opts.minPx || 7;
+  const pad = opts.pad != null ? opts.pad : 3;
+  let fontPx = Math.max(minPx, Math.min(opts.maxPx || 18, box.h * 0.7) * scale);
+  const innerW = box.w - pad * 2;
+  let lines;
+  for (;;) {
+    ctx.font = (opts.bold ? 'bold ' : '') + fontPx + 'px ' + (opts.family || 'sans-serif');
+    lines = wrapTextLines(ctx, text, innerW);
+    if (lines.length * fontPx * 1.25 <= box.h - 2 || fontPx <= minPx) break;
+    fontPx -= 1;
+  }
+  const lineH = fontPx * 1.25;
+  const topPad = Math.max(1, (box.h - lines.length * lineH) / 2);
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = opts.color || '#111111';
+  lines.forEach(function(line, i) {
+    const drawY = box.y + topPad + i * lineH;
+    if (drawY < box.y + box.h) ctx.fillText(line, box.x + pad, drawY);
+  });
+}
+
 function renderFormOverlay() {
   const img = document.getElementById('form-review-image');
   const overlay = document.getElementById('form-review-overlay');
   if (!img || !overlay) return;
+  // Bind manual-adjust pointer handlers once.
+  if (!overlay._adjustBound) {
+    overlay.addEventListener('pointerdown', onOverlayPointerDown);
+    overlay.addEventListener('pointermove', onOverlayPointerMove);
+    overlay.addEventListener('pointerup', onOverlayPointerUp);
+    overlay.addEventListener('pointercancel', onOverlayPointerUp);
+    overlay._adjustBound = true;
+  }
   overlay.width = img.offsetWidth;
   overlay.height = img.offsetHeight;
   const ctx = overlay.getContext('2d');
@@ -3882,22 +4064,22 @@ function renderFormOverlay() {
     const w = f.width * overlay.width;
     const h = f.height * overlay.height;
     const hasValue = f.value && f.value !== '';
+    const selected = adjustMode && selectedFieldId === f.id;
 
     ctx.fillStyle = hasValue ? 'rgba(245,158,11,0.18)' : 'rgba(220,38,38,0.14)';
-    ctx.strokeStyle = hasValue ? 'rgba(245,158,11,0.8)' : 'rgba(220,38,38,0.65)';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = selected ? '#2563EB' : (hasValue ? 'rgba(245,158,11,0.8)' : 'rgba(220,38,38,0.65)');
+    ctx.lineWidth = selected ? 2.5 : 1.5;
     ctx.fillRect(x, y, w, h);
     ctx.strokeRect(x, y, w, h);
 
     if (hasValue) {
-      const fontSize = Math.max(11, Math.min(14, h * 0.65));
-      ctx.font = 'bold ' + fontSize + 'px sans-serif';
-      ctx.fillStyle = '#1a1a1a';
       ctx.save();
       ctx.beginPath();
-      ctx.rect(x + 2, y + 2, w - 4, h - 4);
+      ctx.rect(x + 1, y + 1, w - 2, h - 2);
       ctx.clip();
-      ctx.fillText(f.value, x + 4, y + h * 0.72);
+      drawFieldText(ctx, f.value, { x: x, y: y, w: w, h: h }, {
+        bold: true, color: '#1a1a1a', minPx: 9, maxPx: 15, scale: f.fontScale || 1
+      });
       ctx.restore();
     }
   });
@@ -3905,6 +4087,88 @@ function renderFormOverlay() {
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== MANUAL FIELD-PLACEMENT ADJUST (Phase 3) =====
+// The escape hatch that makes placement trustworthy on the ugliest forms: tap a
+// filled value, drag to reposition, A-/A+ to resize, Reset to restore.
+function toggleAdjustMode() {
+  adjustMode = !adjustMode;
+  const overlay = document.getElementById('form-review-overlay');
+  const btn = document.getElementById('adjust-toggle-btn');
+  const hint = document.getElementById('adjust-hint');
+  if (overlay) overlay.style.pointerEvents = adjustMode ? 'auto' : 'none';
+  if (btn) {
+    btn.textContent = adjustMode ? 'Done adjusting' : 'Adjust placement';
+    btn.classList.toggle('btn-amber', adjustMode);
+    btn.classList.toggle('btn-outline', !adjustMode);
+  }
+  if (hint) hint.style.display = adjustMode ? 'inline' : 'none';
+  if (!adjustMode) {
+    selectedFieldId = null;
+    const fc = document.getElementById('adjust-font-controls');
+    if (fc) fc.style.display = 'none';
+  }
+  renderFormOverlay();
+}
+
+function _overlayFraction(overlay, ev) {
+  const rect = overlay.getBoundingClientRect();
+  return {
+    fx: Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width)),
+    fy: Math.max(0, Math.min(1, (ev.clientY - rect.top) / rect.height))
+  };
+}
+function _fieldAtFraction(fx, fy) {
+  for (let i = currentFormFields.length - 1; i >= 0; i--) {
+    const f = currentFormFields[i];
+    if (fx >= f.x && fx <= f.x + f.width && fy >= f.y && fy <= f.y + f.height) return f;
+  }
+  return null;
+}
+function onOverlayPointerDown(ev) {
+  if (!adjustMode) return;
+  const overlay = document.getElementById('form-review-overlay');
+  const p = _overlayFraction(overlay, ev);
+  const f = _fieldAtFraction(p.fx, p.fy);
+  const fc = document.getElementById('adjust-font-controls');
+  if (!f) { selectedFieldId = null; if (fc) fc.style.display = 'none'; _dragState = null; renderFormOverlay(); return; }
+  selectedFieldId = f.id;
+  if (fc) fc.style.display = 'flex';
+  // Snapshot the as-loaded position once, so Reset can restore it.
+  if (f._auto === undefined) f._auto = { x: f.x, y: f.y, width: f.width, height: f.height, fontScale: f.fontScale || 1 };
+  _dragState = { id: f.id, offx: p.fx - f.x, offy: p.fy - f.y };
+  if (overlay.setPointerCapture) { try { overlay.setPointerCapture(ev.pointerId); } catch (e) {} }
+  renderFormOverlay();
+  ev.preventDefault();
+}
+function onOverlayPointerMove(ev) {
+  if (!adjustMode || !_dragState) return;
+  const overlay = document.getElementById('form-review-overlay');
+  const p = _overlayFraction(overlay, ev);
+  const f = currentFormFields.find(function(x) { return x.id === _dragState.id; });
+  if (!f) return;
+  f.x = Math.max(0, Math.min(1 - f.width, p.fx - _dragState.offx));
+  f.y = Math.max(0, Math.min(1 - f.height, p.fy - _dragState.offy));
+  f.anchor = 'manual';
+  renderFormOverlay();
+  ev.preventDefault();
+}
+function onOverlayPointerUp() { _dragState = null; }
+
+function adjustSelectedFont(delta) {
+  const f = currentFormFields.find(function(x) { return x.id === selectedFieldId; });
+  if (!f) return;
+  if (f._auto === undefined) f._auto = { x: f.x, y: f.y, width: f.width, height: f.height, fontScale: f.fontScale || 1 };
+  f.fontScale = Math.max(0.6, Math.min(1.8, (f.fontScale || 1) + delta));
+  renderFormOverlay();
+}
+function resetSelectedField() {
+  const f = currentFormFields.find(function(x) { return x.id === selectedFieldId; });
+  if (!f || !f._auto) return;
+  f.x = f._auto.x; f.y = f._auto.y; f.width = f._auto.width; f.height = f._auto.height;
+  f.fontScale = f._auto.fontScale || 1;
+  renderFormOverlay();
 }
 
 // Redraw overlay when review image resizes
@@ -4051,36 +4315,18 @@ async function confirmFilledForm() {
     var hPx = f.height * out.height;
     if (wPx < 4 || hPx < 4) return;
 
-    var fontSize = Math.max(10, Math.min(18, hPx * 0.6));
-
     ctx.save();
-
     // Clip strictly to this field's bounding box
     ctx.beginPath();
     ctx.rect(xPx, yPx, wPx, hPx);
     ctx.clip();
-
     // White backdrop so text reads on any form background
     ctx.fillStyle = 'rgba(255,255,255,0.88)';
     ctx.fillRect(xPx, yPx, wPx, hPx);
-
-    // Set font properties inside save/restore so they're isolated
-    ctx.font = fontSize + 'px sans-serif';
-    ctx.fillStyle = '#111111';
-    ctx.textBaseline = 'top';
-
-    var lines = wrapTextLines(ctx, f.value, wPx - 6);
-    var lineH = fontSize * 1.3;
-    var textBlockH = lines.length * lineH;
-    var topPad = Math.max(1, (hPx - textBlockH) / 2);
-
-    lines.forEach(function(line, i) {
-      var drawY = yPx + topPad + i * lineH;
-      if (drawY < yPx + hPx) {
-        ctx.fillText(line, xPx + 3, drawY);
-      }
+    // Same fitter as the on-screen preview so the exported PDF matches exactly.
+    drawFieldText(ctx, f.value, { x: xPx, y: yPx, w: wPx, h: hPx }, {
+      color: '#111111', minPx: 7, maxPx: 18, scale: f.fontScale || 1
     });
-
     ctx.restore();
   });
 
@@ -5727,6 +5973,15 @@ self.addEventListener('fetch', e => {
   <div class="form-image-wrap" id="form-image-container">
     <img id="form-review-image" alt="Scanned form" style="display:block;width:100%;">
     <canvas id="form-review-overlay"></canvas>
+  </div>
+  <div id="adjust-controls" style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    <button id="adjust-toggle-btn" class="btn btn-outline" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:13px;margin:0;" onclick="toggleAdjustMode()">Adjust placement</button>
+    <span id="adjust-hint" style="display:none;font-size:12px;color:var(--color-text-muted);">Tap a field, then drag to move.</span>
+    <div id="adjust-font-controls" style="display:none;align-items:center;gap:6px;margin-left:auto;">
+      <button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:15px;margin:0;" onclick="adjustSelectedFont(-0.1)" aria-label="Smaller text">A-</button>
+      <button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:15px;margin:0;" onclick="adjustSelectedFont(0.1)" aria-label="Larger text">A+</button>
+      <button class="btn btn-outline" style="width:auto;padding:6px 10px;font-size:12px;margin:0;" onclick="resetSelectedField()">Reset</button>
+    </div>
   </div>
   <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:10px;">Fields</div>
   <div id="form-review-fields-list"></div>
