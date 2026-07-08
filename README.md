@@ -12,7 +12,20 @@ Scan any paper form, speak your answers, and get a completed official PDF back. 
 | `api/scanDocument.js` | Claude document-corner detection (fallback-only as of Phase 2). |
 | `api/extractFields.js` | Claude form-field extraction from a scanned image. |
 | `api/mapVoiceToFields.js` | Maps a voice transcript onto extracted form fields. |
-| `vercel.json` | Vercel function config. |
+| `vendor/opencv.js`, `vendor/jscanify.min.js` | Vendored, pinned (jscanify 1.4.2) client-side document scanner. Served same-origin, lazy-loaded on first scan. |
+| `vercel.json` | Vercel config (headers only). |
+
+## Document scanning (Phase 2)
+
+Document-boundary detection runs **client-side** with vendored OpenCV.js + jscanify — deterministic, instant, free, and offline-capable. The pipeline in `handleScanButton()` is a fallback chain:
+
+1. **Primary — jscanify/OpenCV** on the full-res frame. A detected quad is validated (`isPlausibleQuad`: area > 20% of frame, convex, aspect 0.5–2.0). Zero API calls in the happy path.
+2. **Fallback 1 — `/api/scanDocument`** (Claude) if OpenCV finds no plausible quad and the device is online.
+3. **Fallback 2 — full frame**, no perspective warp; the raw capture is kept for manual crop/adjust (Phase 3).
+
+The existing `computeHomography` / `perspectiveCorrect` math is reused unchanged — only the input corners changed. The `expandCorners` fudge factor is gone from the primary path (it only compensated for Claude's inset bias) and is applied solely in the Claude fallback. Add `?debug=1` to the URL to draw the detected quad on the live frame.
+
+OpenCV.js (~9MB, inlined wasm) is lazy-loaded when the scanner opens and cached via `vercel.json` (`max-age=86400, stale-while-revalidate` — no `immutable`).
 
 ## Local development
 
