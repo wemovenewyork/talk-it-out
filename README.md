@@ -34,6 +34,15 @@ Claude's `extractFields` stays the semantic brain (what fields exist, their labe
 
 **Manual adjust** — the review screen has an *Adjust placement* toggle: tap a field to select, drag to move, `A-`/`A+` to resize the font, `Reset` to restore. Adjusted coords/scale persist on the field so the exported PDF matches the preview. A shared `drawFieldText` fitter (shrink-to-fit min 7pt + wrap + vertical centre) is used by **both** the on-screen overlay and the PDF fill, so they always agree.
 
+## Voice transcription (Phase 4)
+
+Recording uses **MediaRecorder → Groq Whisper** as the source of truth, not the browser's Web Speech API. All three voice surfaces (all-at-once `voice-all`, the per-field mini recorder, and the field-by-field screen) share one `createAudioRecorder()` + `transcribeBlob()` path:
+
+- **Primary:** capture with `MediaRecorder` (mime picked by capability probe: `audio/webm;codecs=opus` → `audio/mp4`/AAC for iOS Safari), cap 90s/5MB, upload to `/api/transcribe`, show "Transcribing…", then feed the transcript into the existing `mapVoiceToFields` flow unchanged.
+- **Live feedback:** if Web Speech is available it runs *in parallel* for on-screen interim text only — the **server transcript is authoritative**.
+- **Fallback:** no `MediaRecorder` → Web Speech-only or type-instead (unchanged).
+- Language hint (`en/es/ht/zh/ar`) is passed from settings; multiple takes append ("tap again to add more").
+
 ## Interim app gate (`APP_SHARED_SECRET`)
 
 Active as of Phase 3: `app.html` sends `x-tio-app: <APP_SHARED_SECRET const>` on every AI call, and each endpoint rejects mismatches with 401 **when** the `APP_SHARED_SECRET` env var is set in Vercel. The const in `app.html` and the Vercel env var must hold the **same** value. This is obfuscation, not security (the value ships in the client) — superseded by the Phase 5 session cookie.
@@ -63,6 +72,8 @@ Set via the Vercel dashboard or REST API. Grows each phase of the production-har
 | `APP_SHARED_SECRET` | Phase 1 | Optional interim app gate. When set, all AI endpoints require an `x-tio-app` header matching this value, and the same value must be placed in `app.html`'s `APP_SHARED_SECRET` const. **Obfuscation, not security** — real gate is the Phase 5 session cookie. Leave unset to disable. |
 | `EXTRACT_FORM_FIELDS_MODEL` | Phase 1 | Optional model override for `extractFormFields` (default `claude-sonnet-4-6`). |
 | `REWRITE_MODEL` | Phase 1 | Optional model override for `rewrite` (default `claude-sonnet-4-6`). |
+| `GROQ_API_KEY` | Phase 4 | **Required for voice transcription.** Groq API key for Whisper. Without it, `/api/transcribe` returns 500 and the app falls back to type-instead. |
+| `GROQ_WHISPER_MODEL` | Phase 4 | Optional model override for `transcribe` (default `whisper-large-v3-turbo`). |
 
 ### API endpoints
 
@@ -73,6 +84,7 @@ Set via the Vercel dashboard or REST API. Grows each phase of the production-har
 | `POST /api/scanDocument` | `{ imageData, mimeType, imageWidth, imageHeight }` | Claude document-corner detection (Phase 2: fallback-only). |
 | `POST /api/extractFields` | `{ imageData, mimeType }` | Alt field extraction (id/label + 0–1 fraction coords). |
 | `POST /api/mapVoiceToFields` | `{ transcript, fields }` | Map a transcript onto extracted fields. |
+| `POST /api/transcribe` | `{ audio (base64), mimeType, language }` | Transcribe recorded audio via Groq Whisper (`whisper-large-v3-turbo`). Caps 5MB/90s. Returns `{ transcript, language }`. Gated by `APP_SHARED_SECRET`. |
 
 > The generic `/api/chat` proxy was **removed in Phase 1** — all AI features now go through the purpose-built endpoints above, each of which hardcodes its model, system prompt, and token limits server-side. There is no generic Anthropic pass-through in the deployment.
 
