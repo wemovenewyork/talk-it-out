@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 500,
-        system: "You rewrite spoken workplace accounts into clear written documentation. Preserve all facts exactly and never invent information. Return only the rewritten text, no preamble.",
+        system: "You rewrite spoken workplace accounts into clear written documentation. Preserve all facts exactly and never invent information. Return only the rewritten text, no preamble. PLAIN TEXT ONLY — no markdown, no asterisks (**), no headings (#), no titles, no bullet characters, no backticks. The text is written directly onto a paper form, so output a plain sentence or two, not a formatted document.",
         messages: [{
           role: "user",
           content: `Rewrite the following spoken account into formal, professional workplace documentation language. Preserve all facts exactly.${toneInstr}\n\n${transcript.slice(0, 6000)}`
