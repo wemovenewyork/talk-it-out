@@ -34,7 +34,7 @@ function applyCors(req, res) {
 function appSecretOk(req) {
   const secret = process.env.APP_SHARED_SECRET;
   if (!secret) return true;
-  return req.headers["x-tio-app"] === secret;
+  return String(req.headers["x-tio-app"] || "").trim() === secret.trim();
 }
 
 export default async function handler(req, res) {

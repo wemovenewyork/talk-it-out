@@ -30,7 +30,7 @@ function applyCors(req, res) {
 function appSecretOk(req) {
   const secret = process.env.APP_SHARED_SECRET;
   if (!secret) return true;
-  return req.headers["x-tio-app"] === secret;
+  return String(req.headers["x-tio-app"] || "").trim() === secret.trim();
 }
 
 const IMAGE_SYSTEM = `You are a form field extractor. Given one or more images of a workplace form, identify every field that needs to be filled in.
