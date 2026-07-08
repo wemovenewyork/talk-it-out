@@ -2169,15 +2169,11 @@ window.addEventListener('unhandledrejection', function(e) {
 
 <script>
 // ===== AI ENDPOINT CONFIG =====
-// TODO(phase5): interim app gate. A secret embedded in client HTML is
-// obfuscation, not security — the real gate is the Phase 5 session cookie.
-// Leave empty to disable; if set, must match APP_SHARED_SECRET in Vercel.
-const APP_SHARED_SECRET = 'efc6ca4a3d4dd51086695983ff72ca483ef43008790bf29c';
-// Standard JSON headers for AI endpoint calls, plus the interim app gate header.
+// AI endpoints require a logged-in session (Phase 5). The httpOnly session
+// cookie is sent automatically on these same-origin requests — there is no
+// client-embedded secret (the interim x-tio-app gate was retired).
 function aiHeaders(extra) {
-  const h = { 'Content-Type': 'application/json' };
-  if (APP_SHARED_SECRET) h['x-tio-app'] = APP_SHARED_SECRET;
-  return Object.assign(h, extra || {});
+  return Object.assign({ 'Content-Type': 'application/json' }, extra || {});
 }
 
 // ===== SESSION STATE =====
@@ -2284,31 +2280,44 @@ window.addEventListener('load', () => {
 });
 
 // ===== AUTH =====
-function handleSignIn() {
+async function handleSignIn() {
   const email = document.getElementById('signin-email').value.trim();
   const password = document.getElementById('signin-password').value;
   if (!email || !password) { alert('Please enter your email and password.'); return; }
-  const user = getUser();
-  // Local auth remains demo-only until Phase 5 (real server auth). We no longer
-  // store plaintext credentials; sign-in just proceeds if the email matches.
-  if (user.email && user.email !== email) { alert('Account not found.'); return; }
-  // Accept any password for demo; real app would validate
-  if (!user.email) {
-    setUser({ name: email.split('@')[0], email });
+  try {
+    const resp = await fetch('/api/auth/signin', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) { alert(data.error || 'Incorrect email or password.'); return; }
+    setUser({ name: data.user.name, email: data.user.email, personalEmail: getUser().personalEmail || '', orgCode: '' });
+    afterAuth();
+  } catch (e) {
+    alert('Network error — please check your connection and try again.');
   }
-  afterAuth();
 }
 
-function handleCreateAccount() {
+async function handleCreateAccount() {
   const name = document.getElementById('create-name').value.trim();
   const email = document.getElementById('create-email').value.trim();
   const password = document.getElementById('create-password').value;
   const orgCode = document.getElementById('create-orgcode').value.trim().toUpperCase();
   if (!name || !email || !password) { alert('Please fill all required fields.'); return; }
-  setUser({ name, email, personalEmail: '', orgCode });
-  // Plaintext password intentionally NOT stored (was setLS('tio_password', ...)).
-  // Real credential handling arrives in Phase 5.
-  afterAuth();
+  try {
+    const resp = await fetch('/api/auth/signup', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, orgCode })
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) { alert(data.error || 'Could not create your account.'); return; }
+    setUser({ name: data.user.name, email: data.user.email, personalEmail: '', orgCode });
+    afterAuth();
+  } catch (e) {
+    alert('Network error — please check your connection and try again.');
+  }
 }
 
 function afterAuth() {
@@ -5893,8 +5902,9 @@ function deleteSignature() {
   initProfile();
 }
 
-function signOut() {
+async function signOut() {
   if (!confirm('Sign out?')) return;
+  await fetch('/api/auth/signout', { method: 'POST', credentials: 'include' }).catch(function() {});
   localStorage.removeItem('tio_user');
   localStorage.removeItem('tio_password');
   showScreen('screen-auth-signin');
@@ -5905,9 +5915,11 @@ function showDeleteConfirm() {
   document.getElementById('delete-account-modal').classList.add('active');
 }
 
-function confirmDeleteAccount() {
+async function confirmDeleteAccount() {
   const val = document.getElementById('delete-confirm-input').value;
   if (val !== 'DELETE') { alert('Please type DELETE to confirm.'); return; }
+  // Server-side: deletes the user + cascades rows + removes Blob artifacts (R5).
+  await fetch('/api/auth/delete-account', { method: 'POST', credentials: 'include' }).catch(function() {});
   localStorage.clear();
   closeModal('delete-account-modal');
   showScreen('screen-auth-signin');
