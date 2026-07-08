@@ -3,10 +3,24 @@ export const config = {
   api: { bodyParser: { sizeLimit: '1mb' } },
 };
 
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "https://talk-it-out-two.vercel.app");
+const MODEL = process.env.MAP_VOICE_MODEL || "claude-sonnet-4-6";
+
+// Env-driven CORS allowlist. Reflect the request Origin only if it is on the
+// comma-separated ALLOWED_ORIGINS list; allow same-origin (no Origin header).
+function applyCors(req, res) {
+  const allowed = (process.env.ALLOWED_ORIGINS || "")
+    .split(",").map(o => o.trim()).filter(Boolean);
+  const origin = req.headers.origin;
+  if (origin && allowed.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-tio-app");
+}
+
+export default async function handler(req, res) {
+  applyCors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
@@ -29,7 +43,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: MODEL,
         max_tokens: 1500,
         system: `You are a form filling assistant. You will receive a voice transcript from a worker describing information for a form, and a list of form fields. Map the spoken information to the correct fields.
 

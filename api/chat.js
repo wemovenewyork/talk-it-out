@@ -7,10 +7,22 @@ export const config = {
   },
 };
 
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "https://talk-it-out-two.vercel.app");
+// Env-driven CORS allowlist. Reflect the request Origin only if it is on the
+// comma-separated ALLOWED_ORIGINS list; allow same-origin (no Origin header).
+function applyCors(req, res) {
+  const allowed = (process.env.ALLOWED_ORIGINS || "")
+    .split(",").map(o => o.trim()).filter(Boolean);
+  const origin = req.headers.origin;
+  if (origin && allowed.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-tio-app");
+}
+
+export default async function handler(req, res) {
+  applyCors(req, res);
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
