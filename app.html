@@ -2302,6 +2302,24 @@ async function persistCompletedForm(record) {
   }
 }
 
+// Verify the httpOnly session against the server. Only an explicit 401 forces
+// re-auth; network/offline errors keep the local session (offline-tolerant).
+async function validateServerSession() {
+  try {
+    const r = await fetch('/api/auth/me', { credentials: 'include' });
+    if (r.status === 401) {
+      localStorage.removeItem('tio_user');
+      showScreen('screen-auth-signin');
+    } else if (r.ok) {
+      const data = await r.json().catch(function() { return null; });
+      if (data && data.user) {
+        const cur = getUser();
+        setUser({ name: data.user.name, email: data.user.email, personalEmail: data.user.personalEmail || cur.personalEmail || '', orgCode: cur.orgCode || '' });
+      }
+    }
+  } catch (e) { /* offline — keep the local session */ }
+}
+
 // ===== APP INIT =====
 window.addEventListener('load', () => {
   try {
@@ -2318,6 +2336,10 @@ window.addEventListener('load', () => {
     } else {
       showScreen('screen-welcome');
     }
+    // Validate the server session in the background. Local says logged-in but
+    // there may be no server cookie (pre-Phase-5 user or expired) — route to
+    // sign-in so AI features don't silently 401. Offline keeps the local session.
+    if (user.email) validateServerSession();
 
     setupOrgCodeInputs();
     setupPWAInstall();
