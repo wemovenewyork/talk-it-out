@@ -2247,6 +2247,40 @@ function setSettings(s) { setLS('tio_settings', s); }
 function getHistory() { return getLS('tio_history', []); }
 function getDrafts() { return getLS('tio_drafts', []); }
 
+// ===== SERVER PERSISTENCE (Phase 5) =====
+// Best-effort: persist a completed form to the account so it survives cleared
+// storage and appears on the worker's other devices. localStorage stays the
+// offline cache; a failure here never blocks the local save. Mutates record with
+// the returned serverId on success.
+async function persistCompletedForm(record) {
+  try {
+    const fieldsPayload = (record.fields || []).map(function(f, i) {
+      const ans = record.answers && record.answers[i];
+      return {
+        name: f.name || f.label || ('Field ' + (i + 1)),
+        type: f.type || 'short_text',
+        value: (ans && ans.value) || f.value || ''
+      };
+    });
+    const cr = await fetch('/api/submissions/create', {
+      method: 'POST', credentials: 'include', headers: aiHeaders(),
+      body: JSON.stringify({ refCode: record.refNumber, formType: record.formType, fields: fieldsPayload, transcript: currentFormSummary || '' })
+    });
+    if (!cr.ok) return;
+    const created = await cr.json();
+    const pdfBase64 = session.scannedPdfUri ? String(session.scannedPdfUri).split(',')[1] : null;
+    const scanBase64 = session.formImage || null;
+    const signatureBase64 = session.signature ? String(session.signature).split(',')[1] : null;
+    await fetch('/api/submissions/complete', {
+      method: 'POST', credentials: 'include', headers: aiHeaders(),
+      body: JSON.stringify({ id: created.id, fields: fieldsPayload, pdfBase64: pdfBase64, scanBase64: scanBase64, signatureBase64: signatureBase64 })
+    });
+    record.serverId = created.id;
+  } catch (e) {
+    console.warn('[sync] server persist failed (kept locally):', e && e.message);
+  }
+}
+
 // ===== APP INIT =====
 window.addEventListener('load', () => {
   try {
@@ -4520,6 +4554,7 @@ async function confirmFilledForm() {
   const history = getHistory();
   history.unshift(record);
   setLS('tio_history', history);
+  persistCompletedForm(record); // best-effort server backup (non-blocking)
   sendLocalNotification('Form saved', session.formType + ' \u2014 ' + session.refNumber);
 
   showScreen('screen-output');
@@ -5104,6 +5139,7 @@ function submitApproval() {
   const history = getHistory();
   history.unshift(record);
   setLS('tio_history', history);
+  persistCompletedForm(record); // best-effort server backup (non-blocking)
 
   // Remove from drafts if it was one
   const drafts = getDrafts();
