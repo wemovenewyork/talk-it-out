@@ -11,7 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Talk%20It%20Out%22,%22short_name%22:%22TalkItOut%22,%22theme_color%22:%22%23F59E0B%22,%22background_color%22:%22%23FFFFFF%22,%22display%22:%22standalone%22,%22start_url%22:%22app.html%22,%22icons%22:[{%22src%22:%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AQFEhQnrqfGxQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAMvSURBVHja7d0xbhpBFIDhN0tBkSNYR0iRI3CEnCBH4ARITpAj+AQ+QU5gH4GShiNYR0iRI1iHlAIJEGD2zby3839SR9oV7Mz8O29mRwIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFzGGGOMg2OMAQ4iYowxjjHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMOe4BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2CsAAQYAExIBjgAAAABJRU5ErkJggg==%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#F59E0B">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
 /* ===== CSS RESET & ROOT VARIABLES ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2284,46 +2286,137 @@ function setSettings(s) { setLS('tio_settings', s); }
 function getHistory() { return getLS('tio_history', []); }
 function getDrafts() { return getLS('tio_drafts', []); }
 
-// ===== SERVER PERSISTENCE (Phase 5) =====
-// Best-effort: persist a completed form to the account so it survives cleared
-// storage and appears on the worker's other devices. localStorage stays the
-// offline cache; a failure here never blocks the local save. Mutates record with
-// the returned serverId on success.
-async function persistCompletedForm(record) {
-  try {
-    const fieldsPayload = (record.fields || []).map(function(f, i) {
-      const ans = record.answers && record.answers[i];
-      return {
-        name: f.name || f.label || ('Field ' + (i + 1)),
-        type: f.type || 'short_text',
-        value: (ans && ans.value) || f.value || ''
-      };
+// ===== OFFLINE OUTBOX (Phase 6, IndexedDB) =====
+function _openOutboxDB() {
+  return new Promise(function(resolve, reject) {
+    const rq = indexedDB.open('tio-outbox', 1);
+    rq.onupgradeneeded = function() { if (!rq.result.objectStoreNames.contains('outbox')) rq.result.createObjectStore('outbox', { keyPath: 'key' }); };
+    rq.onsuccess = function() { resolve(rq.result); };
+    rq.onerror = function() { reject(rq.error); };
+  });
+}
+function _outboxTx(mode, fn) {
+  return _openOutboxDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      const tx = db.transaction('outbox', mode);
+      const req = fn(tx.objectStore('outbox'));
+      tx.oncomplete = function() { resolve(req && req.result); };
+      tx.onerror = function() { reject(tx.error); };
     });
+  });
+}
+function outboxAll() { return _outboxTx('readonly', function(os) { return os.getAll(); }); }
+function outboxDelete(key) { return _outboxTx('readwrite', function(os) { return os.delete(key); }); }
+
+function showAppToast(msg) {
+  let t = document.getElementById('tio-app-toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = 'tio-app-toast';
+    t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;z-index:9999;max-width:88%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._timer); t._timer = setTimeout(function() { t.style.display = 'none'; }, 3500);
+}
+
+// Queue a completed form for upload when back online, and flag it in history.
+async function queueOutbox(record, payload) {
+  try {
+    await _outboxTx('readwrite', function(os) {
+      return os.put(Object.assign({ key: record.refNumber || ('tio-' + Date.now()), queuedAt: Date.now() }, payload));
+    });
+    record.pendingSync = true;
+    const hist = getHistory();
+    const idx = hist.findIndex(function(r) { return r.refNumber === record.refNumber; });
+    if (idx >= 0) { hist[idx].pendingSync = true; setLS('tio_history', hist); }
+    showAppToast("Saved on device — will upload when you're back online.");
+  } catch (e) { console.warn('[outbox] queue failed:', e && e.message); }
+}
+
+// Push queued forms to the server. Called on load, on SW register, and on the
+// 'online' event. Stops on the first network error (retries next time).
+let _flushingOutbox = false;
+async function flushOutbox() {
+  if (_flushingOutbox || !navigator.onLine) return;
+  _flushingOutbox = true;
+  try {
+    const items = await outboxAll().catch(function() { return []; });
+    for (let i = 0; i < (items || []).length; i++) {
+      const it = items[i];
+      try {
+        const cr = await fetch('/api/submissions/create', {
+          method: 'POST', credentials: 'include', headers: aiHeaders(),
+          body: JSON.stringify({ refCode: it.refCode, formType: it.formType, fields: it.fields, transcript: it.transcript })
+        });
+        if (cr.status === 401) break; // signed out — retry later
+        if (!cr.ok) continue;
+        const created = await cr.json();
+        const done = await fetch('/api/submissions/complete', {
+          method: 'POST', credentials: 'include', headers: aiHeaders(),
+          body: JSON.stringify({ id: created.id, fields: it.fields, pdfBase64: it.pdfBase64, scanBase64: it.scanBase64, signatureBase64: it.signatureBase64 })
+        });
+        await outboxDelete(it.key);
+        const hist = getHistory();
+        const rec = hist.find(function(h) { return h.refNumber === it.refCode; });
+        if (rec) {
+          rec.serverId = created.id; rec.pendingSync = false;
+          const dj = done.ok ? await done.json().catch(function() { return null; }) : null;
+          if (dj && dj.pdfUrl) rec.pdfUrl = dj.pdfUrl;
+          setLS('tio_history', hist);
+        }
+      } catch (e) { break; } // network hiccup — stop, retry on next online
+    }
+    const screen = document.getElementById('screen-history');
+    if (screen && screen.classList.contains('active')) renderHistory();
+  } finally { _flushingOutbox = false; }
+}
+
+// ===== SERVER PERSISTENCE (Phase 5) =====
+// Persist a completed form to the account so it survives cleared storage and
+// appears on the worker's other devices. When offline (or the request fails) it
+// is queued to the IndexedDB outbox and uploaded on reconnect. localStorage
+// stays the offline cache; this never blocks the local save.
+async function persistCompletedForm(record) {
+  const fieldsPayload = (record.fields || []).map(function(f, i) {
+    const ans = record.answers && record.answers[i];
+    return {
+      name: f.name || f.label || ('Field ' + (i + 1)),
+      type: f.type || 'short_text',
+      value: (ans && ans.value) || f.value || ''
+    };
+  });
+  const payload = {
+    refCode: record.refNumber, formType: record.formType, fields: fieldsPayload,
+    transcript: currentFormSummary || '',
+    pdfBase64: session.scannedPdfUri ? String(session.scannedPdfUri).split(',')[1] : null,
+    scanBase64: session.formImage || null,
+    signatureBase64: session.signature ? String(session.signature).split(',')[1] : null
+  };
+
+  if (!navigator.onLine) { await queueOutbox(record, payload); return; }
+
+  try {
     const cr = await fetch('/api/submissions/create', {
       method: 'POST', credentials: 'include', headers: aiHeaders(),
-      body: JSON.stringify({ refCode: record.refNumber, formType: record.formType, fields: fieldsPayload, transcript: currentFormSummary || '' })
+      body: JSON.stringify({ refCode: payload.refCode, formType: payload.formType, fields: payload.fields, transcript: payload.transcript })
     });
-    if (!cr.ok) return;
+    if (!cr.ok) { await queueOutbox(record, payload); return; }
     const created = await cr.json();
-    const pdfBase64 = session.scannedPdfUri ? String(session.scannedPdfUri).split(',')[1] : null;
-    const scanBase64 = session.formImage || null;
-    const signatureBase64 = session.signature ? String(session.signature).split(',')[1] : null;
     const done = await fetch('/api/submissions/complete', {
       method: 'POST', credentials: 'include', headers: aiHeaders(),
-      body: JSON.stringify({ id: created.id, fields: fieldsPayload, pdfBase64: pdfBase64, scanBase64: scanBase64, signatureBase64: signatureBase64 })
+      body: JSON.stringify({ id: created.id, fields: payload.fields, pdfBase64: payload.pdfBase64, scanBase64: payload.scanBase64, signatureBase64: payload.signatureBase64 })
     });
     record.serverId = created.id;
     const doneJson = done.ok ? await done.json().catch(function() { return null; }) : null;
-    // Persist the server Blob URL of the filled PDF back into local history so
-    // re-export uses it (and it survives cleared storage / other devices).
     if (doneJson && doneJson.pdfUrl) {
       record.pdfUrl = doneJson.pdfUrl;
       const hist = getHistory();
       const idx = hist.findIndex(function(r) { return r.refNumber === record.refNumber; });
-      if (idx >= 0) { hist[idx].pdfUrl = doneJson.pdfUrl; hist[idx].serverId = created.id; setLS('tio_history', hist); }
+      if (idx >= 0) { hist[idx].pdfUrl = doneJson.pdfUrl; hist[idx].serverId = created.id; hist[idx].pendingSync = false; setLS('tio_history', hist); }
     }
   } catch (e) {
-    console.warn('[sync] server persist failed (kept locally):', e && e.message);
+    console.warn('[sync] server persist failed — queuing outbox:', e && e.message);
+    await queueOutbox(record, payload);
   }
 }
 
@@ -2630,6 +2723,8 @@ function setupNetworkListener() {
     const s = document.querySelector('.screen.active');
     if (s && s.id !== 'screen-err-network') showScreen('screen-err-network');
   });
+  // Back online: upload anything saved to the offline outbox.
+  window.addEventListener('online', function() { flushOutbox(); });
 }
 
 // ===== QUICK PHOTO =====
@@ -3582,24 +3677,30 @@ async function processScannedImage(base64Data, mimeType) {
 }
 
 // ===== DOCUMENT SCAN (photo → enhanced image + PDF) =====
-async function loadJsPDF() {
-  if (window.jspdf) return;
-  await new Promise((resolve, reject) => {
+// Load a script from the vendored (offline) copy first, falling back to the CDN.
+function loadScriptWithFallback(localSrc, cdnSrc) {
+  return new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    s.onload = resolve; s.onerror = reject;
+    s.src = localSrc; s.async = true;
+    s.onload = resolve;
+    s.onerror = function() {
+      const s2 = document.createElement('script');
+      s2.src = cdnSrc; s2.async = true;
+      s2.onload = resolve; s2.onerror = reject;
+      document.head.appendChild(s2);
+    };
     document.head.appendChild(s);
   });
 }
 
+async function loadJsPDF() {
+  if (window.jspdf) return;
+  await loadScriptWithFallback('/vendor/jspdf.umd.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+}
+
 async function loadPdfLib() {
   if (window.PDFLib) return;
-  await new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';
-    s.onload = resolve; s.onerror = reject;
-    document.head.appendChild(s);
-  });
+  await loadScriptWithFallback('/vendor/pdf-lib.min.js', 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js');
 }
 
 function applyDocumentScanEffect(canvas) {
@@ -5817,9 +5918,9 @@ function renderHistory() {
       </div>
       <div class="list-item-text">
         <div class="list-item-title">${h.formType || 'Form'}</div>
-        <div class="list-item-sub">${new Date(h.timestamp).toLocaleDateString()} &nbsp;·&nbsp; ${h.refNumber}</div>
+        <div class="list-item-sub">${new Date(h.timestamp).toLocaleDateString()} &nbsp;·&nbsp; ${h.refNumber}${h.pendingSync ? ' &nbsp;·&nbsp; <span style="color:var(--color-amber-dark);font-weight:600;">⟳ pending sync</span>' : ''}</div>
       </div>
-      <span class="status-dot status-dot-${h.status === 'sent' ? 'success' : h.status === 'pending' ? 'amber' : 'info'}"></span>
+      <span class="status-dot status-dot-${h.pendingSync ? 'amber' : (h.status === 'sent' ? 'success' : h.status === 'pending' ? 'amber' : 'info')}"></span>
     </div>
   `).join('');
 }
@@ -6455,32 +6556,16 @@ function retryConnection() {
   }
 }
 
-// ===== SERVICE WORKER =====
+// ===== SERVICE WORKER (Phase 6) =====
+// Real same-origin worker at /sw.js (origin-wide scope). Precaches the shell +
+// vendored libs (tio-shell-v1), network-only for /api/*. Flush the offline
+// outbox when the worker takes control and whenever we come back online.
 if ('serviceWorker' in navigator) {
-  // Unregister any old service workers that may be caching a broken app.html
-  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-
-  const swCode = `
-const CACHE = 'tio-v3';
-self.addEventListener('install', e => {
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  if (e.request.mode === 'navigate') {
-    // Always fetch HTML from network so deployments reach the user immediately
-    e.respondWith(fetch(e.request).catch(() => caches.match('./app.html')));
-  } else {
-    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-  }
-});
-  `.trim();
-  const blob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(err => console.log('SW reg failed', err));
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function() { flushOutbox(); })
+      .catch(function(err) { console.log('SW reg failed', err); });
+  });
 }
 </script>
 
