@@ -4370,18 +4370,29 @@ function snapFieldsToOCR(fields, words, imgW, imgH) {
     if (!best) return Object.assign(base, { anchor: 'claude' });
 
     const lb = best.box;
-    const orientation = f.orientation || (f.y > lb.y + lb.h * 1.5 ? 'below' : 'inline');
+    // Inline room: horizontal space to the right of the label on its OWN line, up
+    // to the next OCR word (a pre-printed value) or the right margin.
+    const inlineStart = lb.x + lb.w + 0.005;
+    let nextX = null;
+    best.line.words.forEach(function(w) {
+      if (w.x > inlineStart && (nextX === null || w.x < nextX)) nextX = w.x;
+    });
+    const inlineRightEdge = (nextX !== null ? nextX - 0.005 : 0.98);
+    const inlineRoom = inlineRightEdge - inlineStart;
+    // Orientation from OCR GEOMETRY, not Claude's y. Claude's y carries a downward
+    // bias (the same one the snap corrects for the box) — feeding it to a
+    // y-threshold pushed inline fields a full row low, overlapping the next label
+    // (the one-row-shift defect). Place text ON the label's own line whenever
+    // there's room to its right; only drop below when the label runs to the margin
+    // (no inline room) OR Claude clearly puts the answer a full section below
+    // (> ~2.5 label-heights) — a genuine below-the-label answer area.
+    const gapRows = (f.y - lb.y) / Math.max(lb.h, 1e-6);
+    const orientation = (inlineRoom >= 0.04 && gapRows < 2.5) ? 'inline' : 'below';
     let nx, ny, nw, nh;
     if (orientation === 'below') {
       nx = lb.x; ny = lb.y + lb.h; nh = lb.h; nw = Math.max(f.width, lb.w);
     } else {
-      nx = lb.x + lb.w + 0.005; ny = lb.y; nh = lb.h;
-      // Extend to the next OCR word to the right of the label, else the margin.
-      let nextX = null;
-      best.line.words.forEach(function(w) {
-        if (w.x > lb.x + lb.w + 0.005 && (nextX === null || w.x < nextX)) nextX = w.x - 0.005;
-      });
-      nw = (nextX !== null ? nextX : 0.98) - nx;
+      nx = inlineStart; ny = lb.y; nh = lb.h; nw = inlineRoom;
     }
     if (!(nw > 0.02) || !(nh > 0.008)) return Object.assign(base, { anchor: 'claude' });
     return Object.assign(base, { x: nx, y: ny, width: nw, height: nh, anchor: 'ocr' });
