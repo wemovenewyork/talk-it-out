@@ -3766,14 +3766,17 @@ async function loadMammoth() {
 
 async function loadPdfJs() {
   if (window.pdfjsLib) return;
-  await new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  // Vendored (offline + CSP-clean: the worker is same-origin, satisfying
+  // worker-src 'self'). CDN is a fallback only.
+  await loadScriptWithFallback('/vendor/pdfjs-pdf.min.js', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+  try {
+    const r = await fetch('/vendor/pdfjs-pdf.worker.min.js', { method: 'HEAD' });
+    pdfjsLib.GlobalWorkerOptions.workerSrc = r.ok
+      ? '/vendor/pdfjs-pdf.worker.min.js'
+      : 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  } catch (e) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs-pdf.worker.min.js';
+  }
 }
 
 async function processScannedDocument(base64Data) {
@@ -3784,26 +3787,29 @@ async function processScannedDocument(base64Data) {
     const arr = new Uint8Array(pdfBytes.length);
     for (let i = 0; i < pdfBytes.length; i++) arr[i] = pdfBytes.charCodeAt(i);
     const pdf = await pdfjsLib.getDocument({ data: arr }).promise;
-    const pageCount = Math.min(pdf.numPages, 10); // cap at 10 pages
-    const pageImages = [];
-    for (let p = 1; p <= pageCount; p++) {
-      const page = await pdf.getPage(p);
-      const viewport = page.getViewport({ scale: 1.5 });
-      const canvas = document.createElement('canvas');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-      pageImages.push(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
-    }
+    // WO2b v1 — PAGE-1-ONLY: render page 1 at ~200 DPI (scale = 200/72) for crisp
+    // extraction + overlay. The overlay is a single image, so a later page's
+    // fields would have no valid position — rather than misplacing them (or
+    // silently dropping pages) we fill page 1 and tell the user. A multi-page
+    // picker is proposed in the PR for Q's decision.
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({ scale: 200 / 72 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    const pageImage = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+    if (pdf.numPages > 1) showAppToast('Multi-page PDF — filling page 1 of ' + pdf.numPages + '.');
+
     // Show first page as preview
     const previewImg = document.getElementById('scan-preview-img');
-    previewImg.src = 'data:image/jpeg;base64,' + pageImages[0];
+    previewImg.src = 'data:image/jpeg;base64,' + pageImage;
     previewImg.style.display = 'block';
     if (!navigator.onLine) { showScreen('screen-err-network'); return; }
     const resp = await fetch('/api/extractFormFields', {
       method: 'POST',
       headers: aiHeaders(),
-      body: JSON.stringify({ images: pageImages, mimeType: 'image/jpeg' })
+      body: JSON.stringify({ images: [pageImage], mimeType: 'image/jpeg' })
     });
     if (!resp.ok) {
       const errBody = await resp.json().catch(() => ({}));
@@ -3815,7 +3821,7 @@ async function processScannedDocument(base64Data) {
       showScanError('could not read pdf form: ' + (data.error || 'no fields')); return;
     }
     session.fields = parsed;
-    session.formImage = pageImages[0];
+    session.formImage = pageImage;
     session.refNumber = generateRef();
     session.answers = new Array(parsed.length).fill(null);
     session.formType = deriveFormType(parsed);
