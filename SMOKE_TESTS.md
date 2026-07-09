@@ -65,5 +65,15 @@ Run on **iOS Safari** and **Android Chrome** (the target field devices).
 - [ ] **E. Second device:** history on another device serves the filled-scan PDF
       for A–C.
 
+## Upload as first-class input (WO2b)
+- [ ] **Upload = camera parity:** upload the SAME printed form as a **PDF** →
+      identical filled-scan artifact as the camera path (extraction → snap →
+      voice → overlay → filled page-1 PDF). Uploaded **image** skips edge
+      detection (already flat) and yields the same.
+- [ ] **pdf.js under CSP + offline:** first PDF upload works with **no CSP console
+      violation** (vendored same-origin worker); works in airplane mode
+      (SW-precached). Multi-page PDF fills **page 1** and shows the
+      "filling page 1 of N" notice (no silent drop).
+
 ## Landing page
 - [ ] `index.html` claims match reality (offline, the 5 named languages, security).

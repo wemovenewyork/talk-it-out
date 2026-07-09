@@ -1,6 +1,6 @@
 // Talk It Out service worker (Phase 6). Same convention as ATU 823's shell cache.
 // Bump the version to invalidate the precache on a shell change.
-const CACHE = 'tio-shell-v1';
+const CACHE = 'tio-shell-v2';
 
 // App shell + vendored libs precached for offline use. CDN-free: OpenCV,
 // jscanify, Tesseract, jsPDF, and pdf-lib are all vendored same-origin so the
@@ -21,7 +21,9 @@ const PRECACHE = [
   '/vendor/tesseract/tesseract-core-lstm.wasm.js',
   '/vendor/tesseract/eng.traineddata.gz',
   '/vendor/jspdf.umd.min.js',
-  '/vendor/pdf-lib.min.js'
+  '/vendor/pdf-lib.min.js',
+  '/vendor/pdfjs-pdf.min.js',
+  '/vendor/pdfjs-pdf.worker.min.js'
 ];
 
 self.addEventListener('install', function(e) {
